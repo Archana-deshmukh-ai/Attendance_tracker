@@ -1,0 +1,256 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #102094;
+    padding: 15px 30px;
+    color: white;
+    flex-wrap: wrap;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: white;
+    margin: 0 15px;
+    font-size: 16px;
+    border-right: 1px solid #374151;
+    padding: 10px;
+}
+
+.nav-links a:last-child {
+    border-right: none;
+}
+
+.nav-links a:hover {
+    color: #38bdf8;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+#search {
+    border-style: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-right: 10px;
+    width: 200px;
+}
+
+.logout-btn {
+    background-color: #ef4444;
+    border: none;
+    padding: 8px 16px;
+    color: white;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    background-color: #dc2626;
+}
+
+/* CONTENT STYLES */
+.content {
+    margin-top: 50px;
+    margin-bottom: 50px;
+    padding: 0 20px;
+    min-height: 400px;
+}
+
+.hero {
+    text-align: center;
+    padding: 40px 20px;
+    background: #f8fafc;
+    border-radius: 10px;
+    margin-bottom: 40px;
+}
+
+.hero h1 {
+    color: #1e293b;
+    margin-bottom: 15px;
+    font-size: 32px;
+}
+
+.hero p {
+    color: #64748b;
+    margin-bottom: 25px;
+    font-size: 18px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background: #102094;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.btn:hover {
+    background: #0d1a7a;
+}
+
+.features {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+}
+
+.feature-box {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    text-align: center;
+    min-width: 250px;
+    flex: 1;
+    max-width: 350px;
+}
+
+.feature-box h3 {
+    color: #102094;
+    margin-bottom: 10px;
+    font-size: 20px;
+}
+
+.feature-box p {
+    color: #64748b;
+}
+
+/* FOOTER STYLES */
+.footer {
+    background-color: #0f172a;
+    color: #e5e7eb;
+    padding: 30px 20px 10px;
+    margin-top: 40px;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-section {
+    max-width: 300px;
+    margin-bottom: 20px;
+    border-right: 2px solid #374151;
+    padding: 20px;
+    flex: 1;
+}
+
+.footer-section:last-child {
+    border-right: none;
+}
+
+.footer-section h3,
+.footer-section h4 {
+    color: skyblue;
+    margin-bottom: 10px;
+}
+
+.footer-section h3 {
+    font-size: 20px;
+}
+
+.footer-section h4 {
+    font-size: 16px;
+}
+
+.footer-section p {
+    color: #9ca3af;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.footer-section ul {
+    list-style: none;
+}
+
+.footer-section ul li {
+    margin-bottom: 6px;
+}
+
+.footer-section a {
+    display: block;
+    color: #9ca3af;
+    text-decoration: none;
+}
+
+.footer-section a:hover {
+    color: #38bdf8;
+}
+
+.footer-bottom {
+    text-align: center;
+    font-size: 14px;
+    color: #9ca3af;
+    border-top: 1px solid #1e293b;
+    padding-top: 20px;
+    margin-top: 20px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .header-right {
+        margin-top: 10px;
+    }
+    
+    .features {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .footer-container {
+        flex-direction: column;
+    }
+    
+    .footer-section {
+        border-right: none;
+        border-bottom: 2px solid #374151;
+        max-width: 100%;
+    }
+    
+    .footer-section:last-child {
+        border-bottom: none;
+    }
+}

@@ -1,0 +1,12 @@
+# .gitignore content
+__pycache__/
+*.pyc
+venv/
+env/
+.DS_Store
+.vscode/
+.idea/
+*.log
+
+# CSV data (optional - you might want to keep sample data)
+# backend/data/attendance.csv  # Exclude if large
