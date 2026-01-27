@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Attendance Reports</title>
+    <link rel="stylesheet" href="report.css">
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+ 
+
+</head>
+<body>
+<header class="navbar">
+    <div class="logo">
+        📊 Attendance Tracker
+    </div>
+
+    <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="mark_attendance.html">Mark Attendance</a>
+        <a href="report.html" class="active">Reports</a>
+        <a href=" #">About</a>
+        <a href="#">Profile</a>
+        <a href="#" class="logout">Logout</a>
+    </nav>
+</header>
+
+
+<!-- <main class="container"> -->
+    <!-- <h1>📝 Reports</h1> -->
+    
+<section class="container">
+    <h1>📊 Attendance Report</h1> -->
+
+    <!-- Filters -->
+    <div class="filters">
+        <input type="text" id="searchName" placeholder="Search by name">
+        <select id="statusFilter">
+            <option value="">All Status</option>
+            <option value="Present">Present</option>
+            <option value="Absent">Absent</option>
+            <option value="Late">Late</option>
+        </select>
+        <button onclick="filterTable()">Apply</button>
+    </div> -->
+
+    <!-- Table -->
+    <table id="reportTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- CSV data will load here -->
+        </tbody> 
+    </table>
+    <h2>📊 Attendance Analytics</h2>
+
+<div class="charts">
+    <canvas id="statusChart"></canvas>
+    <canvas id="trendChart"></canvas>
+</div> -->
+<!-- </main> -->
+
+</section>
+
+<script src="report.js"></script>
+</body>
+</html>
