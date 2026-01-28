@@ -72,7 +72,7 @@ if __name__ == '__main__':
             'department': ['CSE', 'ECE', 'ME', 'CE', 'EEE'] * 8
         })
         students.to_csv('data/students.csv', index=False)
-    
+    #create sample subjects
     if not os.path.exists('data/subjects.csv'):
         subjects = pd.DataFrame({
             'subject_id': [1, 2, 3, 4, 5, 6],
@@ -86,6 +86,5 @@ if __name__ == '__main__':
     
     print("Starting Flask server...")
     print("Home page: http://localhost:5000")
-    print("Mark Attendance: http://localhost:5000/mark-attendance")
     print("API endpoints: http://localhost:5000/api/*")
     app.run(debug=True, port=5000)

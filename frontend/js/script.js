@@ -79,6 +79,7 @@ async function initializeMarkAttendancePage() {
         attendanceList.appendChild(studentDiv);
     });
     
+    
     // Load subjects into dropdown
     const subjects = await fetchSubjects();
     const dropdown = document.querySelector('.dropdown');
