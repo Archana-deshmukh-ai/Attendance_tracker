@@ -1,0 +1,127 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f4f6f9;
+}
+
+/* NAVBAR */
+.navbar {
+    background-color: #062087;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.navbar nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.navbar nav a:hover {
+    background-color: #34495e;
+}
+
+.navbar .active {
+    background-color: #59accf;
+}
+
+.logout {
+    background-color: #e74c3c;
+}
+
+/* CONTAINER */
+.container {
+    padding: 25px;
+}
+
+.container h1 {
+    margin-bottom: 20px;
+}
+
+/* TABLE */
+.table-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+th {
+    background-color: #34495e;
+    color: white;
+}
+
+.present {
+    color: green;
+    font-weight: bold;
+}
+
+.absent {
+    color: red;
+    font-weight: bold;
+}
+
+.late {
+    color: orange;
+    font-weight: bold;
+}
+
+/* CHARTS */
+.chart-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.charts {
+    display: flex;
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.chart-box {
+    width: 50%;
+}
+
+canvas {
+    width: 100% !important;
+    height: 350px !important;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .charts {
+        flex-direction: column;
+    }
+
+    .chart-box {
+        width: 100%;
+    }
+}

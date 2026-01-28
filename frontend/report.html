@@ -3,71 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <title>Attendance Reports</title>
-    <link rel="stylesheet" href="report.css">
-    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
- 
 
+    <!-- CSS -->
+    <link rel="stylesheet" href="./report.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<header class="navbar">
-    <div class="logo">
-        📊 Attendance Tracker
-    </div>
 
-    <nav class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="mark_attendance.html">Mark Attendance</a>
-        <a href="report.html" class="active">Reports</a>
-        <a href=" #">About</a>
-        <a href="#">Profile</a>
+<!-- NAVBAR -->
+<header class="navbar">
+    <div class="logo">📊 Attendance Tracker</div>
+    <nav>
+        <a href="#">Home</a>
+        <a href="#">Mark Attendance</a>
+        <a href="#" class="active">Reports</a>
+        <a href="#">About</a>
         <a href="#" class="logout">Logout</a>
     </nav>
 </header>
 
+<!-- MAIN CONTENT -->
+<main class="container">
 
-<!-- <main class="container"> -->
-    <!-- <h1>📝 Reports</h1> -->
-    
-<section class="container">
-    <h1>📊 Attendance Report</h1> -->
+    <h1>Attendance Reports</h1>
 
-    <!-- Filters -->
-    <div class="filters">
-        <input type="text" id="searchName" placeholder="Search by name">
-        <select id="statusFilter">
-            <option value="">All Status</option>
-            <option value="Present">Present</option>
-            <option value="Absent">Absent</option>
-            <option value="Late">Late</option>
-        </select>
-        <button onclick="filterTable()">Apply</button>
-    </div> -->
+    <!-- TABLE -->
+    <section class="table-section">
+        <h2>Student Attendance Records</h2>
 
-    <!-- Table -->
-    <table id="reportTable">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Class</th>
-                <th>Date</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- CSV data will load here -->
-        </tbody> 
-    </table>
-    <h2>📊 Attendance Analytics</h2>
+        <table id="reportTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Batch</th>
+                    <th>Department</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </section>
 
-<div class="charts">
-    <canvas id="statusChart"></canvas>
-    <canvas id="trendChart"></canvas>
-</div> -->
-<!-- </main> -->
+    <!-- CHARTS -->
+    <section class="chart-section">
+        <h2>Attendance Analytics</h2>
 
-</section>
+        <div class="charts">
+            <div class="chart-box">
+                <canvas id="statusChart"></canvas>
+            </div>
 
-<script src="report.js"></script>
+            <div class="chart-box">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- JS -->
+<script src="./report.js"></script>
 </body>
 </html>
