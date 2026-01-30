@@ -4,7 +4,7 @@ let absent = 0;
 let late = 0;
 let dateCount = {};
 
-fetch("./students.csv")
+fetch("csv/students.csv")
     .then(res => res.text())
     .then(data => {
         const rows = data.trim().split("\n").slice(1);

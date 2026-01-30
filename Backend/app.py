@@ -23,6 +23,11 @@ def mark_attendance_page():
     """Serve the mark attendance page HTML"""
     return render_template('mark_attendance.html')
 
+@app.route('/report')
+def report_page():
+    """Serve the report page HTML"""
+    return render_template('report.html')
+
 # ========== API ENDPOINTS ==========
 
 @app.route('/api/health')
