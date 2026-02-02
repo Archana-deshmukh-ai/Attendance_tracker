@@ -23,6 +23,17 @@ def mark_attendance_page():
     """Serve the mark attendance page HTML"""
     return render_template('mark_attendance.html')
 
+@app.route('/report')
+def report_page():
+    """Serve the reports page HTML"""
+    return render_template('report.html')
+
+@app.route('/about')
+def about_page():
+    return render_template('about.html')
+
+
+
 # ========== API ENDPOINTS ==========
 
 @app.route('/api/health')
@@ -86,6 +97,5 @@ if __name__ == '__main__':
     
     print("Starting Flask server...")
     print("Home page: http://localhost:5000")
-    print("Mark Attendance: http://localhost:5000/mark-attendance")
     print("API endpoints: http://localhost:5000/api/*")
     app.run(debug=True, port=5000)
