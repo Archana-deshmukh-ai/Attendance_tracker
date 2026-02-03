@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Profile</title>
+  <link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <h2>📊Attendance Tracker</h2>
+    <div class="nav-right">
+      <a href="/">Home</a>
+      <a href="profile.html">Profile</a>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- Main Profile Container -->
+  <div class="profile-container">
+
+    <!-- Left Card -->
+    <div class="profile-card">
+      <h1>My Profile</h1>
+
+      <div class="avatar">👨🏻‍🎓</div>
+
+      <div class="field">
+        <label>Name</label>
+        <input type="text" id="Name" disabled >
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" disabled>
+      </div>
+
+      <div class="field">
+        <label>Student ID</label>
+        <input type="text" value=" 13466769" disabled>
+      </div>
+
+      <div class="field">
+        <label>Role</label>
+        <input type="text" value="Student" disabled>
+      </div>
+
+      <div class="field">
+        <label>Branch</label>
+        <input type="text" id="Branch" disabled>
+      </div>
+
+      <div class="field">
+        <label>DOB</label>
+        <input type="text"  id="Date Of Birth" disabled>
+      </div>
+    </div>
+
+    <!-- Right Card -->
+    <div class="side-card">
+      <h3>Achievements</h3>
+
+      <div class="achievement">
+        <span>📘 Classes Attended</span>
+        <progress value="#" max="10"></progress>
+      </div>
+
+      <div class="achievement">
+        <span>⏰ Punctuality</span>
+        <progress value="#" max="10"></progress>
+      </div>
+
+      <div class="achievement">
+        <span>🏆 Attendance Score</span>
+        <progress value="#" max="10"></progress>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/profile.js"></script>
+</body>
+</html>

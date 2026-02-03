@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Faculty Profile</title>
+    <link rel="stylesheet" href="css/facultyprofile.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">📊Attendance Tracker</div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="report.html">Reports</a></li>
+            <li><a href="facultyprofile.html" class="active">Profile</a></li>
+            <li><a href="#">Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- Profile Container -->
+    <div class="container">
+
+        <h2>Faculty Profile</h2>
+
+        <div class="profile-card">
+         
+
+            <!-- Left Section -->
+            <div class="left-section">
+                <div class="avatar">👨‍🏫</div>
+                <h3 id="facultyName">Dr. John Smith</h3>
+                <p class="role">Faculty</p>
+            </div>
+
+            <!-- Right Section -->
+            <div class="right-section">
+
+                <div class="form-group">
+                    <label>Faculty ID</label>
+                    <input type="text" value="FAC1023" disabled>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>            
+                    <input type="email" id="email" value="john.smith@college.edu">
+                </div>
+                <div class="form-group">
+                    <label>Department</label>
+                    <input type="text" id="department" value="Computer Science">
+                </div>
+                <div class="form-group"> 
+                    <label>Designation</label>
+                    <input type="text" id="designation" value="Assistant Professor">
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="text" id="phone" value="+91 98765 43210">
+                </div>
+
+                <button onclick="saveProfile()">Save Changes</button>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script src="facultyprofile.js"></script>
+</body>
+</html>
