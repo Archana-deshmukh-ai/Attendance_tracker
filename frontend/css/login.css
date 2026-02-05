@@ -55,3 +55,657 @@ button:hover {
     background: #15803d;
     text-decoration:underline;
 }
+
+/* Forgot Password Styles */
+.forgot-password {
+    text-align: center;
+    margin: 15px 0;
+}
+
+.forgot-password a {
+    color: #102094;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s;
+}
+
+.forgot-password a:hover {
+    color: #0d1a7a;
+    text-decoration: underline;
+}
+
+.forgot-form {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.forgot-form h3 {
+    margin-bottom: 15px;
+    color: #102094;
+    text-align: center;
+}
+
+.reset-btn {
+    width: 100%;
+    padding: 12px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-top: 10px;
+}
+
+.reset-btn:hover {
+    background: #0da271;
+}
+
+.reset-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+.reset-message {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.reset-message.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.reset-message.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.reset-message.info {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+}
+
+.back-btn {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    color: #64748b;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+}
+
+.back-btn:hover {
+    background: #f1f5f9;
+    color: #374151;
+}
+
+.status-message {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 14px;
+    display: none;
+}
+
+.status-message.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    display: block;
+}
+
+.status-message.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    display: block;
+}
+
+/* OTP Verification Styles */
+.otp-form {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.otp-form h3 {
+    margin-bottom: 15px;
+    color: #102094;
+    text-align: center;
+}
+
+.otp-input-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.otp-input {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 24px;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    font-weight: bold;
+    color: #102094;
+}
+
+.otp-input:focus {
+    border-color: #102094;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(16, 32, 148, 0.1);
+}
+
+.timer {
+    text-align: center;
+    color: #ef4444;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.resend-link {
+    text-align: center;
+    margin: 10px 0;
+}
+
+.resend-link a {
+    color: #102094;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.resend-link a:hover {
+    text-decoration: underline;
+}
+
+.resend-link a.disabled {
+    color: #9ca3af;
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+.new-password-form {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.new-password-form h3 {
+    margin-bottom: 15px;
+    color: #102094;
+    text-align: center;
+}
+
+.password-input-group {
+    margin: 15px 0;
+}
+
+.password-strength {
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s, background 0.3s;
+}
+
+.strength-bar.weak {
+    background: #ef4444;
+    width: 33%;
+}
+
+.strength-bar.medium {
+    background: #f59e0b;
+    width: 66%;
+}
+
+.strength-bar.strong {
+    background: #10b981;
+    width: 100%;
+}
+
+.password-requirements {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.password-requirements ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.password-requirements li {
+    margin: 3px 0;
+    padding-left: 20px;
+    position: relative;
+}
+
+.password-requirements li.valid:before {
+    content: "✓";
+    color: #10b981;
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+}
+
+.password-requirements li.invalid:before {
+    content: "✗";
+    color: #ef4444;
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Security-related styles */
+
+/* Cooldown Indicator */
+.cooldown-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 15px 0;
+    padding: 10px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.cooldown-spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #e2e8f0;
+    border-top: 3px solid #102094;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.cooldown-text {
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* Locked/Blocked Messages */
+.locked-message, .blocked-message, .cooldown-message {
+    text-align: left;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.locked-message {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+}
+
+.blocked-message {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+}
+
+.cooldown-message {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+}
+
+.locked-icon, .blocked-icon, .cooldown-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.locked-content h4, .blocked-content h4, .cooldown-content h4 {
+    color: #dc2626;
+    margin-bottom: 5px;
+}
+
+.blocked-content h4 {
+    color: #d97706;
+}
+
+.cooldown-content h4 {
+    color: #1d4ed8;
+}
+
+.locked-content p, .blocked-content p, .cooldown-content p {
+    margin: 5px 0;
+    color: #4b5563;
+}
+
+.unlock-btn {
+    margin-top: 10px;
+    padding: 8px 16px;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.unlock-btn:hover {
+    background: #b91c1c;
+}
+
+.cooldown-timer {
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.cooldown-progress {
+    height: 100%;
+    background: #1d4ed8;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+/* Security Warnings */
+.security-warning {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #fffbeb;
+    border: 2px solid #f59e0b;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 300px;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.warning-icon {
+    font-size: 24px;
+    color: #d97706;
+}
+
+.warning-content {
+    flex: 1;
+    color: #92400e;
+    font-size: 14px;
+}
+
+.warning-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #92400e;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+}
+
+/* Security Notifications */
+.security-notification {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #dbeafe;
+    border: 2px solid #3b82f6;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 350px;
+    z-index: 1000;
+    animation: slideInLeft 0.3s ease-out;
+}
+
+@keyframes slideInLeft {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.notification-icon {
+    font-size: 24px;
+    color: #1d4ed8;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-content h4 {
+    color: #1e40af;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.notification-content p {
+    color: #1e40af;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.notification-content small {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #1e40af;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+}
+
+/* CAPTCHA Challenge */
+.captcha-challenge {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.captcha-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.captcha-header h4 {
+    color: #102094;
+    margin-bottom: 5px;
+}
+
+.captcha-header p {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.captcha-question {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+    font-size: 24px;
+    color: #102094;
+}
+
+.captcha-question input {
+    width: 80px;
+    padding: 10px;
+    font-size: 20px;
+    text-align: center;
+    border: 2px solid #d1d5db;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.captcha-question input:focus {
+    border-color: #102094;
+    outline: none;
+}
+
+.captcha-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.captcha-submit, .captcha-refresh {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.captcha-submit {
+    background: #102094;
+    color: white;
+}
+
+.captcha-submit:hover {
+    background: #0d1a7a;
+}
+
+.captcha-refresh {
+    background: #f1f5f9;
+    color: #374151;
+}
+
+.captcha-refresh:hover {
+    background: #e2e8f0;
+}
+
+.captcha-success, .captcha-error {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+.captcha-success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.captcha-error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.success-icon, .error-icon {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.captcha-try-again {
+    margin-left: 10px;
+    padding: 5px 10px;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* Unlock Option */
+.unlock-option {
+    margin-top: 15px;
+    padding: 15px;
+    background: #fef2f2;
+    border-radius: 8px;
+    border: 1px solid #fecaca;
+}
+
+.unlock-request-btn {
+    padding: 10px 15px;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px auto;
+}
+
+.unlock-request-btn:hover {
+    background: #b91c1c;
+}
+
+/* Status message types */
+.status-message.warning {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+/* Login attempt counter */
+.login-attempt-counter {
+    display: inline-block;
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #374151;
+    margin-left: 10px;
+}
+
+.login-attempt-counter.high {
+    background: #fef2f2;
+    color: #dc2626;
+}

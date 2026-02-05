@@ -2,140 +2,194 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mark Attendance</title>
+    <title>Mark Attendance - Attendance Atlas</title>
     <link rel="stylesheet" href="css/mark_attendance.css">
 </head>
 <body>
 
 <header class="navbar">
     <div class="logo">
-        📊 Attendance Atlas
+        📊 Lecturer Dashboard
     </div>
-    <nav class="nav-links">
-        <a href="/">Home</a>
-        <a href="/mark-attendance">Mark Attendance</a>
-        <a href="/report">Reports</a>
-        <a href="/about">About Us</a>
-        <a href="#" class="logout">Logout</a>
+    
+    <nav class="nav-links" id="nav-links">
+        <!-- Will be populated by JavaScript -->
     </nav>
+    
+    <div class="header-right" id="auth-area">
+        <!-- JS will inject User info here -->
+    </div>
 </header>
 
 <main class="content">
-    <h2>📝 Mark Attendance</h2>
+    <!-- Access Control Message -->
+    <div id="access-message" class="access-message" style="display: none;">
+        <p>❌ Access Denied. Only lecturers can mark attendance.</p>
+        <p>Redirecting to home page...</p>
+    </div>
     
-    <!-- Controls Section -->
-    <div class="controls">
-        <!-- Search Box -->
-        <input type="text" 
-               id="studentSearch" 
-               class="student-search" 
-               placeholder="🔍 Search students by name or ID...">
+    <div id="attendance-content">
+        <h2>📝 Mark Attendance</h2>
         
-        <!-- Subject Selection -->
-        <div class="select-group">
-            <label for="subjectSelect">Select Subject:</label>
-            <select id="subjectSelect" class="dropdown">
-                <option value="">Loading subjects...</option>
-            </select>
-        </div>
-        
-        <!-- Date Selection -->
-        <div class="select-group">
-            <label for="dateSelect">Select Date:</label>
-            <input type="date" 
-                   id="dateSelect" 
-                   class="date-picker">
-        </div>
-    </div>
-    
-    <!-- Bulk Actions -->
-    <div class="bulk-actions">
-        <button id="selectAllBtn" class="btn-select-all">✅ Select All</button>
-        <button id="clearAllBtn" class="btn-clear-all">❌ Clear All</button>
-        <button id="markPresentBtn" class="btn-mark-present">🎯 Mark All Present</button>
-        <button id="markAbsentBtn" class="btn-mark-absent">🚫 Mark All Absent</button>
-    </div>
-    
-    <!-- Attendance Summary -->
-    <div class="summary" id="attendanceSummary">
-        <span class="summary-item">📊 Total Students: <span id="totalCount">0</span></span>
-        <span class="summary-item">✅ Present: <span id="presentCount" class="present">0</span></span>
-        <span class="summary-item">❌ Absent: <span id="absentCount" class="absent">0</span></span>
-        <span class="summary-item">📈 Percentage: <span id="percentage">0%</span></span>
-    </div>
-    
-    <!-- Student List Container -->
-    <div class="student-list-container">
-        <div class="student-list-header">
-            <h3>👨‍🎓 Students List</h3>
-            <div class="department-filters">
-                <button class="dept-filter active" data-dept="all">All</button>
-                <button class="dept-filter" data-dept="CSE">CSE</button>
-                <button class="dept-filter" data-dept="ECE">ECE</button>
-                <button class="dept-filter" data-dept="ME">ME</button>
-                <button class="dept-filter" data-dept="CE">CE</button>
-                <button class="dept-filter" data-dept="EEE">EEE</button>
+        <!-- Controls Section -->
+        <div class="controls">
+            <!-- Search Box -->
+            <input type="text" 
+                   id="studentSearch" 
+                   class="student-search" 
+                   placeholder="🔍 Search students by name or ID...">
+            
+            <!-- Subject Selection -->
+            <div class="select-group">
+                <label for="subjectSelect">Select Subject:</label>
+                <select id="subjectSelect" class="dropdown">
+                    <option value="">Loading subjects...</option>
+                </select>
+            </div>
+            
+            <!-- Date Selection -->
+            <div class="select-group">
+                <label for="dateSelect">Select Date:</label>
+                <input type="date" 
+                       id="dateSelect" 
+                       class="date-picker">
             </div>
         </div>
         
-        <!-- Loading Indicator -->
-        <div id="loadingIndicator" class="loading">
-            <p>Loading students from database...</p>
+        <!-- Bulk Actions -->
+        <div class="bulk-actions">
+            <button id="selectAllBtn" class="btn-select-all">✅ Select All</button>
+            <button id="clearAllBtn" class="btn-clear-all">❌ Clear All</button>
+            <button id="markPresentBtn" class="btn-mark-present">🎯 Mark All Present</button>
+            <button id="markAbsentBtn" class="btn-mark-absent">🚫 Mark All Absent</button>
         </div>
         
-        <!-- Student List - Will be populated by JavaScript -->
-        <div id="studentList" class="attendance-list">
-            <!-- Students will appear here -->
+        <!-- Attendance Summary -->
+        <div class="summary" id="attendanceSummary">
+            <span class="summary-item">📊 Total Students: <span id="totalCount">0</span></span>
+            <span class="summary-item">✅ Present: <span id="presentCount" class="present">0</span></span>
+            <span class="summary-item">❌ Absent: <span id="absentCount" class="absent">0</span></span>
+            <span class="summary-item">📈 Percentage: <span id="percentage">0%</span></span>
         </div>
         
-        <!-- Pagination -->
-        <div class="pagination" id="pagination">
-            <!-- Pagination buttons will appear here -->
+        <!-- Student List Container -->
+        <div class="student-list-container">
+            <div class="student-list-header">
+                <h3>👨‍🎓 Students List</h3>
+                <div class="department-filters">
+                    <button class="dept-filter active" data-dept="all">All</button>
+                    <button class="dept-filter" data-dept="CSE">CSE</button>
+                    <button class="dept-filter" data-dept="ECE">ECE</button>
+                    <button class="dept-filter" data-dept="ME">ME</button>
+                    <button class="dept-filter" data-dept="CE">CE</button>
+                    <button class="dept-filter" data-dept="EEE">EEE</button>
+                </div>
+            </div>
+            
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="loading">
+                <p>Loading students from database...</p>
+            </div>
+            
+            <!-- Student List - Will be populated by JavaScript -->
+            <div id="studentList" class="attendance-list">
+                <!-- Students will appear here -->
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <!-- Pagination buttons will appear here -->
+            </div>
         </div>
+        
+        <!-- Submit Button -->
+        <div class="submit-section">
+            <button id="submitBtn" class="submit-btn" disabled>
+                📤 Submit Attendance
+            </button>
+            <p class="help-text">
+                ℹ️ Select a subject and date to enable submission
+            </p>
+        </div>
+        
+        <!-- Status Message -->
+        <div id="statusMessage" class="status-message"></div>
     </div>
-    
-    <!-- Submit Button -->
-    <div class="submit-section">
-        <button id="submitBtn" class="submit-btn" disabled>
-            📤 Submit Attendance
-        </button>
-        <p class="help-text">
-            ℹ️ Select a subject and date to enable submission
-        </p>
-    </div>
-    
-    <!-- Status Message -->
-    <div id="statusMessage" class="status-message"></div>
 </main>
 
 <footer class="footer">
     <div class="footer-container">
         <div class="footer-section">
-            <h3>Attendance Tracker</h3>
-            <p>Smart attendance tracking system for students and teachers.</p>
+            <h3>Attendance Atlas</h3>
+            <p>Smart attendance tracking system for lecturers.</p>
         </div>
         <div class="footer-section">
             <h4>Quick Links</h4>
             <ul>
                 <li><a href="/">Home</a></li>
-                <li><a href="/mark-attendance">Mark Attendance</a></li>
+                <li><a href="/lecturer-dashboard">Lecturer Dashboard</a></li>
                 <li><a href="/report">Reports</a></li>
-                <li><a href="#">Help</a></li>
             </ul>
         </div>
         <div class="footer-section">
             <h4>Contact</h4>
-            <p>Email: support@attendanceatlas.com</p>
+            <p>Email: faculty.support@attendanceatlas.com</p>
             <p>College Project - 2026</p>
         </div>
     </div>
     <div class="footer-bottom">
-        © 2026 Attendance Atlas. All rights reserved.
+        © 2026 Attendance Atlas - Lecturer Portal
     </div>
 </footer>
 
 <!-- JavaScript Files -->
 <script src="js/attendanceManager.js"></script>
 <script src="js/markAttendance.js"></script>
+<script>
+// Check access before loading attendance functionality
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const response = await fetch('/api/login-status');
+        const data = await response.json();
+        
+        if (!data.logged_in) {
+            // Not logged in
+            document.getElementById('access-message').style.display = 'block';
+            document.getElementById('attendance-content').style.display = 'none';
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 3000);
+        } else if (data.role !== 'lecturer') {
+            // Logged in but not as lecturer
+            document.getElementById('access-message').innerHTML = `
+                <p>❌ Access Denied. Only lecturers can mark attendance.</p>
+                <p>You are logged in as ${data.name} (${data.role})</p>
+                <p>Redirecting to your dashboard...</p>
+            `;
+            document.getElementById('access-message').style.display = 'block';
+            document.getElementById('attendance-content').style.display = 'none';
+            
+            setTimeout(() => {
+                if (data.role === 'student') {
+                    window.location.href = '/student-dashboard';
+                } else {
+                    window.location.href = '/';
+                }
+            }, 3000);
+        } else {
+            // Valid lecturer - show attendance content
+            document.getElementById('access-message').style.display = 'none';
+            document.getElementById('attendance-content').style.display = 'block';
+            
+            // Initialize attendance page
+            if (typeof window.initializeAttendancePage === 'function') {
+                window.initializeAttendancePage();
+            }
+        }
+    } catch (error) {
+        console.error('Error checking login status:', error);
+    }
+});
+</script>
 </body>
 </html>

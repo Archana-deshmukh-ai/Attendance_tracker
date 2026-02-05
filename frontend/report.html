@@ -2,11 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Attendance Reports</title>
-
-    <!-- CSS -->
+    <title>Attendance Reports - Attendance Atlas</title>
     <link rel="stylesheet" href="css/report.css">
-
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -14,61 +11,227 @@
 
 <!-- NAVBAR -->
 <header class="navbar">
-    <div class="logo">📊 Attendance Tracker</div>
-    <nav>
-        <a href="/">Home</a>
-        <a href="/mark-attendance">Mark Attendance</a>
-        <a href="/report" class="active">Reports</a>
-        <a href="/about">About</a>
-
-        
-        <a href="#" class="logout">Logout</a>
+    <div class="logo">📊 Attendance Atlas</div>
+    <nav class="nav-links" id="nav-links">
+        <!-- Will be populated by JavaScript -->
     </nav>
+    <div class="header-right" id="auth-area">
+        <!-- JS will inject User info here -->
+    </div>
 </header>
 
 <!-- MAIN CONTENT -->
 <main class="container">
-
-    <h1>Attendance Reports</h1>
-
-    <!-- TABLE -->
-    <section class="table-section">
-        <h2>Student Attendance Records</h2>
-
-        <table id="reportTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Batch</th>
-                    <th>Department</th>
-                    <!-- <th>Date</th>
-                    <th>Status</th> -->
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </section>
-
-    <!-- CHARTS -->
-    <section class="chart-section">
-        <h2>Attendance Analytics</h2>
-
-        <div class="charts">
-            <div class="chart-box">
-                <canvas id="statusChart"></canvas>
+    
+    <!-- Access Control Message -->
+    <div id="access-message" class="access-message" style="display: none;">
+        <p>❌ Please login to view reports.</p>
+        <p>Redirecting to login page...</p>
+    </div>
+    
+    <div id="report-content">
+        <h1>Attendance Reports</h1>
+        
+        <!-- Role-specific header -->
+        <div class="report-header">
+            <div id="report-welcome">
+                <h2>Loading reports...</h2>
             </div>
-
-            <div class="chart-box">
-                <canvas id="trendChart"></canvas>
+            <div class="report-actions" id="report-actions">
+                <!-- Action buttons based on role -->
             </div>
         </div>
-    </section>
-
+        
+        <!-- Filters Section -->
+        <section class="filters-section">
+            <h3>📊 Filter Reports</h3>
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="dateFilter">Date Range:</label>
+                    <input type="date" id="fromDate">
+                    <span>to</span>
+                    <input type="date" id="toDate">
+                </div>
+                
+                <div class="filter-group" id="subject-filter-group">
+                    <label for="subjectFilter">Subject:</label>
+                    <select id="subjectFilter">
+                        <option value="all">All Subjects</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group" id="student-filter-group" style="display: none;">
+                    <label for="studentFilter">Student:</label>
+                    <select id="studentFilter">
+                        <option value="all">All Students</option>
+                    </select>
+                </div>
+                
+                <button id="applyFilters" class="filter-btn">Apply Filters</button>
+                <button id="resetFilters" class="filter-btn secondary">Reset</button>
+            </div>
+        </section>
+        
+        <!-- Summary Statistics -->
+        <section class="summary-section">
+            <h3>📈 Summary Statistics</h3>
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-classes">0</div>
+                    <div class="stat-label">Total Classes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-present">0</div>
+                    <div class="stat-label">Total Present</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-absent">0</div>
+                    <div class="stat-label">Total Absent</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="attendance-percent">0%</div>
+                    <div class="stat-label">Attendance %</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Charts Section -->
+        <section class="chart-section">
+            <h3>📊 Attendance Analytics</h3>
+            <div class="charts">
+                <div class="chart-box">
+                    <canvas id="statusChart"></canvas>
+                    <p class="chart-title">Attendance Distribution</p>
+                </div>
+                <div class="chart-box">
+                    <canvas id="trendChart"></canvas>
+                    <p class="chart-title">Attendance Trend</p>
+                </div>
+                <div class="chart-box">
+                    <canvas id="subjectChart"></canvas>
+                    <p class="chart-title">Subject-wise Attendance</p>
+                </div>
+                <div class="chart-box">
+                    <canvas id="departmentChart"></canvas>
+                    <p class="chart-title">Department-wise Attendance</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Data Table Section -->
+        <section class="table-section">
+            <div class="table-header">
+                <h3>📋 Detailed Attendance Records</h3>
+                <div class="table-actions">
+                    <button id="exportCsv" class="action-btn">📥 Export CSV</button>
+                    <button id="exportPdf" class="action-btn">📄 Export PDF</button>
+                    <button id="printReport" class="action-btn">🖨️ Print</button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="reportTable">
+                    <thead>
+                        <tr id="reportTableHeader">
+                            <!-- Headers will be populated based on role -->
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination" id="pagination">
+                <!-- Pagination will be added here -->
+            </div>
+        </section>
+        
+        <!-- Download Section -->
+        <section class="download-section">
+            <h3>📥 Download Reports</h3>
+            <div class="download-options">
+                <button class="download-btn" data-type="csv">
+                    <span class="icon">📊</span>
+                    <span>Download as CSV</span>
+                </button>
+                <button class="download-btn" data-type="pdf">
+                    <span class="icon">📄</span>
+                    <span>Download as PDF</span>
+                </button>
+                <button class="download-btn" data-type="excel">
+                    <span class="icon">📈</span>
+                    <span>Download as Excel</span>
+                </button>
+            </div>
+        </section>
+    </div>
 </main>
+
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h3>Attendance Atlas</h3>
+            <p>Smart attendance reporting system.</p>
+        </div>
+        <div class="footer-section">
+            <h4>Report Types</h4>
+            <ul>
+                <li><a href="#">Daily Reports</a></li>
+                <li><a href="#">Monthly Reports</a></li>
+                <li><a href="#">Subject Reports</a></li>
+                <li><a href="#">Student Reports</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h4>Support</h4>
+            <p>Email: reports@attendanceatlas.com</p>
+            <p>Phone: +91-9876543210</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        © 2026 Attendance Atlas - Reports Portal
+    </div>
+</footer>
 
 <!-- JS -->
 <script src="js/report.js"></script>
+<script>
+// Check access before loading reports
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const response = await fetch('/api/login-status');
+        const data = await response.json();
+        
+        if (!data.logged_in) {
+            // Not logged in
+            document.getElementById('access-message').style.display = 'block';
+            document.getElementById('report-content').style.display = 'none';
+            setTimeout(() => {
+                window.location.href = '/login.html';
+            }, 3000);
+        } else {
+            // Logged in - show report content
+            document.getElementById('access-message').style.display = 'none';
+            document.getElementById('report-content').style.display = 'block';
+            
+            // Update welcome message
+            const welcomeDiv = document.getElementById('report-welcome');
+            welcomeDiv.innerHTML = `
+                <h2>Welcome, ${data.name}!</h2>
+                <p>Viewing attendance reports as ${data.role}</p>
+            `;
+            
+            // Initialize reports page
+            if (typeof window.initializeReportsPage === 'function') {
+                window.initializeReportsPage(data.role, data);
+            }
+        }
+    } catch (error) {
+        console.error('Error checking login status:', error);
+    }
+});
+</script>
 </body>
 </html>
+

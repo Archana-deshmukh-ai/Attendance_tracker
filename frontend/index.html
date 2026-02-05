@@ -2,70 +2,102 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>📊Attendance Tracker</title>
+    <title>📊 Attendance Atlas</title>
     <link rel="stylesheet" href="css/index.css">
 </head>
 <body>
 
-    <!-- Header Start -->
-    <header class="navbar">
-        <div class="logo">
-           📊 Attendance Atlas
-        </div>
+<!-- ================= HEADER ================= -->
+<header class="navbar">
+    <div class="logo">
+        📊 Attendance Atlas
+    </div>
 
-        <nav class="nav-links">
-            <a href="#">Home</a>
-            <a href="/mark-attendance">Mark Attendance</a>
-            <a href="/report">Reports</a>
-            <a href="#">About Us</a>
-            <a href="profile.html">Profile</a>
-        </nav>
-        
-        <!-- ADD THIS DIV AROUND search and button -->
-        <div class="header-right">
-            <input id="search" type="text" placeholder="enter student ID/Name">
-            <button class="logout-btn">Logout</button>
-        </div>
-    </header>
-    <!-- Header End -->
+    <nav class="nav-links" id="nav-links">
+        <!-- Will be populated by JavaScript based on login status -->
+        <a href="/">Home</a>
+        <!-- Mark Attendance link will be added for lecturers only -->
+        <!-- Reports link will be added for both -->
+        <a href="/about">About Us</a>
+    </nav>
 
+    <!-- AUTH AREA (Handled by script.js) -->
+    <div class="header-right" id="auth-area">
+        <!-- JS will inject Login / User info here -->
+    </div>
+</header>
+<!-- ================= HEADER END ================= -->
+
+<!-- ================= MAIN CONTENT ================= -->
 <main class="content">
-    <!-- ADD HOME PAGE CONTENT HERE -->
+
     <section class="hero">
         <h1>Welcome to Attendance Atlas</h1>
         <p>Smart attendance tracking system for students and teachers</p>
-        <a href="mark_attendance.html" class="btn">Mark Attendance</a>
-    </section>
-    
-    <div class="features">
-        <div class="feature-box">
-            <h3>Real-time Tracking</h3>
-            <p>Track attendance instantly</p>
-        </div>
-        <div class="feature-box">
-            <h3>Smart Analytics</h3>
-            <p>Get detailed reports</p>
-        </div>
-        <div class="feature-box">
-            <h3>Export Data</h3>
-            <p>CSV & PDF exports</p>
-        </div>
-    </div>
-</main>
 
+        <!-- Role-specific call-to-action buttons -->
+        <div class="hero-buttons" id="hero-buttons">
+            <!-- Will be populated by JavaScript -->
+            <a href="/login.html" class="btn primary-btn">Login to Get Started</a>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="feature-box">
+            <h3>For Students</h3>
+            <p>Track your attendance in real-time</p>
+            <ul class="feature-list">
+                <li>View attendance reports</li>
+                <li>Check subject-wise attendance</li>
+                <li>Download attendance records</li>
+            </ul>
+        </div>
+
+        <div class="feature-box">
+            <h3>For Lecturers</h3>
+            <p>Efficient attendance management</p>
+            <ul class="feature-list">
+                <li>Mark attendance quickly</li>
+                <li>Generate detailed reports</li>
+                <li>Export data to CSV/PDF</li>
+            </ul>
+        </div>
+
+        <div class="feature-box">
+            <h3>Admin Dashboard</h3>
+            <p>Complete system overview</p>
+            <ul class="feature-list">
+                <li>Manage students & lecturers</li>
+                <li>View overall statistics</li>
+                <li>Monitor attendance trends</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Login Status Info -->
+    <section class="status-info" id="status-info">
+        <!-- Will show login status -->
+    </section>
+
+</main>
+<!-- ================= MAIN END ================= -->
+
+<!-- ================= FOOTER ================= -->
 <footer class="footer">
     <div class="footer-container">
+
         <div class="footer-section">
-            <h3>Attendance Tracker</h3>
+            <h3>Attendance Atlas</h3>
             <p>Smart attendance tracking system for students and teachers.</p>
         </div>
 
         <div class="footer-section">
             <h4>Quick Links</h4>
             <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="/report">Reports</a></li>
-                <li><a href="#">Help</a></li>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about">About Us</a></li>
+                <li><a href="/login.html">Login</a></li>
+                <li><a href="/signup.html">Sign Up</a></li>
             </ul>
         </div>
 
@@ -74,13 +106,17 @@
             <p>Email: support@attendanceatlas.com</p>
             <p>College Project – 2026</p>
         </div>
+
     </div>
 
     <div class="footer-bottom">
         © 2026 Attendance Atlas. All rights reserved.
     </div>
 </footer>
+<!-- ================= FOOTER END ================= -->
 
+<!-- ================= SCRIPT ================= -->
 <script src="js/script.js"></script>
+
 </body>
 </html>

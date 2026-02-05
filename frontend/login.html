@@ -2,29 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
-    <link rel="stylesheet" href="login.css">
+    <title>Login - Attendance Atlas</title>
+    <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
+
 <header class="navbar">
     <div class="logo">
         📊 Attendance Atlas
     </div>
+    <nav class="nav-links">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+    </nav>
 </header>
 
-<div class="container">
-    <h2>Login</h2>
+<div class="login-container">
+    <div class="login-box">
+        <h2>Login to Attendance Atlas</h2>
+        
+        <!-- Role Selection -->
+        <select id="role" class="form-select">
+            <option value="">Select Role</option>
+            <option value="student">Student</option>
+            <option value="lecturer">Lecturer</option>
+        </select>
 
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
+        <input type="email" id="email" class="form-input" placeholder="Email Address" required>
+        <input type="password" id="password" class="form-input" placeholder="Password" required>
 
-    <button onclick="login()">Login</button>
+        <button type="button" id="loginBtn" class="login-btn">Login</button>
+        
+        <!-- Forgot Password Link -->
+        <div class="forgot-password">
+            <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+        </div>
 
-    <p>New user?
-        <a href="signup.html">Sign up</a>
-    </p>
+        <!-- Forgot Password Form (Hidden by default) -->
+        <div id="forgotPasswordForm" class="forgot-form" style="display: none;">
+            <h3>Reset Password</h3>
+            <input type="email" id="resetEmail" class="form-input" placeholder="Enter your email">
+            <button type="button" id="sendResetBtn" class="reset-btn">Send Reset Link</button>
+            <p class="reset-message" id="resetMessage"></p>
+            <button type="button" id="backToLogin" class="back-btn">Back to Login</button>
+        </div>
+
+        <div class="signup-link">
+            <p>New user? <a href="signup.html">Create an account</a></p>
+        </div>
+        
+        <!-- Status Messages -->
+        <div id="statusMessage" class="status-message"></div>
+    </div>
 </div>
 
-<script src="login.js"></script>
+<script src="js/login.js"></script>
 </body>
 </html>
+

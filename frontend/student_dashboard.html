@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard - Attendance Atlas</title>
+    <link rel="stylesheet" href="css/student_dashboard.css">
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="navbar">
+    <div class="logo">
+        📊 Student Dashboard
+    </div>
+
+    <nav class="nav-links">
+        <a href="/">Home</a>
+        <a href="/report">Reports</a>
+        <a href="/about">About</a>
+    </nav>
+
+    <div class="header-right" id="auth-area">
+        <!-- Will be populated by JavaScript -->
+    </div>
+</header>
+
+<!-- ================= MAIN CONTENT ================= -->
+<main class="content">
+
+    <div class="dashboard-header">
+        <h1>Welcome, <span id="studentName">Student</span>!</h1>
+        <p class="student-info">Student ID: <span id="studentId">--</span> | Department: <span id="studentDept">--</span></p>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Statistics Section -->
+        <div class="stats-section">
+            <h2><span class="icon">📊</span> Attendance Statistics</h2>
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalClasses">0</div>
+                    <div class="stat-label">Total Classes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="presentCount">0</div>
+                    <div class="stat-label">Classes Present</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="absentCount">0</div>
+                    <div class="stat-label">Classes Absent</div>
+                </div>
+                <div class="stat-card highlight">
+                    <div class="stat-number" id="attendancePercent">0%</div>
+                    <div class="stat-label">Overall Attendance</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Attendance -->
+        <div class="attendance-section">
+            <h2><span class="icon">📅</span> Recent Attendance</h2>
+            <div class="table-container">
+                <table id="attendanceTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <p class="table-note">Showing last 10 attendance records</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="actions-section">
+            <h2><span class="icon">⚡</span> Quick Actions</h2>
+            <div class="action-buttons">
+                <a href="/report" class="action-btn">
+                    <span class="btn-icon">📈</span>
+                    <span>View Detailed Reports</span>
+                </a>
+                <a href="/" class="action-btn">
+                    <span class="btn-icon">🏠</span>
+                    <span>Back to Home</span>
+                </a>
+                <button class="action-btn" id="downloadReportBtn">
+                    <span class="btn-icon">📥</span>
+                    <span>Download Report (PDF)</span>
+                </button>
+                <a href="/logout" class="action-btn logout">
+                    <span class="btn-icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Subject-wise Breakdown -->
+        <div class="subjects-section">
+            <h2><span class="icon">📚</span> Subject-wise Attendance</h2>
+            <div id="subjectChart" class="subject-chart">
+                <!-- Will be populated by JavaScript -->
+                <p class="loading">Loading subject data...</p>
+            </div>
+        </div>
+
+        <!-- ================= SECURITY SECTION ================= -->
+        <div class="security-section">
+            <h3><span class="icon">🔒</span> Security Center</h3>
+            
+            <div class="security-cards">
+                <div class="security-card">
+                    <div class="security-icon">👁️</div>
+                    <h4>Recent Login Activity</h4>
+                    <div id="loginActivity">
+                        <p>Loading activity...</p>
+                    </div>
+                    <button class="security-btn" onclick="viewAllActivity()">View All</button>
+                </div>
+                
+                <div class="security-card">
+                    <div class="security-icon">⚙️</div>
+                    <h4>Security Settings</h4>
+                    <ul class="security-settings">
+                        <li>
+                            <label class="switch">
+                                <input type="checkbox" id="emailNotifications" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span>Email notifications for new logins</span>
+                        </li>
+                        <li>
+                            <label class="switch">
+                                <input type="checkbox" id="twoFactorAuth">
+                                <span class="slider"></span>
+                            </label>
+                            <span>Two-factor authentication</span>
+                        </li>
+                    </ul>
+                    <button class="security-btn" onclick="changePassword()">Change Password</button>
+                </div>
+                
+                <div class="security-card">
+                    <div class="security-icon">📱</div>
+                    <h4>Active Sessions</h4>
+                    <div id="activeSessions">
+                        <p>Current session: <span id="currentSession"></span></p>
+                    </div>
+                    <button class="security-btn logout-all" onclick="logoutOtherSessions()">Logout Other Devices</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h3>Attendance Atlas</h3>
+            <p>Smart attendance tracking system for students.</p>
+        </div>
+        <div class="footer-section">
+            <h4>Need Help?</h4>
+            <ul>
+                <li><a href="/about">Contact Admin</a></li>
+                <li><a href="/report">View All Reports</a></li>
+                <li><a href="#">FAQs</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h4>Student Portal</h4>
+            <p>Track your attendance in real-time</p>
+            <p>Email: student.support@attendanceatlas.com</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        © 2026 Attendance Atlas - Student Dashboard
+    </div>
+</footer>
+
+<script src="js/student_dashboard.js"></script>
+
+<style>
+.security-section {
+    grid-column: 1 / -1;
+    margin: 30px 0;
+    padding: 25px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+}
+
+.security-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.security-card {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 4px solid #102094;
+}
+
+.security-icon {
+    font-size: 2rem;
+    margin-bottom: 15px;
+}
+
+.security-card h4 {
+    color: #102094;
+    margin-bottom: 15px;
+}
+
+#loginActivity p {
+    color: #64748b;
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+.security-settings {
+    list-style: none;
+    padding-left: 0;
+}
+
+.security-settings li {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    color: #4b5563;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+    margin-right: 10px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #102094;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.security-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #102094;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+    transition: background 0.3s;
+}
+
+.security-btn:hover {
+    background: #0d1a7a;
+}
+
+.security-btn.logout-all {
+    background: #ef4444;
+}
+
+.security-btn.logout-all:hover {
+    background: #dc2626;
+}
+</style>
+
+<script>
+// Security functions for student dashboard
+async function loadSecurityInfo() {
+    try {
+        // Load login activity
+        const activityRes = await fetch('/api/security/login-attempts');
+        const activityData = await activityRes.json();
+        
+        if (activityData.success) {
+            const activityDiv = document.getElementById('loginActivity');
+            if (activityData.attempts.length > 0) {
+                let html = '';
+                activityData.attempts.slice(0, 3).forEach(attempt => {
+                    const status = attempt.success ? '✅ Success' : '❌ Failed';
+                    const location = attempt.ip ? `from ${attempt.ip}` : '';
+                    html += `<p>${status} ${location} - ${attempt.time_ago}</p>`;
+                });
+                activityDiv.innerHTML = html;
+            }
+        }
+        
+        // Show current session info
+        const currentSession = document.getElementById('currentSession');
+        if (currentSession) {
+            const now = new Date();
+            currentSession.textContent = `Logged in at ${now.toLocaleTimeString()}`;
+        }
+        
+    } catch (error) {
+        console.error('Error loading security info:', error);
+    }
+}
+
+function viewAllActivity() {
+    alert('This would show all login activity in a detailed view.');
+}
+
+function changePassword() {
+    window.location.href = '/forgot-password.html?action=change';
+}
+
+function logoutOtherSessions() {
+    if (confirm('Logout from all other devices?')) {
+        alert('All other sessions have been terminated.');
+    }
+}
+
+// Call this when dashboard loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadSecurityInfo();
+});
+</script>
+</body>
+</html>
