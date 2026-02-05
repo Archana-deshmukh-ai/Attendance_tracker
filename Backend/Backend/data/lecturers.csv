@@ -1,0 +1,4 @@
+lecturer_id,name,email,password,department
+L201,Dr. Rajesh Iyer,rajesh.iyer@uni.edu,prof@201,CSE
+L202,Dr. Meera Nandakumar,meera.n@uni.edu,prof@202,ECE
+L203,Dr. Anil Verma,anil.verma@uni.edu,prof@203,ME
