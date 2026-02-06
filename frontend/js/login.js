@@ -1,9 +1,184 @@
 // frontend/js/login.js
 
-let failedAttempts = 0;
-let isAccountLocked = false;
-let unlockTime = null;
+// ================= SECURITY CONFIGURATION =================
+const SECURITY_CONFIG = {
+    maxAttempts: 5,
+    lockDuration: 15 * 60 * 1000, // 15 minutes in milliseconds
+    cooldownDuration: 30 * 1000, // 30 seconds
+    captchaThreshold: 3, // Show CAPTCHA after 3 failed attempts
+    warningThreshold: 2 // Show warning after 2 attempts remaining
+};
 
+// ================= STATE MANAGEMENT =================
+let securityState = {
+    failedAttempts: 0,
+    isAccountLocked: false,
+    unlockTime: null,
+    isCooldown: false,
+    cooldownEnd: null,
+    lastAttemptTime: null
+};
+
+// ================= DOM ELEMENTS =================
+let elements = {
+    loginBtn: null,
+    roleSelect: null,
+    emailInput: null,
+    passwordInput: null,
+    togglePassword: null,
+    statusMessage: null,
+    securityMessages: null,
+    attemptCounter: null,
+    attemptText: null,
+    captchaArea: null,
+    forgotPasswordLink: null,
+    forgotPasswordForm: null,
+    sendResetBtn: null,
+    backToLoginBtn: null,
+    resetMessage: null,
+    resetEmail: null
+};
+
+// ================= INITIALIZATION =================
+function initLoginPage() {
+    console.log("Login page initialized");
+    
+    // Cache DOM elements
+    cacheElements();
+    
+    // Check if user is already logged in
+    checkLoginStatus();
+    
+    // Setup event listeners
+    setupEventListeners();
+    
+    // Initialize security state from localStorage
+    loadSecurityState();
+    
+    // Update attempt counter display
+    updateAttemptCounter();
+    
+    // Setup forgot password functionality
+    setupForgotPassword();
+}
+
+function cacheElements() {
+    elements.loginBtn = document.getElementById('loginBtn');
+    elements.roleSelect = document.getElementById('role');
+    elements.emailInput = document.getElementById('email');
+    elements.passwordInput = document.getElementById('password');
+    elements.togglePassword = document.getElementById('togglePassword');
+    elements.statusMessage = document.getElementById('statusMessage');
+    elements.securityMessages = document.getElementById('securityMessages');
+    elements.attemptCounter = document.getElementById('attemptCounter');
+    elements.attemptText = document.getElementById('attemptText');
+    elements.captchaArea = document.getElementById('captchaArea');
+    elements.forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    elements.forgotPasswordForm = document.getElementById('forgotPasswordForm');
+    elements.sendResetBtn = document.getElementById('sendResetBtn');
+    elements.backToLoginBtn = document.getElementById('backToLoginBtn');
+    elements.resetMessage = document.getElementById('resetMessage');
+    elements.resetEmail = document.getElementById('resetEmail');
+}
+
+function setupEventListeners() {
+    // Login button
+    if (elements.loginBtn) {
+        elements.loginBtn.addEventListener('click', handleLogin);
+    }
+    
+    // Password visibility toggle
+    if (elements.togglePassword) {
+        elements.togglePassword.addEventListener('click', togglePasswordVisibility);
+    }
+    
+    // Login on Enter key
+    if (elements.passwordInput) {
+        elements.passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleLogin();
+            }
+        });
+    }
+    
+    // Email input for auto-fill detection
+    if (elements.emailInput) {
+        elements.emailInput.addEventListener('input', () => {
+            checkAccountStatus(elements.emailInput.value.trim());
+        });
+    }
+}
+
+// ================= SECURITY STATE MANAGEMENT =================
+function loadSecurityState() {
+    const savedState = localStorage.getItem('loginSecurityState');
+    if (savedState) {
+        try {
+            const state = JSON.parse(savedState);
+            const now = Date.now();
+            
+            // Check if lock has expired
+            if (state.unlockTime && state.unlockTime > now) {
+                securityState = state;
+            } else {
+                // Reset if lock expired
+                resetSecurityState();
+            }
+            
+            // Check cooldown
+            if (state.cooldownEnd && state.cooldownEnd > now) {
+                securityState.isCooldown = true;
+                securityState.cooldownEnd = state.cooldownEnd;
+                showCooldownMessage();
+            }
+        } catch (error) {
+            console.error('Error loading security state:', error);
+            resetSecurityState();
+        }
+    }
+}
+
+function saveSecurityState() {
+    localStorage.setItem('loginSecurityState', JSON.stringify(securityState));
+}
+
+function resetSecurityState() {
+    securityState = {
+        failedAttempts: 0,
+        isAccountLocked: false,
+        unlockTime: null,
+        isCooldown: false,
+        cooldownEnd: null,
+        lastAttemptTime: null
+    };
+    saveSecurityState();
+    updateAttemptCounter();
+}
+
+function updateAttemptCounter() {
+    if (!elements.attemptCounter || !elements.attemptText) return;
+    
+    const remaining = SECURITY_CONFIG.maxAttempts - securityState.failedAttempts;
+    
+    if (remaining <= 0) {
+        elements.attemptCounter.style.display = 'none';
+        return;
+    }
+    
+    elements.attemptCounter.style.display = 'flex';
+    elements.attemptText.textContent = `${remaining} attempt${remaining !== 1 ? 's' : ''} remaining`;
+    
+    // Update styling based on remaining attempts
+    elements.attemptCounter.className = 'attempt-counter';
+    if (remaining <= SECURITY_CONFIG.warningThreshold) {
+        elements.attemptCounter.classList.add('warning');
+    }
+    if (remaining === 1) {
+        elements.attemptCounter.classList.add('critical');
+    }
+}
+
+// ================= LOGIN FUNCTIONALITY =================
 async function checkLoginStatus() {
     try {
         const response = await fetch('/api/login-status');
@@ -24,244 +199,155 @@ async function checkLoginStatus() {
     }
 }
 
-function login() {
-    const role = document.getElementById("role").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+async function checkAccountStatus(email) {
+    if (!email) return;
+    
+    try {
+        const response = await fetch('/api/security/check-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.locked) {
+                showAccountLockedMessage('Account is locked', data.unlock_time);
+                disableLoginForm();
+            }
+        }
+    } catch (error) {
+        console.error('Error checking account status:', error);
+    }
+}
 
-    if (!role || !email || !password) {
-        showStatusMessage("Please fill all fields", "error");
+async function handleLogin() {
+    // Check cooldown first
+    if (securityState.isCooldown && securityState.cooldownEnd > Date.now()) {
+        const remaining = Math.ceil((securityState.cooldownEnd - Date.now()) / 1000);
+        showStatusMessage(`Please wait ${remaining} seconds before trying again`, 'warning');
         return;
     }
-
+    
+    const role = elements.roleSelect ? elements.roleSelect.value : '';
+    const email = elements.emailInput ? elements.emailInput.value.trim() : '';
+    const password = elements.passwordInput ? elements.passwordInput.value : '';
+    
+    // Validation
+    if (!role || !email || !password) {
+        showStatusMessage('Please fill all fields', 'error');
+        return;
+    }
+    
+    if (!validateEmail(email)) {
+        showStatusMessage('Please enter a valid email address', 'error');
+        return;
+    }
+    
+    // Update security state
+    securityState.lastAttemptTime = Date.now();
+    
     // Show loading state
-    const loginBtn = document.getElementById("loginBtn");
-    const originalText = loginBtn.textContent;
-    loginBtn.disabled = true;
-    loginBtn.textContent = "Verifying...";
-
-    // Add cooldown indicator
+    setLoginButtonState(true);
     showCooldownIndicator();
-
-    fetch("/login", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            role,
-            email,
-            password
-        })
-    })
-    .then(res => {
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-            throw new Error("Server returned non-JSON response");
-        }
-        return res.json();
-    })
-    .then(data => {
-        // Remove cooldown indicator
+    
+    try {
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role, email, password })
+        });
+        
+        const data = await response.json();
         removeCooldownIndicator();
         
         if (data.success) {
-            // Reset failed attempts on success
-            failedAttempts = 0;
-            isAccountLocked = false;
-            
-            showStatusMessage(data.security?.message || "Login successful! Redirecting...", "success");
-            
-            // Show security notification if there were previous failed attempts
-            if (data.security?.previous_failed_attempts > 0) {
-                showSecurityNotification(`There were ${data.security.previous_failed_attempts} failed login attempts on your account.`);
-            }
-            
-            setTimeout(() => {
-                if (data.role === "student") {
-                    window.location.href = "/student-dashboard";
-                } else if (data.role === "lecturer") {
-                    window.location.href = "/lecturer-dashboard";
-                } else {
-                    window.location.href = "/";
-                }
-            }, 1500);
+            // Successful login
+            handleSuccessfulLogin(data);
         } else {
-            // Handle different types of failures
-            if (data.locked) {
-                // Account is locked
-                isAccountLocked = true;
-                unlockTime = data.unlock_time;
-                showAccountLockedMessage(data.message, data.unlock_time);
-            } else if (data.blocked) {
-                // IP is blocked
-                showIPBlockedMessage(data.message, data.cooldown);
-            } else if (data.cooldown) {
-                // In cooldown period
-                showCooldownMessage(data.message, data.wait_time);
-            } else {
-                // Normal failed attempt
-                failedAttempts++;
-                const remainingAttempts = data.remaining_attempts || (5 - failedAttempts);
-                
-                if (remainingAttempts <= 3) {
-                    showSecurityWarning(`⚠️ ${remainingAttempts} attempt(s) remaining before account lock`);
-                }
-                
-                showStatusMessage(data.message || "Invalid credentials", "error");
-                
-                // Check if we should show CAPTCHA
-                if (failedAttempts >= 3) {
-                    showCaptchaChallenge();
-                }
-            }
-            
-            loginBtn.disabled = false;
-            loginBtn.textContent = originalText;
+            // Failed login
+            handleFailedLogin(data);
         }
-    })
-    .catch(err => {
-        console.error("Login error:", err);
+    } catch (error) {
+        console.error('Login error:', error);
         removeCooldownIndicator();
-        showStatusMessage("Network error. Please check your connection.", "error");
-        loginBtn.disabled = false;
-        loginBtn.textContent = originalText;
-    });
+        showStatusMessage('Network error. Please check your connection.', 'error');
+        setLoginButtonState(false);
+    }
 }
 
-// Forgot Password functionality
-function setupForgotPassword() {
-    const forgotLink = document.getElementById('forgotPasswordLink');
-    const forgotForm = document.getElementById('forgotPasswordForm');
-    const loginForm = document.querySelector('.login-box');
-    const sendResetBtn = document.getElementById('sendResetBtn');
-    const backToLoginBtn = document.getElementById('backToLogin');
+function handleSuccessfulLogin(data) {
+    // Reset security state on success
+    resetSecurityState();
     
-    if (!forgotLink || !forgotForm) return;
+    // Show success message
+    showStatusMessage(data.message || 'Login successful! Redirecting...', 'success');
     
-    // Show forgot password form
-    forgotLink.addEventListener('click', async function(e) {
-        e.preventDefault();
-        
-        // Check if account is locked first
-        const email = document.getElementById('email').value.trim();
-        if (email) {
-            try {
-                const response = await fetch('/api/security/check-lock', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-                
-                const data = await response.json();
-                if (data.locked) {
-                    showAccountLockedMessage(
-                        "Account is locked. Please use the unlock option below.",
-                        data.unlock_in
-                    );
-                    return;
-                }
-            } catch (error) {
-                console.error('Error checking account lock:', error);
-            }
-        }
-        
-        forgotForm.style.display = 'block';
-        loginForm.querySelectorAll('input, select, button').forEach(el => {
-            if (el.id !== 'forgotPasswordLink') {
-                el.style.opacity = '0.5';
-                el.disabled = true;
-            }
-        });
-    });
+    // Show security notification if needed
+    if (data.security_notice) {
+        showSecurityNotification(data.security_notice);
+    }
     
-    // Send reset link
-    sendResetBtn.addEventListener('click', async function() {
-        const email = document.getElementById('resetEmail').value.trim();
-        const messageDiv = document.getElementById('resetMessage');
-        
-        if (!validateEmail(email)) {
-            showForgotMessage('Please enter a valid email address', 'error', messageDiv);
-            return;
+    // Redirect based on role
+    setTimeout(() => {
+        if (data.role === 'student') {
+            window.location.href = '/student-dashboard';
+        } else if (data.role === 'lecturer') {
+            window.location.href = '/lecturer-dashboard';
         }
-        
-        // Check if account is locked
-        try {
-            const lockCheck = await fetch('/api/security/check-lock', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            });
-            
-            const lockData = await lockCheck.json();
-            if (lockData.locked) {
-                showForgotMessage(
-                    'Account is locked. Please use the unlock option below.',
-                    'error',
-                    messageDiv
-                );
-                
-                // Show unlock option
-                showUnlockOption(email, messageDiv);
-                return;
-            }
-        } catch (error) {
-            console.error('Error checking account lock:', error);
-        }
-        
-        sendResetBtn.disabled = true;
-        sendResetBtn.textContent = 'Sending...';
-        
-        try {
-            const response = await fetch('/api/forgot-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                showForgotMessage('Reset link sent to your email! Check your inbox.', 'success', messageDiv);
-                // Redirect to full forgot password page for OTP entry
-                setTimeout(() => {
-                    window.location.href = '/forgot-password.html?email=' + encodeURIComponent(email);
-                }, 2000);
-            } else {
-                showForgotMessage(data.message || 'Failed to send reset link', 'error', messageDiv);
-            }
-        } catch (error) {
-            showForgotMessage('Network error. Please try again.', 'error', messageDiv);
-        } finally {
-            sendResetBtn.disabled = false;
-            sendResetBtn.textContent = 'Send Reset Link';
-        }
-    });
-    
-    // Back to login
-    backToLoginBtn.addEventListener('click', function() {
-        forgotForm.style.display = 'none';
-        loginForm.querySelectorAll('input, select, button').forEach(el => {
-            el.style.opacity = '1';
-            el.disabled = false;
-        });
-    });
+    }, 1500);
 }
 
-// Security-related functions
+function handleFailedLogin(data) {
+    // Increment failed attempts
+    securityState.failedAttempts++;
+    saveSecurityState();
+    updateAttemptCounter();
+    
+    // Handle different failure types
+    if (data.locked) {
+        // Account is locked
+        securityState.isAccountLocked = true;
+        securityState.unlockTime = data.unlock_time ? new Date(data.unlock_time).getTime() : Date.now() + SECURITY_CONFIG.lockDuration;
+        showAccountLockedMessage(data.message, securityState.unlockTime);
+        disableLoginForm();
+    } else if (data.cooldown) {
+        // IP cooldown
+        securityState.isCooldown = true;
+        securityState.cooldownEnd = Date.now() + (data.wait_time || SECURITY_CONFIG.cooldownDuration);
+        showCooldownMessage(data.message, data.wait_time || 30);
+    } else {
+        // Normal failure
+        showStatusMessage(data.message || 'Invalid credentials', 'error');
+        
+        // Check if we should show CAPTCHA
+        if (securityState.failedAttempts >= SECURITY_CONFIG.captchaThreshold) {
+            showCaptchaChallenge();
+        }
+        
+        // Check for remaining attempts warning
+        const remaining = SECURITY_CONFIG.maxAttempts - securityState.failedAttempts;
+        if (remaining <= SECURITY_CONFIG.warningThreshold && remaining > 0) {
+            showSecurityWarning(`⚠️ ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining before account lock`);
+        }
+    }
+    
+    setLoginButtonState(false);
+}
+
+// ================= SECURITY FEATURES =================
 function showCooldownIndicator() {
-    const loginBtn = document.getElementById('loginBtn');
-    if (!loginBtn) return;
+    if (!elements.loginBtn) return;
     
     const cooldownDiv = document.createElement('div');
     cooldownDiv.id = 'cooldownIndicator';
     cooldownDiv.className = 'cooldown-indicator';
     cooldownDiv.innerHTML = `
         <div class="cooldown-spinner"></div>
-        <span class="cooldown-text">Security check in progress...</span>
+        <span class="cooldown-text">Security verification in progress...</span>
     `;
     
-    loginBtn.parentNode.insertBefore(cooldownDiv, loginBtn.nextSibling);
+    elements.loginBtn.parentNode.insertBefore(cooldownDiv, elements.loginBtn.nextSibling);
 }
 
 function removeCooldownIndicator() {
@@ -272,56 +358,32 @@ function removeCooldownIndicator() {
 }
 
 function showAccountLockedMessage(message, unlockTime) {
-    const statusDiv = document.getElementById('statusMessage');
-    if (!statusDiv) return;
+    const now = Date.now();
+    const unlockTimestamp = new Date(unlockTime).getTime();
+    const minutes = Math.ceil((unlockTimestamp - now) / 60000);
     
-    // Calculate time until unlock
-    const now = new Date();
-    const unlockDate = new Date(unlockTime || now.getTime() + 15 * 60000); // Default 15 min
-    const timeDiff = unlockDate - now;
-    const minutes = Math.ceil(timeDiff / 60000);
-    
-    statusDiv.innerHTML = `
+    const messageDiv = createSecurityMessage('locked', `
         <div class="locked-message">
             <div class="locked-icon">🔒</div>
             <div class="locked-content">
                 <h4>Account Locked</h4>
                 <p>${message}</p>
-                <p>Account will be unlocked in <strong>${minutes} minutes</strong>.</p>
-                <button class="unlock-btn" onclick="requestAccountUnlock()">Request Unlock via Email</button>
+                <p>Account will be unlocked in <strong>${minutes} minute${minutes !== 1 ? 's' : ''}</strong>.</p>
+                <button class="unlock-btn" onclick="requestAccountUnlock()">
+                    <i class="fas fa-envelope"></i> Request Unlock via Email
+                </button>
             </div>
         </div>
-    `;
-    statusDiv.className = 'status-message error';
-    statusDiv.style.display = 'block';
-}
-
-function showIPBlockedMessage(message, cooldown) {
-    const statusDiv = document.getElementById('statusMessage');
-    if (!statusDiv) return;
+    `);
     
-    const minutes = Math.ceil(cooldown / 60);
-    
-    statusDiv.innerHTML = `
-        <div class="blocked-message">
-            <div class="blocked-icon">🚫</div>
-            <div class="blocked-content">
-                <h4>Access Temporarily Blocked</h4>
-                <p>${message}</p>
-                <p>Please try again in <strong>${minutes} minutes</strong>.</p>
-                <small>This is a security measure to prevent brute force attacks.</small>
-            </div>
-        </div>
-    `;
-    statusDiv.className = 'status-message error';
-    statusDiv.style.display = 'block';
+    // Start countdown timer
+    if (unlockTimestamp > now) {
+        startUnlockCountdown(unlockTimestamp, messageDiv);
+    }
 }
 
 function showCooldownMessage(message, waitTime) {
-    const statusDiv = document.getElementById('statusMessage');
-    if (!statusDiv) return;
-    
-    statusDiv.innerHTML = `
+    const messageDiv = createSecurityMessage('cooldown', `
         <div class="cooldown-message">
             <div class="cooldown-icon">⏳</div>
             <div class="cooldown-content">
@@ -333,31 +395,36 @@ function showCooldownMessage(message, waitTime) {
                 </div>
             </div>
         </div>
-    `;
-    statusDiv.className = 'status-message warning';
-    statusDiv.style.display = 'block';
+    `);
     
-    // Animate the progress bar
-    const progressBar = document.getElementById('cooldownProgress');
+    // Start progress bar animation
     let progress = 0;
     const interval = setInterval(() => {
         progress += 100 / (waitTime * 10); // Update every 100ms
-        progressBar.style.width = `${Math.min(progress, 100)}%`;
+        const progressBar = messageDiv.querySelector('#cooldownProgress');
+        if (progressBar) {
+            progressBar.style.width = `${Math.min(progress, 100)}%`;
+        }
         
         if (progress >= 100) {
             clearInterval(interval);
-            statusDiv.style.display = 'none';
+            messageDiv.remove();
+            securityState.isCooldown = false;
+            securityState.cooldownEnd = null;
+            saveSecurityState();
         }
     }, 100);
 }
 
 function showSecurityWarning(message) {
-    // Create warning notification
     const warningDiv = document.createElement('div');
     warningDiv.className = 'security-warning';
     warningDiv.innerHTML = `
         <div class="warning-icon">⚠️</div>
-        <div class="warning-content">${message}</div>
+        <div class="warning-content">
+            <h4>Security Warning</h4>
+            <p>${message}</p>
+        </div>
         <button class="warning-close" onclick="this.parentElement.remove()">×</button>
     `;
     
@@ -372,7 +439,6 @@ function showSecurityWarning(message) {
 }
 
 function showSecurityNotification(message) {
-    // Create security notification
     const notificationDiv = document.createElement('div');
     notificationDiv.className = 'security-notification';
     notificationDiv.innerHTML = `
@@ -380,7 +446,7 @@ function showSecurityNotification(message) {
         <div class="notification-content">
             <h4>Security Notice</h4>
             <p>${message}</p>
-            <small>If this wasn't you, please change your password immediately.</small>
+            <small>If this wasn't you, please secure your account.</small>
         </div>
         <button class="notification-close" onclick="this.parentElement.remove()">×</button>
     `;
@@ -395,11 +461,74 @@ function showSecurityNotification(message) {
     }, 10000);
 }
 
+function createSecurityMessage(type, content) {
+    // Clear existing security messages
+    if (elements.securityMessages) {
+        elements.securityMessages.innerHTML = '';
+    }
+    
+    // Create message container
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `security-message ${type}`;
+    messageDiv.innerHTML = content;
+    
+    // Add to DOM
+    if (elements.securityMessages) {
+        elements.securityMessages.appendChild(messageDiv);
+    } else {
+        // Fallback to status message area
+        if (elements.statusMessage) {
+            elements.statusMessage.innerHTML = content;
+            elements.statusMessage.className = `status-message ${type}`;
+            elements.statusMessage.style.display = 'block';
+        }
+    }
+    
+    return messageDiv;
+}
+
+function startUnlockCountdown(unlockTimestamp, container) {
+    const updateCountdown = () => {
+        const now = Date.now();
+        const remaining = unlockTimestamp - now;
+        
+        if (remaining <= 0) {
+            // Unlock time reached
+            securityState.isAccountLocked = false;
+            securityState.unlockTime = null;
+            securityState.failedAttempts = 0;
+            saveSecurityState();
+            
+            if (container.parentNode) {
+                container.remove();
+            }
+            
+            enableLoginForm();
+            showStatusMessage('Account is now unlocked. You may try logging in again.', 'success');
+            return;
+        }
+        
+        const minutes = Math.floor(remaining / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+        
+        const timeElement = container.querySelector('.locked-content strong');
+        if (timeElement) {
+            timeElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Continue countdown
+        requestAnimationFrame(updateCountdown);
+    };
+    
+    updateCountdown();
+}
+
+// ================= CAPTCHA FUNCTIONALITY =================
 function showCaptchaChallenge() {
-    // Simple CAPTCHA implementation
-    const captchaDiv = document.createElement('div');
-    captchaDiv.id = 'captchaChallenge';
-    captchaDiv.className = 'captcha-challenge';
+    if (!elements.captchaArea) return;
+    
+    // Clear existing CAPTCHA
+    elements.captchaArea.innerHTML = '';
     
     // Generate simple math CAPTCHA
     const num1 = Math.floor(Math.random() * 10) + 1;
@@ -414,63 +543,156 @@ function showCaptchaChallenge() {
         case '*': answer = num1 * num2; break;
     }
     
-    captchaDiv.innerHTML = `
-        <div class="captcha-header">
-            <h4>Security Check Required</h4>
-            <p>Please verify you're not a robot</p>
-        </div>
-        <div class="captcha-question">
-            <span>${num1} ${operator} ${num2} = </span>
-            <input type="number" id="captchaAnswer" placeholder="?">
-        </div>
-        <div class="captcha-actions">
-            <button class="captcha-submit" onclick="verifyCaptcha(${answer})">Verify</button>
-            <button class="captcha-refresh" onclick="refreshCaptcha()">↻ New Challenge</button>
+    const captchaId = `captcha-${Date.now()}`;
+    
+    elements.captchaArea.innerHTML = `
+        <div class="captcha-challenge" id="${captchaId}">
+            <div class="captcha-header">
+                <h4><i class="fas fa-robot"></i> Security Verification</h4>
+                <p>Please solve this challenge to continue</p>
+            </div>
+            <div class="captcha-question">
+                <span>${num1} ${operator} ${num2} = </span>
+                <input type="number" id="captchaAnswer" placeholder="?" autocomplete="off">
+            </div>
+            <div class="captcha-actions">
+                <button class="captcha-submit" onclick="verifyCaptcha(${answer}, '${captchaId}')">
+                    <i class="fas fa-check"></i> Verify
+                </button>
+                <button class="captcha-refresh" onclick="refreshCaptcha()">
+                    <i class="fas fa-redo"></i> New Challenge
+                </button>
+            </div>
         </div>
     `;
-    
-    // Insert before login button
-    const loginBtn = document.getElementById('loginBtn');
-    if (loginBtn && loginBtn.parentNode) {
-        loginBtn.parentNode.insertBefore(captchaDiv, loginBtn);
-    }
 }
 
-function verifyCaptcha(correctAnswer) {
-    const userAnswer = parseInt(document.getElementById('captchaAnswer').value);
-    const captchaDiv = document.getElementById('captchaChallenge');
+function verifyCaptcha(correctAnswer, captchaId) {
+    const captchaDiv = document.getElementById(captchaId);
+    if (!captchaDiv) return;
+    
+    const userAnswer = parseInt(captchaDiv.querySelector('#captchaAnswer').value);
     
     if (userAnswer === correctAnswer) {
         captchaDiv.innerHTML = `
-            <div class="captcha-success">
-                <span class="success-icon">✓</span>
-                <span>Verification successful! You may proceed.</span>
+            <div class="captcha-success" style="background: #d1fae5; padding: 15px; border-radius: 8px; color: #065f46; text-align: center;">
+                <i class="fas fa-check-circle" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <p style="margin: 0; font-weight: 600;">Verification successful!</p>
+                <p style="margin: 5px 0 0; font-size: 14px;">You may proceed with login.</p>
             </div>
         `;
+        
+        // Remove CAPTCHA after success
         setTimeout(() => {
-            captchaDiv.remove();
+            if (captchaDiv.parentNode) {
+                captchaDiv.remove();
+            }
         }, 2000);
     } else {
         captchaDiv.innerHTML = `
-            <div class="captcha-error">
-                <span class="error-icon">✗</span>
-                <span>Incorrect answer. Please try again.</span>
-                <button class="captcha-try-again" onclick="showCaptchaChallenge()">Try Again</button>
+            <div class="captcha-error" style="background: #fee2e2; padding: 15px; border-radius: 8px; color: #991b1b; text-align: center;">
+                <i class="fas fa-times-circle" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <p style="margin: 0; font-weight: 600;">Incorrect answer</p>
+                <p style="margin: 10px 0; font-size: 14px;">Please try again.</p>
+                <button onclick="showCaptchaChallenge()" style="padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Try Again
+                </button>
             </div>
         `;
     }
 }
 
 function refreshCaptcha() {
-    const captchaDiv = document.getElementById('captchaChallenge');
-    if (captchaDiv) {
-        captchaDiv.remove();
-        showCaptchaChallenge();
+    showCaptchaChallenge();
+}
+
+// ================= FORGOT PASSWORD =================
+function setupForgotPassword() {
+    if (!elements.forgotPasswordLink || !elements.forgotPasswordForm) return;
+    
+    elements.forgotPasswordLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showForgotPasswordForm();
+    });
+    
+    if (elements.backToLoginBtn) {
+        elements.backToLoginBtn.addEventListener('click', hideForgotPasswordForm);
+    }
+    
+    if (elements.sendResetBtn) {
+        elements.sendResetBtn.addEventListener('click', sendResetLink);
+    }
+}
+
+function showForgotPasswordForm() {
+    if (elements.forgotPasswordForm) {
+        elements.forgotPasswordForm.style.display = 'block';
+    }
+    
+    // Disable login form
+    disableLoginForm();
+}
+
+function hideForgotPasswordForm() {
+    if (elements.forgotPasswordForm) {
+        elements.forgotPasswordForm.style.display = 'none';
+    }
+    
+    // Enable login form
+    enableLoginForm();
+    
+    // Clear reset message
+    if (elements.resetMessage) {
+        elements.resetMessage.style.display = 'none';
+        elements.resetMessage.textContent = '';
+    }
+}
+
+async function sendResetLink() {
+    const email = elements.resetEmail ? elements.resetEmail.value.trim() : '';
+    
+    if (!validateEmail(email)) {
+        showResetMessage('Please enter a valid email address', 'error');
+        return;
+    }
+    
+    // Show loading state
+    const originalText = elements.sendResetBtn.innerHTML;
+    elements.sendResetBtn.disabled = true;
+    elements.sendResetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    
+    try {
+        const response = await fetch('/api/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showResetMessage('Reset link sent to your email! Check your inbox.', 'success');
+            
+            // Auto-hide form after success
+            setTimeout(() => {
+                hideForgotPasswordForm();
+                if (elements.resetEmail) {
+                    elements.resetEmail.value = '';
+                }
+            }, 3000);
+        } else {
+            showResetMessage(data.message || 'Failed to send reset link', 'error');
+        }
+    } catch (error) {
+        showResetMessage('Network error. Please try again.', 'error');
+    } finally {
+        elements.sendResetBtn.disabled = false;
+        elements.sendResetBtn.innerHTML = originalText;
     }
 }
 
 async function requestAccountUnlock() {
-    const email = document.getElementById('email').value.trim();
+    const email = elements.emailInput ? elements.emailInput.value.trim() : '';
     
     if (!email) {
         showStatusMessage('Please enter your email first', 'error');
@@ -496,94 +718,85 @@ async function requestAccountUnlock() {
     }
 }
 
-function showUnlockOption(email, messageDiv) {
-    const unlockDiv = document.createElement('div');
-    unlockDiv.className = 'unlock-option';
-    unlockDiv.innerHTML = `
-        <p style="margin: 10px 0; color: #dc2626;">Your account is locked due to too many failed attempts.</p>
-        <button class="unlock-request-btn" onclick="requestUnlockForEmail('${email}')">
-            🔓 Send Unlock Instructions
-        </button>
-    `;
+// ================= HELPER FUNCTIONS =================
+function setLoginButtonState(isLoading) {
+    if (!elements.loginBtn) return;
     
-    messageDiv.parentNode.insertBefore(unlockDiv, messageDiv.nextSibling);
-}
-
-async function requestUnlockForEmail(email) {
-    try {
-        const response = await fetch('/api/security/unlock-request', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showStatusMessage('Unlock instructions sent to your email!', 'success');
-        } else {
-            showStatusMessage(data.message || 'Failed to send unlock request', 'error');
-        }
-    } catch (error) {
-        showStatusMessage('Network error. Please try again.', 'error');
+    if (isLoading) {
+        elements.loginBtn.disabled = true;
+        elements.loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+    } else {
+        elements.loginBtn.disabled = false;
+        elements.loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
     }
 }
 
-// Helper functions
+function togglePasswordVisibility() {
+    if (!elements.passwordInput || !elements.togglePassword) return;
+    
+    const type = elements.passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    elements.passwordInput.setAttribute('type', type);
+    
+    // Update icon
+    const icon = elements.togglePassword.querySelector('i');
+    if (icon) {
+        icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+    }
+}
+
+function disableLoginForm() {
+    if (elements.roleSelect) elements.roleSelect.disabled = true;
+    if (elements.emailInput) elements.emailInput.disabled = true;
+    if (elements.passwordInput) elements.passwordInput.disabled = true;
+    if (elements.loginBtn) elements.loginBtn.disabled = true;
+}
+
+function enableLoginForm() {
+    if (elements.roleSelect) elements.roleSelect.disabled = false;
+    if (elements.emailInput) elements.emailInput.disabled = false;
+    if (elements.passwordInput) elements.passwordInput.disabled = false;
+    if (elements.loginBtn) elements.loginBtn.disabled = false;
+}
+
 function validateEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
 }
 
 function showStatusMessage(message, type) {
-    const statusDiv = document.getElementById('statusMessage');
-    if (!statusDiv) return;
+    if (!elements.statusMessage) return;
     
-    // Clear any existing content
-    statusDiv.innerHTML = '';
-    statusDiv.textContent = message;
-    statusDiv.className = `status-message ${type}`;
-    statusDiv.style.display = 'block';
+    elements.statusMessage.textContent = message;
+    elements.statusMessage.className = `status-message ${type}`;
+    elements.statusMessage.style.display = 'block';
     
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-        statusDiv.style.display = 'none';
-    }, 5000);
-}
-
-function showForgotMessage(message, type, element) {
-    element.textContent = message;
-    element.className = `reset-message ${type}`;
-    element.style.display = 'block';
-    
-    // Auto-hide success messages after 5 seconds
-    if (type === 'success') {
+    // Auto-hide after 5 seconds (except for success messages during redirect)
+    if (type !== 'success') {
         setTimeout(() => {
-            element.style.display = 'none';
+            elements.statusMessage.style.display = 'none';
         }, 5000);
     }
 }
 
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    checkLoginStatus();
+function showResetMessage(message, type) {
+    if (!elements.resetMessage) return;
     
-    // Add event listener to login button
-    const loginBtn = document.getElementById('loginBtn');
-    if (loginBtn) {
-        loginBtn.addEventListener('click', login);
+    elements.resetMessage.textContent = message;
+    elements.resetMessage.className = `reset-message ${type}`;
+    elements.resetMessage.style.display = 'block';
+    
+    // Auto-hide success messages
+    if (type === 'success') {
+        setTimeout(() => {
+            elements.resetMessage.style.display = 'none';
+        }, 5000);
     }
-    
-    // Also allow login on Enter key
-    const passwordField = document.getElementById('password');
-    if (passwordField) {
-        passwordField.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                login();
-            }
-        });
-    }
-    
-    // Setup forgot password functionality
-    setupForgotPassword();
-});
+}
+
+// ================= INITIALIZE ON LOAD =================
+document.addEventListener('DOMContentLoaded', initLoginPage);
+
+// Make functions available globally
+window.verifyCaptcha = verifyCaptcha;
+window.refreshCaptcha = refreshCaptcha;
+window.requestAccountUnlock = requestAccountUnlock;

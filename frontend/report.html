@@ -2,16 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Reports - Attendance Atlas</title>
     <link rel="stylesheet" href="css/report.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
 <!-- NAVBAR -->
 <header class="navbar">
-    <div class="logo">📊 Attendance Atlas</div>
+    <div class="logo">
+        <i class="fas fa-chart-line"></i> Attendance Atlas
+    </div>
     <nav class="nav-links" id="nav-links">
         <!-- Will be populated by JavaScript -->
     </nav>
@@ -25,112 +30,340 @@
     
     <!-- Access Control Message -->
     <div id="access-message" class="access-message" style="display: none;">
-        <p>❌ Please login to view reports.</p>
-        <p>Redirecting to login page...</p>
+        <div class="access-card">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Access Required</h3>
+            <p>Please login to view reports.</p>
+            <p>Redirecting to login page...</p>
+        </div>
     </div>
     
-    <div id="report-content">
-        <h1>Attendance Reports</h1>
-        
-        <!-- Role-specific header -->
-        <div class="report-header">
-            <div id="report-welcome">
-                <h2>Loading reports...</h2>
+    <div id="report-content" style="display: none;">
+        <!-- Quick Stats Dashboard -->
+        <div class="quick-stats-bar">
+            <div class="stat-card">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <div class="stat-info">
+                    <span class="stat-label">Total Classes</span>
+                    <span class="stat-value" id="quickTotalClasses">0</span>
+                </div>
             </div>
-            <div class="report-actions" id="report-actions">
-                <!-- Action buttons based on role -->
+            <div class="stat-card">
+                <i class="fas fa-user-check"></i>
+                <div class="stat-info">
+                    <span class="stat-label">Present</span>
+                    <span class="stat-value" id="quickTotalPresent">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-user-times"></i>
+                <div class="stat-info">
+                    <span class="stat-label">Absent</span>
+                    <span class="stat-value" id="quickTotalAbsent">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-chart-pie"></i>
+                <div class="stat-info">
+                    <span class="stat-label">Attendance %</span>
+                    <span class="stat-value" id="quickAttendancePercent">0%</span>
+                </div>
             </div>
         </div>
         
-        <!-- Filters Section -->
+        <!-- Welcome & Role Header -->
+        <div class="report-header">
+            <div class="welcome-section">
+                <h1><i class="fas fa-chart-bar"></i> Attendance Analytics</h1>
+                <div id="report-welcome">
+                    <h2>Welcome to Reports Dashboard</h2>
+                    <p>View detailed attendance analytics and insights</p>
+                </div>
+            </div>
+            
+            <div class="report-actions" id="report-actions">
+                <!-- Action buttons based on role -->
+                <button class="action-btn refresh-btn" id="refreshReports">
+                    <i class="fas fa-sync-alt"></i> Refresh Data
+                </button>
+                <div class="last-updated">
+                    <i class="fas fa-clock"></i> Last updated: <span id="lastUpdated">Just now</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filters & Controls Section -->
         <section class="filters-section">
-            <h3>📊 Filter Reports</h3>
-            <div class="filters">
-                <div class="filter-group">
-                    <label for="dateFilter">Date Range:</label>
-                    <input type="date" id="fromDate">
-                    <span>to</span>
-                    <input type="date" id="toDate">
+            <div class="section-header">
+                <h3><i class="fas fa-filter"></i> Filter Reports</h3>
+                <button class="collapse-toggle" data-target="filterControls">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+            
+            <div class="filters" id="filterControls">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="dateRange"><i class="fas fa-calendar-alt"></i> Date Range:</label>
+                        <div class="date-range">
+                            <input type="date" id="fromDate" class="date-input">
+                            <span class="date-separator">to</span>
+                            <input type="date" id="toDate" class="date-input">
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="periodFilter"><i class="fas fa-calendar-week"></i> Period:</label>
+                        <select id="periodFilter" class="dropdown">
+                            <option value="custom">Custom Range</option>
+                            <option value="today">Today</option>
+                            <option value="yesterday">Yesterday</option>
+                            <option value="this_week">This Week</option>
+                            <option value="last_week">Last Week</option>
+                            <option value="this_month">This Month</option>
+                            <option value="last_month">Last Month</option>
+                            <option value="this_year">This Year</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <div class="filter-group" id="subject-filter-group">
-                    <label for="subjectFilter">Subject:</label>
-                    <select id="subjectFilter">
-                        <option value="all">All Subjects</option>
-                    </select>
+                <div class="filter-row">
+                    <div class="filter-group" id="subject-filter-group">
+                        <label for="subjectFilter"><i class="fas fa-book"></i> Subject:</label>
+                        <select id="subjectFilter" class="dropdown">
+                            <option value="all">All Subjects</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group" id="student-filter-group" style="display: none;">
+                        <label for="studentFilter"><i class="fas fa-user-graduate"></i> Student:</label>
+                        <select id="studentFilter" class="dropdown">
+                            <option value="all">All Students</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group" id="department-filter-group">
+                        <label for="departmentFilter"><i class="fas fa-building"></i> Department:</label>
+                        <select id="departmentFilter" class="dropdown">
+                            <option value="all">All Departments</option>
+                            <option value="CSE">CSE</option>
+                            <option value="ECE">ECE</option>
+                            <option value="ME">ME</option>
+                            <option value="CE">CE</option>
+                            <option value="EEE">EEE</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <div class="filter-group" id="student-filter-group" style="display: none;">
-                    <label for="studentFilter">Student:</label>
-                    <select id="studentFilter">
-                        <option value="all">All Students</option>
-                    </select>
+                <div class="filter-actions">
+                    <button id="applyFilters" class="filter-btn primary">
+                        <i class="fas fa-check"></i> Apply Filters
+                    </button>
+                    <button id="resetFilters" class="filter-btn secondary">
+                        <i class="fas fa-redo"></i> Reset All
+                    </button>
+                    <button id="saveFilter" class="filter-btn">
+                        <i class="fas fa-save"></i> Save Filter
+                    </button>
                 </div>
-                
-                <button id="applyFilters" class="filter-btn">Apply Filters</button>
-                <button id="resetFilters" class="filter-btn secondary">Reset</button>
             </div>
         </section>
         
         <!-- Summary Statistics -->
         <section class="summary-section">
-            <h3>📈 Summary Statistics</h3>
+            <div class="section-header">
+                <h3><i class="fas fa-chart-line"></i> Summary Statistics</h3>
+                <div class="time-period" id="selectedPeriod">Showing: All Time</div>
+            </div>
+            
             <div class="stats-grid" id="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-number" id="total-classes">0</div>
-                    <div class="stat-label">Total Classes</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="total-classes">0</div>
+                        <div class="stat-label">Total Classes</div>
+                        <div class="stat-trend positive" id="classTrend">
+                            <i class="fas fa-arrow-up"></i> 0%
+                        </div>
+                    </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="total-present">0</div>
-                    <div class="stat-label">Total Present</div>
+                    <div class="stat-icon present">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="total-present">0</div>
+                        <div class="stat-label">Present Students</div>
+                        <div class="stat-trend positive" id="presentTrend">
+                            <i class="fas fa-arrow-up"></i> 0%
+                        </div>
+                    </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="total-absent">0</div>
-                    <div class="stat-label">Total Absent</div>
+                    <div class="stat-icon absent">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="total-absent">0</div>
+                        <div class="stat-label">Absent Students</div>
+                        <div class="stat-trend negative" id="absentTrend">
+                            <i class="fas fa-arrow-down"></i> 0%
+                        </div>
+                    </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="attendance-percent">0%</div>
-                    <div class="stat-label">Attendance %</div>
+                    <div class="stat-icon percentage">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="attendance-percent">0%</div>
+                        <div class="stat-label">Attendance Rate</div>
+                        <div class="stat-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
         
-        <!-- Charts Section -->
-        <section class="chart-section">
-            <h3>📊 Attendance Analytics</h3>
-            <div class="charts">
-                <div class="chart-box">
-                    <canvas id="statusChart"></canvas>
-                    <p class="chart-title">Attendance Distribution</p>
+        <!-- Charts Dashboard -->
+        <section class="chart-dashboard">
+            <div class="section-header">
+                <h3><i class="fas fa-chart-area"></i> Visual Analytics</h3>
+                <div class="chart-controls">
+                    <div class="chart-type-toggle">
+                        <button class="chart-type active" data-type="daily"><i class="fas fa-calendar-day"></i> Daily</button>
+                        <button class="chart-type" data-type="weekly"><i class="fas fa-calendar-week"></i> Weekly</button>
+                        <button class="chart-type" data-type="monthly"><i class="fas fa-calendar-alt"></i> Monthly</button>
+                    </div>
+                    <button class="action-btn" id="exportCharts">
+                        <i class="fas fa-download"></i> Export Charts
+                    </button>
                 </div>
-                <div class="chart-box">
+            </div>
+            
+            <div class="charts-grid">
+                <!-- Main Chart Area -->
+                <div class="chart-container main-chart">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-chart-line"></i> Attendance Trend Analysis</h4>
+                        <div class="chart-legend">
+                            <span class="legend-item"><span class="legend-color present"></span> Present</span>
+                            <span class="legend-item"><span class="legend-color absent"></span> Absent</span>
+                        </div>
+                    </div>
                     <canvas id="trendChart"></canvas>
-                    <p class="chart-title">Attendance Trend</p>
+                    <div class="chart-footer">
+                        <span>Data updates in real-time</span>
+                        <button class="chart-fullscreen" data-chart="trendChart">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="chart-box">
+                
+                <!-- Status Distribution -->
+                <div class="chart-container pie-chart">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-chart-pie"></i> Attendance Distribution</h4>
+                    </div>
+                    <canvas id="statusChart"></canvas>
+                    <div class="chart-stats">
+                        <div class="chart-stat">
+                            <span class="stat-label">Present</span>
+                            <span class="stat-value" id="presentStat">0%</span>
+                        </div>
+                        <div class="chart-stat">
+                            <span class="stat-label">Absent</span>
+                            <span class="stat-value" id="absentStat">0%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Subject-wise Performance -->
+                <div class="chart-container bar-chart">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-book-open"></i> Subject Performance</h4>
+                        <select id="subjectSort" class="dropdown-sm">
+                            <option value="attendance">By Attendance %</option>
+                            <option value="name">By Subject Name</option>
+                            <option value="classes">By Classes Count</option>
+                        </select>
+                    </div>
                     <canvas id="subjectChart"></canvas>
-                    <p class="chart-title">Subject-wise Attendance</p>
+                    <div class="chart-info">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Hover over bars for details</span>
+                    </div>
                 </div>
-                <div class="chart-box">
+                
+                <!-- Department Comparison -->
+                <div class="chart-container bar-chart">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-university"></i> Department Comparison</h4>
+                    </div>
                     <canvas id="departmentChart"></canvas>
-                    <p class="chart-title">Department-wise Attendance</p>
+                    <div class="department-legend" id="departmentLegend">
+                        <!-- Department legend will be populated here -->
+                    </div>
                 </div>
             </div>
         </section>
         
         <!-- Data Table Section -->
         <section class="table-section">
-            <div class="table-header">
-                <h3>📋 Detailed Attendance Records</h3>
-                <div class="table-actions">
-                    <button id="exportCsv" class="action-btn">📥 Export CSV</button>
-                    <button id="exportPdf" class="action-btn">📄 Export PDF</button>
-                    <button id="printReport" class="action-btn">🖨️ Print</button>
+            <div class="section-header">
+                <h3><i class="fas fa-table"></i> Detailed Records</h3>
+                <div class="table-controls">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="tableSearch" placeholder="Search records...">
+                    </div>
+                    <div class="records-info">
+                        Showing <span id="recordsCount">0</span> of <span id="totalRecords">0</span> records
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-actions">
+                <div class="export-options">
+                    <button id="exportCsv" class="export-btn">
+                        <i class="fas fa-file-csv"></i> CSV
+                    </button>
+                    <button id="exportPdf" class="export-btn">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                    <button id="exportExcel" class="export-btn">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </button>
+                    <button id="printReport" class="export-btn">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                    <button id="emailReport" class="export-btn">
+                        <i class="fas fa-envelope"></i> Email
+                    </button>
+                </div>
+                
+                <div class="table-settings">
+                    <label>Show:</label>
+                    <select id="rowsPerPage" class="dropdown-sm">
+                        <option value="10">10 rows</option>
+                        <option value="25" selected>25 rows</option>
+                        <option value="50">50 rows</option>
+                        <option value="100">100 rows</option>
+                        <option value="250">250 rows</option>
+                    </select>
+                    <button class="table-cols-toggle" id="toggleColumns">
+                        <i class="fas fa-columns"></i> Columns
+                    </button>
                 </div>
             </div>
             
             <div class="table-container">
-                <table id="reportTable">
+                <table id="reportTable" class="printable-table">
                     <thead>
                         <tr id="reportTableHeader">
                             <!-- Headers will be populated based on role -->
@@ -142,70 +375,245 @@
                 </table>
             </div>
             
-            <div class="pagination" id="pagination">
-                <!-- Pagination will be added here -->
+            <div class="table-footer">
+                <div class="pagination" id="pagination">
+                    <!-- Pagination will be added here -->
+                </div>
+                <div class="download-links">
+                    <a href="#" class="download-link" data-format="csv">
+                        <i class="fas fa-download"></i> Download Full CSV
+                    </a>
+                    <a href="#" class="download-link" data-format="pdf">
+                        <i class="fas fa-download"></i> Download Report PDF
+                    </a>
+                </div>
             </div>
         </section>
         
-        <!-- Download Section -->
-        <section class="download-section">
-            <h3>📥 Download Reports</h3>
-            <div class="download-options">
-                <button class="download-btn" data-type="csv">
-                    <span class="icon">📊</span>
-                    <span>Download as CSV</span>
-                </button>
-                <button class="download-btn" data-type="pdf">
-                    <span class="icon">📄</span>
-                    <span>Download as PDF</span>
-                </button>
-                <button class="download-btn" data-type="excel">
-                    <span class="icon">📈</span>
-                    <span>Download as Excel</span>
-                </button>
+        <!-- Insights & Recommendations -->
+        <section class="insights-section">
+            <div class="section-header">
+                <h3><i class="fas fa-lightbulb"></i> Insights & Recommendations</h3>
+                <div class="insights-refresh">
+                    <i class="fas fa-sync-alt"></i> Auto-refresh every 5 minutes
+                </div>
+            </div>
+            
+            <div class="insights-grid">
+                <div class="insight-card warning" id="lowAttendanceInsight">
+                    <div class="insight-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="insight-content">
+                        <h4>Low Attendance Alert</h4>
+                        <p id="lowAttendanceText">No low attendance detected</p>
+                        <button class="insight-action">View Details</button>
+                    </div>
+                </div>
+                
+                <div class="insight-card info" id="trendInsight">
+                    <div class="insight-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="insight-content">
+                        <h4>Attendance Trend</h4>
+                        <p id="trendText">Loading trend analysis...</p>
+                        <button class="insight-action">See Chart</button>
+                    </div>
+                </div>
+                
+                <div class="insight-card success" id="improvementInsight">
+                    <div class="insight-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="insight-content">
+                        <h4>Top Performers</h4>
+                        <p id="topPerformersText">Loading top performers...</p>
+                        <button class="insight-action">View List</button>
+                    </div>
+                </div>
+                
+                <div class="insight-card" id="scheduleInsight">
+                    <div class="insight-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="insight-content">
+                        <h4>Schedule Optimization</h4>
+                        <p id="scheduleText">Analyzing schedule patterns...</p>
+                        <button class="insight-action">Optimize</button>
+                    </div>
+                </div>
             </div>
         </section>
+        
+        <!-- Report Templates -->
+        <section class="templates-section">
+            <div class="section-header">
+                <h3><i class="fas fa-file-alt"></i> Report Templates</h3>
+                <div class="templates-info">
+                    <i class="fas fa-info-circle"></i> Pre-formatted reports for different needs
+                </div>
+            </div>
+            
+            <div class="templates-grid">
+                <div class="template-card">
+                    <div class="template-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h4>Student Report</h4>
+                    <p>Detailed individual attendance report with trends</p>
+                    <button class="template-use" data-template="student">
+                        <i class="fas fa-play"></i> Generate
+                    </button>
+                </div>
+                
+                <div class="template-card">
+                    <div class="template-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <h4>Class Report</h4>
+                    <p>Class-wise attendance summary and analysis</p>
+                    <button class="template-use" data-template="class">
+                        <i class="fas fa-play"></i> Generate
+                    </button>
+                </div>
+                
+                <div class="template-card">
+                    <div class="template-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h4>Monthly Report</h4>
+                    <p>Monthly attendance summary and compliance report</p>
+                    <button class="template-use" data-template="monthly">
+                        <i class="fas fa-play"></i> Generate
+                    </button>
+                </div>
+                
+                <div class="template-card">
+                    <div class="template-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h4>Analytics Report</h4>
+                    <p>Advanced analytics with insights and predictions</p>
+                    <button class="template-use" data-template="analytics">
+                        <i class="fas fa-play"></i> Generate
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3>Generating Reports</h3>
+            <p>Please wait while we process your data...</p>
+            <div class="loading-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="loadingProgress"></div>
+                </div>
+                <span id="loadingPercent">0%</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Status Message -->
+    <div id="statusMessage" class="status-message"></div>
+    
+    <!-- Fullscreen Chart Modal -->
+    <div id="fullscreenModal" class="fullscreen-modal">
+        <div class="modal-header">
+            <h3 id="modalTitle">Fullscreen Chart</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <canvas id="fullscreenChart"></canvas>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn" id="downloadChart">
+                <i class="fas fa-download"></i> Download
+            </button>
+            <button class="modal-btn secondary" id="printChart">
+                <i class="fas fa-print"></i> Print
+            </button>
+        </div>
     </div>
 </main>
 
 <footer class="footer">
     <div class="footer-container">
         <div class="footer-section">
-            <h3>Attendance Atlas</h3>
-            <p>Smart attendance reporting system.</p>
+            <h3><i class="fas fa-chart-line"></i> Attendance Atlas</h3>
+            <p>Advanced attendance analytics and reporting system.</p>
+            <div class="footer-status">
+                <span class="status-dot online"></span>
+                <span>Reports System: Operational</span>
+            </div>
         </div>
         <div class="footer-section">
-            <h4>Report Types</h4>
+            <h4><i class="fas fa-file-alt"></i> Report Types</h4>
             <ul>
-                <li><a href="#">Daily Reports</a></li>
-                <li><a href="#">Monthly Reports</a></li>
-                <li><a href="#">Subject Reports</a></li>
-                <li><a href="#">Student Reports</a></li>
+                <li><a href="#"><i class="fas fa-calendar-day"></i> Daily Reports</a></li>
+                <li><a href="#"><i class="fas fa-calendar-week"></i> Weekly Reports</a></li>
+                <li><a href="#"><i class="fas fa-calendar-alt"></i> Monthly Reports</a></li>
+                <li><a href="#"><i class="fas fa-book"></i> Subject Reports</a></li>
+                <li><a href="#"><i class="fas fa-user-graduate"></i> Student Reports</a></li>
             </ul>
         </div>
         <div class="footer-section">
-            <h4>Support</h4>
-            <p>Email: reports@attendanceatlas.com</p>
-            <p>Phone: +91-9876543210</p>
+            <h4><i class="fas fa-headset"></i> Support</h4>
+            <p><i class="fas fa-envelope"></i> reports@attendanceatlas.com</p>
+            <p><i class="fas fa-phone"></i> +91-9876543210</p>
+            <p><i class="fas fa-clock"></i> Support Hours: 9AM - 6PM</p>
+        </div>
+        <div class="footer-section">
+            <h4><i class="fas fa-shield-alt"></i> Data Security</h4>
+            <p><i class="fas fa-lock"></i> Encrypted Data Storage</p>
+            <p><i class="fas fa-user-shield"></i> Role-based Access</p>
+            <p><i class="fas fa-history"></i> 90-day Data Retention</p>
         </div>
     </div>
     <div class="footer-bottom">
-        © 2026 Attendance Atlas - Reports Portal
+        <div class="footer-bottom-left">
+            © 2026 Attendance Atlas - Reports Portal v2.0
+        </div>
+        <div class="footer-bottom-right">
+            <span id="currentDateTime"></span>
+        </div>
     </div>
 </footer>
 
 <!-- JS -->
 <script src="js/report.js"></script>
+<script src="js/navigation.js"></script>
 <script>
 // Check access before loading reports
 document.addEventListener('DOMContentLoaded', async function() {
+    // Update date time in footer
+    function updateDateTime() {
+        const now = new Date();
+        const dateTimeStr = now.toLocaleString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        document.getElementById('currentDateTime').textContent = dateTimeStr;
+    }
+    
+    updateDateTime();
+    setInterval(updateDateTime, 60000);
+    
     try {
         const response = await fetch('/api/login-status');
         const data = await response.json();
         
         if (!data.logged_in) {
             // Not logged in
-            document.getElementById('access-message').style.display = 'block';
+            document.getElementById('access-message').style.display = 'flex';
             document.getElementById('report-content').style.display = 'none';
             setTimeout(() => {
                 window.location.href = '/login.html';
@@ -217,10 +625,17 @@ document.addEventListener('DOMContentLoaded', async function() {
             
             // Update welcome message
             const welcomeDiv = document.getElementById('report-welcome');
+            const roleIcon = data.role === 'lecturer' ? 'fas fa-chalkboard-teacher' : 'fas fa-user-graduate';
             welcomeDiv.innerHTML = `
                 <h2>Welcome, ${data.name}!</h2>
-                <p>Viewing attendance reports as ${data.role}</p>
+                <p><i class="${roleIcon}"></i> Viewing attendance reports as ${data.role}</p>
             `;
+            
+            // Initialize navigation
+            if (typeof window.updateNavigation === 'function') {
+                window.updateNavigation();
+                window.updateAuthArea();
+            }
             
             // Initialize reports page
             if (typeof window.initializeReportsPage === 'function') {
@@ -229,8 +644,32 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     } catch (error) {
         console.error('Error checking login status:', error);
+        showError('Connection error. Please try again later.');
     }
 });
+
+// Utility functions
+function showError(message) {
+    const statusDiv = document.getElementById('statusMessage');
+    statusDiv.textContent = message;
+    statusDiv.className = 'status-message error';
+    statusDiv.style.display = 'block';
+    
+    setTimeout(() => {
+        statusDiv.style.display = 'none';
+    }, 5000);
+}
+
+function showSuccess(message) {
+    const statusDiv = document.getElementById('statusMessage');
+    statusDiv.textContent = message;
+    statusDiv.className = 'status-message success';
+    statusDiv.style.display = 'block';
+    
+    setTimeout(() => {
+        statusDiv.style.display = 'none';
+    }, 3000);
+}
 </script>
 </body>
 </html>

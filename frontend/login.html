@@ -2,61 +2,181 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login - Attendance Atlas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Attendance Atlas | Smart Attendance Management</title>
+    <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/login.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
+<!-- ================= HEADER ================= -->
 <header class="navbar">
     <div class="logo">
         📊 Attendance Atlas
     </div>
-    <nav class="nav-links">
+    <nav class="nav-links" id="nav-links">
+        <!-- Will be populated by JavaScript -->
         <a href="/">Home</a>
         <a href="/about">About</a>
+        <a href="/signup.html" class="signup-link">Sign Up</a>
     </nav>
 </header>
 
-<div class="login-container">
-    <div class="login-box">
-        <h2>Login to Attendance Atlas</h2>
-        
-        <!-- Role Selection -->
-        <select id="role" class="form-select">
-            <option value="">Select Role</option>
-            <option value="student">Student</option>
-            <option value="lecturer">Lecturer</option>
-        </select>
-
-        <input type="email" id="email" class="form-input" placeholder="Email Address" required>
-        <input type="password" id="password" class="form-input" placeholder="Password" required>
-
-        <button type="button" id="loginBtn" class="login-btn">Login</button>
-        
-        <!-- Forgot Password Link -->
-        <div class="forgot-password">
-            <a href="#" id="forgotPasswordLink">Forgot Password?</a>
-        </div>
-
-        <!-- Forgot Password Form (Hidden by default) -->
-        <div id="forgotPasswordForm" class="forgot-form" style="display: none;">
-            <h3>Reset Password</h3>
-            <input type="email" id="resetEmail" class="form-input" placeholder="Enter your email">
-            <button type="button" id="sendResetBtn" class="reset-btn">Send Reset Link</button>
-            <p class="reset-message" id="resetMessage"></p>
-            <button type="button" id="backToLogin" class="back-btn">Back to Login</button>
-        </div>
-
-        <div class="signup-link">
-            <p>New user? <a href="signup.html">Create an account</a></p>
+<!-- ================= MAIN LOGIN CONTENT ================= -->
+<main class="login-main">
+    <div class="login-hero">
+        <div class="login-hero-content">
+            <h1>Welcome Back!</h1>
+            <p class="hero-subtitle">Login to access your attendance dashboard</p>
+            
+            <div class="hero-features">
+                <div class="feature-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Secure & Encrypted</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Real-time Tracking</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Advanced Analytics</span>
+                </div>
+            </div>
+            
+            <div class="testimonial-quote">
+                <p>"Attendance Atlas revolutionized how we manage student attendance. Highly recommended!"</p>
+                <div class="quote-author">- Prof. Sarah Johnson, Computer Science Dept.</div>
+            </div>
         </div>
         
-        <!-- Status Messages -->
-        <div id="statusMessage" class="status-message"></div>
+        <div class="login-form-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <h2><i class="fas fa-sign-in-alt"></i> Login</h2>
+                    <p>Enter your credentials to continue</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="role"><i class="fas fa-user-tag"></i> Select Role</label>
+                    <select id="role" class="form-select">
+                        <option value="">Choose your role</option>
+                        <option value="student">👨‍🎓 Student</option>
+                        <option value="lecturer">👨‍🏫 Lecturer</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" id="email" class="form-input" placeholder="you@university.edu" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" class="form-input password-input" placeholder="Enter your password" required>
+                        <button type="button" class="toggle-password" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Attempt Counter -->
+                <div class="attempt-counter" id="attemptCounter">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="attemptText">5 attempts remaining</span>
+                </div>
+
+                <!-- CAPTCHA Area -->
+                <div id="captchaArea"></div>
+
+                <button type="button" id="loginBtn" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                
+                <!-- Status Messages -->
+                <div id="statusMessage" class="status-message"></div>
+                
+                <!-- Security Messages Container -->
+                <div id="securityMessages"></div>
+                
+                <!-- Forgot Password Link -->
+                <div class="forgot-password">
+                    <a href="#" id="forgotPasswordLink">
+                        <i class="fas fa-key"></i> Forgot Password?
+                    </a>
+                </div>
+
+                <!-- Forgot Password Form (Hidden by default) -->
+                <div id="forgotPasswordForm" class="forgot-form">
+                    <h3><i class="fas fa-unlock-alt"></i> Reset Password</h3>
+                    <p>Enter your email to receive a password reset link</p>
+                    
+                    <div class="form-group">
+                        <input type="email" id="resetEmail" class="form-input" placeholder="Enter your registered email">
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="button" id="sendResetBtn" class="reset-btn">
+                            <i class="fas fa-paper-plane"></i> Send Reset Link
+                        </button>
+                        <button type="button" id="backToLogin" class="back-btn">
+                            <i class="fas fa-arrow-left"></i> Back to Login
+                        </button>
+                    </div>
+                    
+                    <div class="reset-message" id="resetMessage"></div>
+                </div>
+
+                <div class="signup-link">
+                    <p>Don't have an account? <a href="signup.html" class="signup-cta">Create one now</a></p>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="login-stats">
+                    <div class="stat">
+                        <span class="stat-number" id="activeUsers">1,245</span>
+                        <span class="stat-label">Active Users</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">99.9%</span>
+                        <span class="stat-label">Uptime</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+</main>
 
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h3>Attendance Atlas</h3>
+            <p>Secure attendance management system for educational institutions.</p>
+        </div>
+        <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/signup.html">Sign Up</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h4>Support</h4>
+            <p>Email: support@attendanceatlas.com</p>
+            <p>24/7 Help Center Available</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        © 2026 Attendance Atlas. All rights reserved. | <a href="/privacy">Privacy Policy</a>
+    </div>
+</footer>
+
+<script src="js/script.js"></script>
 <script src="js/login.js"></script>
 </body>
 </html>
-
