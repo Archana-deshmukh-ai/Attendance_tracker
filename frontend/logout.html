@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logged Out | Attendance Atlas | Smart Attendance Management</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/logout.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="navbar">
+    <div class="logo">
+        📊 Attendance Atlas
+    </div>
+
+    <nav class="nav-links" id="nav-links">
+        <!-- Will be populated by JavaScript -->
+        <a href="/">Home</a>
+        <a href="/about">About Us</a>
+        <a href="/login.html">Login</a>
+        <a href="/signup.html">Sign Up</a>
+    </nav>
+    
+    <div class="header-right" id="auth-area">
+        <!-- Will be populated by JavaScript -->
+    </div>
+</header>
+
+<!-- ================= MAIN LOGOUT CONTENT ================= -->
+<main class="logout-main">
+    <div class="logout-hero">
+        <div class="logout-card">
+            <!-- Animated logout icon -->
+            <div class="logout-icon-container">
+                <div class="logout-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <div class="icon-ring"></div>
+                <div class="icon-ring ring-2"></div>
+            </div>
+            
+            <h1 class="logout-title">Successfully Logged Out</h1>
+            <p class="logout-subtitle">You have been securely logged out of your account</p>
+            
+            <div class="logout-details">
+                <div class="detail-card">
+                    <div class="detail-icon success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="detail-content">
+                        <h4>Session Terminated</h4>
+                        <p>Your login session has been securely ended</p>
+                    </div>
+                </div>
+                
+                <div class="detail-card">
+                    <div class="detail-icon info">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="detail-content">
+                        <h4>Security Protected</h4>
+                        <p>All sensitive data has been cleared from browser</p>
+                    </div>
+                </div>
+                
+                <div class="detail-card">
+                    <div class="detail-icon timer">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="detail-content">
+                        <h4>Auto Redirect</h4>
+                        <p>Redirecting in <span id="countdown">10</span> seconds</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Progress bar for countdown -->
+            <div class="countdown-progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="/" class="btn btn-primary">
+                    <i class="fas fa-home"></i>
+                    <span>Go to Homepage</span>
+                </a>
+                <a href="/login.html" class="btn btn-secondary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Login Again</span>
+                </a>
+                <a href="/about" class="btn btn-outline">
+                    <i class="fas fa-info-circle"></i>
+                    <span>About Project</span>
+                </a>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="logout-stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalSessions">0</div>
+                    <div class="stat-label">Sessions Today</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">System Uptime</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Secure Logout</div>
+                </div>
+            </div>
+            
+            <!-- Security Tips -->
+            <div class="security-tips">
+                <h3><i class="fas fa-shield-check"></i> Security Best Practices</h3>
+                <div class="tips-grid">
+                    <div class="tip">
+                        <div class="tip-icon">
+                            <i class="fas fa-laptop-house"></i>
+                        </div>
+                        <h4>Clear Browser Data</h4>
+                        <p>Always clear cache on shared devices</p>
+                    </div>
+                    <div class="tip">
+                        <div class="tip-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <h4>Strong Passwords</h4>
+                        <p>Use unique passwords for each account</p>
+                    </div>
+                    <div class="tip">
+                        <div class="tip-icon">
+                            <i class="fas fa-user-lock"></i>
+                        </div>
+                        <h4>Two-Factor Auth</h4>
+                        <p>Enable 2FA for added security</p>
+                    </div>
+                    <div class="tip">
+                        <div class="tip-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <h4>Regular Logout</h4>
+                        <p>Log out after each session</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feedback Section -->
+            <div class="feedback-section">
+                <h4>How was your experience?</h4>
+                <p>Help us improve by sharing your feedback</p>
+                <div class="rating">
+                    <button class="star" data-value="1"><i class="far fa-star"></i></button>
+                    <button class="star" data-value="2"><i class="far fa-star"></i></button>
+                    <button class="star" data-value="3"><i class="far fa-star"></i></button>
+                    <button class="star" data-value="4"><i class="far fa-star"></i></button>
+                    <button class="star" data-value="5"><i class="far fa-star"></i></button>
+                </div>
+                <button class="btn-feedback" id="submitFeedback">
+                    <i class="fas fa-paper-plane"></i> Submit Feedback
+                </button>
+            </div>
+        </div>
+        
+        <!-- Side Panel: Quick Links -->
+        <div class="side-panel">
+            <div class="panel-card">
+                <h3><i class="fas fa-link"></i> Quick Access</h3>
+                <div class="quick-links">
+                    <a href="/student-dashboard" class="quick-link">
+                        <i class="fas fa-user-graduate"></i>
+                        <span>Student Dashboard</span>
+                    </a>
+                    <a href="/lecturer-dashboard" class="quick-link">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <span>Lecturer Dashboard</span>
+                    </a>
+                    <a href="/report" class="quick-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>View Reports</span>
+                    </a>
+                    <a href="/mark-attendance" class="quick-link">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Mark Attendance</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="panel-card">
+                <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p>You logged out</p>
+                            <small>Just now</small>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p>Session secured</p>
+                            <small>Browser cache cleared</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel-card">
+                <h3><i class="fas fa-question-circle"></i> Need Help?</h3>
+                <div class="help-links">
+                    <a href="/about" class="help-link">
+                        <i class="fas fa-info-circle"></i>
+                        <span>About Attendance Atlas</span>
+                    </a>
+                    <a href="/contact" class="help-link">
+                        <i class="fas fa-headset"></i>
+                        <span>Contact Support</span>
+                    </a>
+                    <a href="/faq" class="help-link">
+                        <i class="fas fa-question"></i>
+                        <span>FAQ & Documentation</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h3><i class="fas fa-chart-line"></i> Attendance Atlas</h3>
+            <p>Smart attendance tracking system for educational institutions. Secure, reliable, and efficient.</p>
+            <div class="social-links">
+                <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+
+        <div class="footer-section">
+            <h4><i class="fas fa-link"></i> Quick Links</h4>
+            <ul>
+                <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
+                <li><a href="/login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                <li><a href="/signup.html"><i class="fas fa-user-plus"></i> Sign Up</a></li>
+                <li><a href="/report"><i class="fas fa-chart-bar"></i> Reports</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4><i class="fas fa-envelope"></i> Contact</h4>
+            <p><i class="fas fa-envelope"></i> support@attendanceatlas.com</p>
+            <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+            <p><i class="fas fa-university"></i> College Project – 2026</p>
+            <p><i class="fas fa-clock"></i> 24/7 Support Available</p>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2026 Attendance Atlas. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms of Service</a>
+            <a href="/security">Security</a>
+            <a href="/cookies">Cookie Policy</a>
+        </div>
+    </div>
+</footer>
+
+<!-- ================= SCRIPTS ================= -->
+<script src="js/script.js"></script>
+<script src="js/logout.js"></script>
+</body>
+</html>

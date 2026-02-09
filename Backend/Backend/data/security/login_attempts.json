@@ -1,0 +1,16 @@
+{
+  "aarav.sharma@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-02-06T21:21:51.129923",
+        "ip": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "failed_count": 0,
+    "last_attempt": "2026-02-06T21:21:51.129923"
+  },
+  "127.0.0.1": {
+    "failed_attempts": 0
+  }
+}

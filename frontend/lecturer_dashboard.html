@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecturer Dashboard | Attendance Atlas | Smart Attendance Management</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/lecturer_dashboard.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="navbar">
+    <div class="logo">
+        <i class="fas fa-chalkboard-teacher"></i> Lecturer Dashboard
+    </div>
+
+    <nav class="nav-links" id="nav-links">
+        <!-- Will be populated by JavaScript -->
+    </nav>
+
+    <div class="header-right" id="auth-area">
+        <!-- Will be populated by JavaScript -->
+    </div>
+</header>
+
+<!-- ================= MAIN CONTENT ================= -->
+<main class="dashboard-container">
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+        <div class="banner-content">
+            <div class="lecturer-profile">
+                <div class="profile-avatar">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="profile-info">
+                    <h1>Welcome, <span id="lecturerName">Professor</span>!</h1>
+                    <p class="lecturer-details">
+                        <i class="fas fa-id-card"></i> Lecturer ID: <span id="lecturerId">L001</span> |
+                        <i class="fas fa-university"></i> Department: <span id="lecturerDept">Computer Science</span>
+                    </p>
+                </div>
+            </div>
+            <div class="welcome-actions">
+                <button class="quick-action" onclick="markAttendanceQuick()">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Mark Attendance</span>
+                </button>
+                <button class="quick-action" onclick="generateReport()">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Generate Report</span>
+                </button>
+            </div>
+        </div>
+        <div class="date-time">
+            <div id="currentDate" class="date-display">Loading...</div>
+            <div id="currentTime" class="time-display">--:--:--</div>
+        </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        
+        <!-- Quick Stats -->
+        <div class="stats-section">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-bar"></i> Dashboard Overview</h2>
+                <select id="statPeriod" class="period-select" onchange="updateStatistics()">
+                    <option value="today">Today</option>
+                    <option value="week" selected>This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="semester">This Semester</option>
+                </select>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon total">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalStudents">0</div>
+                        <div class="stat-label">Total Students</div>
+                        <div class="stat-change" id="studentChange">+0% this week</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon attendance">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="todayAttendance">0%</div>
+                        <div class="stat-label">Today's Attendance</div>
+                        <div class="stat-change" id="attendanceChange">+0% from yesterday</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon subjects">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalSubjects">0</div>
+                        <div class="stat-label">Subjects Assigned</div>
+                        <div class="stat-change" id="subjectChange">All active</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon performance">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="avgAttendance">0%</div>
+                        <div class="stat-label">Average Performance</div>
+                        <div class="stat-change" id="performanceChange">Meeting target</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="actions-section">
+            <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+            <div class="actions-grid">
+                <a href="/mark-attendance" class="action-card primary">
+                    <div class="action-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h4>Mark Attendance</h4>
+                    <p>Take attendance for today's classes</p>
+                    <span class="action-badge new">2 pending</span>
+                </a>
+                
+                <a href="/report" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4>Generate Reports</h4>
+                    <p>Create detailed attendance reports</p>
+                    <span class="action-badge">View all</span>
+                </a>
+                
+                <button class="action-card" onclick="exportData()">
+                    <div class="action-icon">
+                        <i class="fas fa-file-export"></i>
+                    </div>
+                    <h4>Export Data</h4>
+                    <p>Export attendance records in CSV/PDF</p>
+                    <span class="action-badge">Quick export</span>
+                </button>
+                
+                <a href="/manage-students" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h4>Manage Students</h4>
+                    <p>View and manage student information</p>
+                    <span class="action-badge">Manage</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Today's Schedule -->
+        <div class="schedule-section">
+            <div class="section-header">
+                <h2><i class="fas fa-calendar-day"></i> Today's Schedule</h2>
+                <button class="view-all" onclick="viewFullSchedule()">View All</button>
+            </div>
+            <div class="schedule-list" id="todaySchedule">
+                <!-- Will be populated by JavaScript -->
+                <div class="schedule-empty">
+                    <i class="fas fa-calendar-times"></i>
+                    <p>No classes scheduled for today</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="activity-section">
+            <div class="section-header">
+                <h2><i class="fas fa-history"></i> Recent Activity</h2>
+                <button class="refresh-btn" onclick="refreshActivity()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            <div class="activity-list" id="recentActivity">
+                <!-- Will be populated by JavaScript -->
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <p>Marked attendance for CS101</p>
+                        <small>10:30 AM · Today</small>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-file-export"></i>
+                    </div>
+                    <div class="activity-content">
+                        <p>Exported monthly report</p>
+                        <small>Yesterday · 3:45 PM</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Chart -->
+        <div class="chart-section">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-line"></i> Attendance Trends</h2>
+                <div class="chart-controls">
+                    <button class="chart-btn active" data-type="weekly">Weekly</button>
+                    <button class="chart-btn" data-type="monthly">Monthly</button>
+                    <button class="chart-btn" data-type="subject">By Subject</button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Assigned Subjects -->
+        <div class="subjects-section">
+            <div class="section-header">
+                <h2><i class="fas fa-book-open"></i> Your Subjects</h2>
+                <button class="add-btn" onclick="addNewSubject()">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+            <div class="subjects-grid" id="subjectsList">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Upcoming Deadlines -->
+        <div class="deadlines-section">
+            <h2><i class="fas fa-clock"></i> Upcoming Deadlines</h2>
+            <div class="deadlines-list" id="upcomingDeadlines">
+                <!-- Will be populated by JavaScript -->
+                <div class="deadline-item urgent">
+                    <div class="deadline-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="deadline-content">
+                        <h4>Submit Attendance Records</h4>
+                        <p>Monthly attendance submission due</p>
+                        <div class="deadline-meta">
+                            <span class="deadline-time">
+                                <i class="fas fa-calendar"></i> Tomorrow, 5:00 PM
+                            </span>
+                            <span class="deadline-status urgent">Urgent</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Panel -->
+        <div class="notifications-section">
+            <div class="section-header">
+                <h2><i class="fas fa-bell"></i> Notifications</h2>
+                <div class="notification-actions">
+                    <button class="mark-all-btn" onclick="markAllAsRead()">Mark all as read</button>
+                    <span class="badge" id="notificationCount">3</span>
+                </div>
+            </div>
+            <div class="notifications-list" id="notificationsList">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Security & Settings Panel -->
+    <div class="security-panel">
+        <h3><i class="fas fa-shield-alt"></i> Security & Settings</h3>
+        <div class="security-grid">
+            <div class="security-card">
+                <div class="security-icon">
+                    <i class="fas fa-user-lock"></i>
+                </div>
+                <h4>Account Security</h4>
+                <p>Last login: <span id="lastLoginTime">Today, 09:30 AM</span></p>
+                <button class="security-btn" onclick="changePassword()">
+                    <i class="fas fa-key"></i> Change Password
+                </button>
+            </div>
+            
+            <div class="security-card">
+                <div class="security-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <h4>Notification Settings</h4>
+                <div class="toggle-group">
+                    <label class="toggle-label">
+                        <span>Email Notifications</span>
+                        <label class="switch">
+                            <input type="checkbox" id="emailNotifications" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </label>
+                    <label class="toggle-label">
+                        <span>SMS Alerts</span>
+                        <label class="switch">
+                            <input type="checkbox" id="smsNotifications">
+                            <span class="slider"></span>
+                        </label>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="security-card">
+                <div class="security-icon">
+                    <i class="fas fa-desktop"></i>
+                </div>
+                <h4>Active Sessions</h4>
+                <p><span id="activeSessionCount">1</span> active session</p>
+                <button class="security-btn logout-btn" onclick="logoutOtherSessions()">
+                    <i class="fas fa-sign-out-alt"></i> Logout Other Devices
+                </button>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h3><i class="fas fa-chart-line"></i> Attendance Atlas</h3>
+            <p>Advanced attendance management system for educators. Streamline tracking, enhance reporting.</p>
+            <div class="footer-stats">
+                <div class="footer-stat">
+                    <div class="footer-stat-number" id="footerTotalStudents">0</div>
+                    <div class="footer-stat-label">Students</div>
+                </div>
+                <div class="footer-stat">
+                    <div class="footer-stat-number" id="footerAvgAttendance">0%</div>
+                    <div class="footer-stat-label">Avg. Attendance</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-section">
+            <h4><i class="fas fa-tools"></i> Lecturer Tools</h4>
+            <ul>
+                <li><a href="/mark-attendance"><i class="fas fa-check-circle"></i> Mark Attendance</a></li>
+                <li><a href="/report"><i class="fas fa-chart-bar"></i> Generate Reports</a></li>
+                <li><a href="/manage-students"><i class="fas fa-users"></i> Manage Students</a></li>
+                <li><a href="/analytics"><i class="fas fa-chart-line"></i> Analytics Dashboard</a></li>
+                <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4><i class="fas fa-headset"></i> Support</h4>
+            <p><i class="fas fa-envelope"></i> faculty.support@attendanceatlas.com</p>
+            <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+            <p><i class="fas fa-clock"></i> Mon-Fri, 9 AM - 6 PM</p>
+            <p><i class="fas fa-university"></i> Faculty Portal v2.0</p>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2026 Attendance Atlas - Lecturer Portal | <span id="sessionTimer">Session expires in: 59:59</span></p>
+        <div class="footer-links">
+            <a href="/privacy"><i class="fas fa-lock"></i> Privacy Policy</a>
+            <a href="/terms"><i class="fas fa-file-contract"></i> Terms of Service</a>
+            <a href="/help"><i class="fas fa-question-circle"></i> Help Center</a>
+        </div>
+    </div>
+</footer>
+
+<!-- ================= SCRIPTS ================= -->
+<script src="js/script.js"></script>
+<script src="js/lecturer_dashboard.js"></script>
+</body>
+</html>

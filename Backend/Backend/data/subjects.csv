@@ -1,0 +1,7 @@
+subject_id,code,name,credits,department,lecturer_id
+1,CS101,Data Structures,4,CSE,L201
+2,CS102,Algorithms,4,CSE,L206
+3,EC201,Digital Electronics,3,ECE,L202
+4,ME301,Thermodynamics,4,ME,L203
+5,CE401,Structural Analysis,3,CE,L204
+6,EE501,Power Systems,4,EEE,L205

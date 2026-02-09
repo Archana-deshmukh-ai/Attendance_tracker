@@ -2,86 +2,419 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>📊Attendance Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Attendance Atlas | Smart Attendance Management</title>
     <link rel="stylesheet" href="css/index.css">
+    <!-- Chart.js for mini chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-    <!-- Header Start -->
-    <header class="navbar">
-        <div class="logo">
-           📊 Attendance Atlas
-        </div>
-
-        <nav class="nav-links">
-            <a href="#">Home</a>
-            <a href="/mark-attendance">Mark Attendance</a>
-            <a href="/report">Reports</a>
-            <a href="#">About Us</a>
-            <a href="profile.html">Profile</a>
-        </nav>
-        
-        <!-- ADD THIS DIV AROUND search and button -->
-        <div class="header-right">
-            <input id="search" type="text" placeholder="enter student ID/Name">
-            <button class="search">search</button>
-            <button class="logout-btn">Logout</button>
-        </div>
-    </header>
-    <!-- Header End -->
-
-<main class="content">
-    <!-- ADD HOME PAGE CONTENT HERE -->
-    <section class="hero">
-        <h1>Welcome to Attendance Atlas</h1>
-        <p>Smart attendance tracking system for students and teachers</p>
-        <a href="mark_attendance.html" class="btn">Mark Attendance</a>
-    </section>
-    
-    <div class="features">
-        <div class="feature-box">
-            <h3>Real-time Tracking</h3>
-            <p>Track attendance instantly</p>
-        </div>
-        <div class="feature-box">
-            <h3>Smart Analytics</h3>
-            <p>Get detailed reports</p>
-        </div>
-        <div class="feature-box">
-            <h3>Export Data</h3>
-            <p>CSV & PDF exports</p>
-        </div>
+<!-- ================= HEADER ================= -->
+<header class="navbar">
+    <div class="logo">
+         Attendance Atlas
     </div>
-</main>
 
+    <nav class="nav-links" id="nav-links">
+        <!-- Will be populated by JavaScript based on login status -->
+        <a href="/">Home</a>
+        <!-- Mark Attendance link will be added for lecturers only -->
+        <!-- Reports link will be added for both -->
+        <a href="/about">About Us</a>
+    </nav>
+
+    <!-- AUTH AREA (Handled by script.js) -->
+    <div class="header-right" id="auth-area">
+        <!-- JS will inject Login / User info here -->
+    </div>
+</header>
+<!-- ================= HEADER END ================= -->
+
+<!-- ================= MAIN CONTENT ================= -->
+<main class="content">
+
+    <!-- ================= ENHANCED HERO SECTION ================= -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">📊 Attendance Atlas</h1>
+            <p class="hero-subtitle">Intelligent Attendance Management System</p>
+            <p class="hero-description">Streamline attendance tracking, generate insightful reports, and enhance educational management</p>
+            
+            <div class="cta-buttons" id="hero-buttons">
+                <!-- Will be populated by JavaScript -->
+                <a href="/login.html" class="btn primary-btn">Login to Get Started</a>
+            </div>
+        </div>
+        
+        <!-- Animated dashboard preview -->
+        <div class="hero-visual">
+            <div class="dashboard-preview">
+                <div class="preview-header">
+                    <div class="preview-dot red"></div>
+                    <div class="preview-dot yellow"></div>
+                    <div class="preview-dot green"></div>
+                    <span>Attendance Dashboard Preview</span>
+                </div>
+                <div class="preview-content">
+                    <!-- Mini chart visualization -->
+                    <canvas id="miniChart" width="300" height="150"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= LIVE STATISTICS ================= -->
+    <section class="stats-section">
+        <h2>Trusted by Educational Institutions</h2>
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-number" id="studentCount">0</div>
+                <div class="stat-label">Active Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="lecturerCount">0</div>
+                <div class="stat-label">Lecturers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="attendanceCount">0</div>
+                <div class="stat-label">Attendance Records</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="subjectsCount">0</div>
+                <div class="stat-label">Subjects</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= FEATURES SHOWCASE ================= -->
+    <section class="features-showcase">
+        <h2>Powerful Features</h2>
+        <div class="features-grid">
+            <div class="feature-highlight">
+                <div class="feature-icon">⚡</div>
+                <h3>Real-time Updates</h3>
+                <p>Instant attendance updates accessible from any device</p>
+            </div>
+            <div class="feature-highlight">
+                <div class="feature-icon">📱</div>
+                <h3>Mobile Friendly</h3>
+                <p>Responsive design works on all devices</p>
+            </div>
+            <div class="feature-highlight">
+                <div class="feature-icon">📊</div>
+                <h3>Analytics Dashboard</h3>
+                <p>Visual charts and insights for better decisions</p>
+            </div>
+            <div class="feature-highlight">
+                <div class="feature-icon">🔒</div>
+                <h3>Secure & Private</h3>
+                <p>Encrypted data with role-based access control</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= HOW IT WORKS ================= -->
+    <section class="process-section">
+        <h2>Get Started in 3 Simple Steps</h2>
+        <div class="process-timeline">
+            <div class="process-step">
+                <div class="step-number">1</div>
+                <h3>Sign Up</h3>
+                <p>Create your account as Student or Lecturer</p>
+            </div>
+            <div class="process-connector"></div>
+            <div class="process-step">
+                <div class="step-number">2</div>
+                <h3>Configure</h3>
+                <p>Set up your subjects and classes</p>
+            </div>
+            <div class="process-connector"></div>
+            <div class="process-step">
+                <div class="step-number">3</div>
+                <h3>Start Tracking</h3>
+                <p>Begin marking and monitoring attendance</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= INTERACTIVE DEMO ================= -->
+    <section class="demo-section">
+        <h2>See How It Works</h2>
+        <div class="demo-tabs">
+            <button class="demo-tab active" data-target="student-demo">For Students</button>
+            <button class="demo-tab" data-target="lecturer-demo">For Lecturers</button>
+            <button class="demo-tab" data-target="admin-demo">For Admin</button>
+        </div>
+        
+        <div class="demo-content">
+            <div id="student-demo" class="demo-panel active">
+                <div class="demo-visual">
+                    <div class="mockup-card">
+                        <div class="mockup-header">Student Dashboard</div>
+                        <div class="mockup-body">
+                            <div class="mockup-stat">
+                                <span>Attendance: 85%</span>
+                                <div class="mockup-bar" style="width: 85%"></div>
+                            </div>
+                            <div class="mockup-stat">
+                                <span>Computer Science: 90%</span>
+                                <div class="mockup-bar" style="width: 90%"></div>
+                            </div>
+                            <div class="mockup-stat">
+                                <span>Mathematics: 80%</span>
+                                <div class="mockup-bar" style="width: 80%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="demo-description">
+                    <h3>Student Dashboard</h3>
+                    <ul class="feature-list">
+                        <li>Real-time attendance tracking</li>
+                        <li>Subject-wise percentage display</li>
+                        <li>Download reports as PDF</li>
+                        <li>Attendance history timeline</li>
+                        <li>Notifications for low attendance</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div id="lecturer-demo" class="demo-panel">
+                <div class="demo-visual">
+                    <div class="mockup-card">
+                        <div class="mockup-header">Lecturer Dashboard</div>
+                        <div class="mockup-body">
+                            <div class="mockup-item">📝 Mark Attendance</div>
+                            <div class="mockup-item">📊 View Reports</div>
+                            <div class="mockup-item">📈 Analytics</div>
+                            <div class="mockup-item">📤 Export Data</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="demo-description">
+                    <h3>Lecturer Tools</h3>
+                    <ul class="feature-list">
+                        <li>Quick attendance marking</li>
+                        <li>Generate detailed reports</li>
+                        <li>Export data to CSV/PDF</li>
+                        <li>Class analytics dashboard</li>
+                        <li>Student performance insights</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div id="admin-demo" class="demo-panel">
+                <div class="demo-visual">
+                    <div class="mockup-card">
+                        <div class="mockup-header">Admin Panel</div>
+                        <div class="mockup-body">
+                            <div class="mockup-item">👥 Manage Users</div>
+                            <div class="mockup-item">📚 Manage Subjects</div>
+                            <div class="mockup-item">📊 System Analytics</div>
+                            <div class="mockup-item">⚙️ Settings</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="demo-description">
+                    <h3>Admin Features</h3>
+                    <ul class="feature-list">
+                        <li>Manage students & lecturers</li>
+                        <li>View overall statistics</li>
+                        <li>Monitor attendance trends</li>
+                        <li>System configuration</li>
+                        <li>Backup and restore data</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= TESTIMONIALS ================= -->
+    <section class="testimonials">
+        <h2>What Our Users Say</h2>
+        <div class="testimonial-container">
+            <div class="testimonial-card">
+                <div class="testimonial-text">
+                    "Attendance Atlas saved us 10+ hours weekly on manual tracking! The analytics are incredibly insightful."
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">👨‍🏫</div>
+                    <div class="author-info">
+                        <h4>Prof. Sarah Johnson</h4>
+                        <p>Computer Science Department</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-card">
+                <div class="testimonial-text">
+                    "As a student, I can easily track my attendance and know exactly where I stand. Very user-friendly!"
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">👩‍🎓</div>
+                    <div class="author-info">
+                        <h4>Alex Chen</h4>
+                        <p>Engineering Student</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-card">
+                <div class="testimonial-text">
+                    "The reporting features are exceptional. I can generate comprehensive reports in seconds."
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">👨‍💼</div>
+                    <div class="author-info">
+                        <h4>Dr. Michael Brown</h4>
+                        <p>College Administrator</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= LATEST UPDATES ================= -->
+    <section class="updates-section">
+        <h2>Latest Updates & Features</h2>
+        <div class="updates-container">
+            <div class="update-card">
+                <div class="update-date">Mar 2024</div>
+                <h4>New Feature: Bulk Attendance Entry</h4>
+                <p>Lecturers can now mark attendance for multiple students at once, saving valuable classroom time.</p>
+            </div>
+            <div class="update-card">
+                <div class="update-date">Feb 2024</div>
+                <h4>Mobile App Released</h4>
+                <p>Now available on both Play Store and App Store for on-the-go attendance management.</p>
+            </div>
+            <div class="update-card">
+                <div class="update-date">Jan 2024</div>
+                <h4>Enhanced Security</h4>
+                <p>Added two-factor authentication and improved data encryption for better security.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= FAQ SECTION ================= -->
+    <section class="faq-section">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-container">
+            <div class="faq-item">
+                <button class="faq-question">How secure is my data? <span class="faq-toggle">+</span></button>
+                <div class="faq-answer">
+                    <p>We use industry-standard 256-bit encryption and secure servers to protect your data. All information is stored securely and accessed only through authenticated endpoints.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">Can I export attendance data? <span class="faq-toggle">+</span></button>
+                <div class="faq-answer">
+                    <p>Yes! You can export attendance data in multiple formats including CSV, Excel, and PDF. Reports can be customized and scheduled for automatic generation.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">Is there mobile access? <span class="faq-toggle">+</span></button>
+                <div class="faq-answer">
+                    <p>Absolutely! Attendance Atlas is fully responsive and works on all devices. We also have dedicated mobile apps for iOS and Android for enhanced mobile experience.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">How do I reset my password? <span class="faq-toggle">+</span></button>
+                <div class="faq-answer">
+                    <p>Click on "Forgot Password" on the login page. You'll receive an email with instructions to reset your password securely.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= ORIGINAL FEATURES ================= -->
+    <section class="features">
+        <div class="feature-box">
+            <h3>For Students</h3>
+            <p>Track your attendance in real-time</p>
+            <ul class="feature-list">
+                <li>View attendance reports</li>
+                <li>Check subject-wise attendance</li>
+                <li>Download attendance records</li>
+            </ul>
+        </div>
+
+        <div class="feature-box">
+            <h3>For Lecturers</h3>
+            <p>Efficient attendance management</p>
+            <ul class="feature-list">
+                <li>Mark attendance quickly</li>
+                <li>Generate detailed reports</li>
+                <li>Export data to CSV/PDF</li>
+            </ul>
+        </div>
+
+        <div class="feature-box">
+            <h3>Admin Dashboard</h3>
+            <p>Complete system overview</p>
+            <ul class="feature-list">
+                <li>Manage students & lecturers</li>
+                <li>View overall statistics</li>
+                <li>Monitor attendance trends</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Login Status Info -->
+    <section class="status-info" id="status-info">
+        <!-- Will show login status -->
+    </section>
+
+</main>
+<!-- ================= MAIN END ================= -->
+
+<!-- ================= FOOTER ================= -->
 <footer class="footer">
     <div class="footer-container">
+
         <div class="footer-section">
-            <h3>Attendance Tracker</h3>
+            <h3>Attendance Atlas</h3>
             <p>Smart attendance tracking system for students and teachers.</p>
         </div>
 
         <div class="footer-section">
             <h4>Quick Links</h4>
             <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="/report">Reports</a></li>
-                <li><a href="#">Help</a></li>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about">About Us</a></li>
+                <li><a href="/login.html">Login</a></li>
+                <li><a href="/signup.html">Sign Up</a></li>
             </ul>
         </div>
 
         <div class="footer-section">
             <h4>Contact</h4>
             <p>Email: support@attendanceatlas.com</p>
+            <p>Phone: +1 (555) 123-4567</p>
             <p>College Project – 2026</p>
         </div>
+
+        <div class="footer-section">
+            <h4>Connect With Us</h4>
+            <div class="social-links">
+                <a href="#" class="social-link">📘 Facebook</a>
+                <a href="#" class="social-link">🐦 Twitter</a>
+                <a href="#" class="social-link">📸 Instagram</a>
+                <a href="#" class="social-link">💼 LinkedIn</a>
+            </div>
+        </div>
+
     </div>
 
     <div class="footer-bottom">
-        © 2026 Attendance Atlas. All rights reserved.
+        © 2026 Attendance Atlas. All rights reserved. | <a href="/privacy" style="color: #9ca3af;">Privacy Policy</a> | <a href="/terms" style="color: #9ca3af;">Terms of Service</a>
     </div>
 </footer>
+<!-- ================= FOOTER END ================= -->
 
+<!-- ================= SCRIPT ================= -->
 <script src="js/script.js"></script>
+
 </body>
 </html>
