@@ -47,14 +47,21 @@
 .header-right {
     display: flex;
     align-items: center;
+    
 }
+.search{
+    padding:6px 10px;
+    margin-right:14px;
+}    
+    
 
 #search {
     border-style: none;
     border-radius: 4px;
     padding: 8px 12px;
-    margin-right: 10px;
+    margin-right:6px;
     width: 200px;
+    border-right:1px solid #374151;
 }
 
 .logout-btn {
