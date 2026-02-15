@@ -12,5 +12,27 @@
   },
   "127.0.0.1": {
     "failed_attempts": 0
+  },
+  "ar007chana@gmail.com": {
+    "attempts": [
+      {
+        "timestamp": "2026-02-07T00:21:06.833107",
+        "ip": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "failed_count": 0,
+    "last_attempt": "2026-02-07T00:21:06.833107"
+  },
+  "rajesh.iyer@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-02-07T00:37:59.035601",
+        "ip": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "failed_count": 0,
+    "last_attempt": "2026-02-07T00:37:59.035601"
   }
 }
