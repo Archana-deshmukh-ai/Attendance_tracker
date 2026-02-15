@@ -1,84 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Profile</title>
-  <link rel="stylesheet" href="css/profile.css">
+    <meta charset="UTF-8">
+    <title>Student Profile</title>
+    <link rel="stylesheet" href="css/profile.css">
 </head>
 <body>
 
-  <!-- Top Navbar -->
-  <header class="navbar">
-    <h2>📊Attendance Tracker</h2>
-    <div class="nav-right">
-      <a href="/">Home</a>
-      <a href="profile.html">Profile</a>
-      <button onclick="logout()">Logout</button>
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="logo">Student Portal</div>
+    <div class="nav-links">
+        <a href="#">Home</a>
+        <a href="#">About Us</a>
     </div>
-  </header>
+</nav>
 
-  <!-- Main Profile Container -->
-  <div class="profile-container">
-
-    <!-- Left Card -->
+<!-- Profile Section -->
+<section class="profile-container">
     <div class="profile-card">
-      <h1>My Profile</h1>
 
-      <div class="avatar">👨🏻‍🎓</div>
+        <div class="profile-left">
+            <div class="profile-pic">👨‍🎓</div>
+            <h2 id="studentName">Rahul Kumar</h2>
+            <p class="student-role">Computer Science Student</p>
+        </div>
 
-      <div class="field">
-        <label>Name</label>
-        <input type="text" id="Name" disabled >
-      </div>
+        <div class="profile-right">
+            <h3>Student Information</h3>
 
-      <div class="field">
-        <label>Email</label>
-        <input type="email" id="email" disabled>
-      </div>
+            <div class="info-grid">
+                <div><span>Roll No:</span> 22CS045</div>
+                <div><span>Department:</span> CSE</div>
+                <div><span>Year:</span> 3rd Year</div>
+                <div><span>Section:</span> A</div>
+                <div><span>Email:</span> rahul@gmail.com</div>
+                <div><span>Phone:</span> +91 9876543210</div>
+                <div><span>Attendance:</span> 92%</div>
+                <div><span>CGPA:</span> 8.7</div>
+            </div>
 
-      <div class="field">
-        <label>Student ID</label>
-        <input type="text" value=" 13466769" disabled>
-      </div>
+            <button class="edit-btn">Edit Profile</button>
+        </div>
 
-      <div class="field">
-        <label>Role</label>
-        <input type="text" value="Student" disabled>
-      </div>
-
-      <div class="field">
-        <label>Branch</label>
-        <input type="text" id="Branch" disabled>
-      </div>
-
-      <div class="field">
-        <label>DOB</label>
-        <input type="text"  id="Date Of Birth" disabled>
-      </div>
     </div>
-
-    <!-- Right Card -->
-    <div class="side-card">
-      <h3>Achievements</h3>
-
-      <div class="achievement">
-        <span>📘 Classes Attended</span>
-        <progress value="#" max="10"></progress>
-      </div>
-
-      <div class="achievement">
-        <span>⏰ Punctuality</span>
-        <progress value="#" max="10"></progress>
-      </div>
-
-      <div class="achievement">
-        <span>🏆 Attendance Score</span>
-        <progress value="#" max="10"></progress>
-      </div>
+</section>
+ <footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h3><i class="fas fa-chart-line"></i> Attendance Atlas</h3>
+            <p>Advanced attendance analytics and reporting system.</p>
+            <div class="footer-status">
+                <span class="status-dot online"></span>
+                <span>Reports System: Operational</span>
+            </div>
+        </div>
+        <div class="footer-section">
+            <h4><i class="fas fa-file-alt"></i> 📄Report Types</h4>
+            <ul>
+                <li><a href="#"><i class="fas fa-calendar-day"></i>📑Daily Reports</a></li>
+                <li><a href="#"><i class="fas fa-calendar-week"></i>📅 Weekly Reports</a></li>
+                <li><a href="#"><i class="fas fa-calendar-alt"></i> 📆Monthly Reports</a></li>
+                <li><a href="#"><i class="fas fa-book"></i>📝 Subject Reports</a></li>
+                <li><a href="#"><i class="fas fa-user-graduate"></i> 👨🏻‍🎓Student Reports</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h4><i class="fas fa-headset"></i> Support</h4>
+            <p><i class="fas fa-envelope"></i> reports@attendanceatlas.com</p>
+            <p><i class="fas fa-phone"></i> +91-9876543210</p>
+            <p><i class="fas fa-clock"></i> Support Hours: 9AM - 6PM</p>
+        </div>
+        <div class="footer-section">
+            <h4><i class="fas fa-shield-alt"></i> Data Security</h4>
+            <p><i class="fas fa-lock"></i> Encrypted Data Storage</p>
+            <p><i class="fas fa-user-shield"></i> Role-based Access</p>
+            <p><i class="fas fa-history"></i> 90-day Data Retention</p>
+        </div>
     </div>
+    <div class="footer-bottom">
+        <div class="footer-bottom-left">
+            © 2026 Attendance Atlas - Reports Portal v2.0
+        </div>
+        <div class="footer-bottom-right">
+            <span id="currentDateTime"></span>
+        </div>
+    </div>
+</footer>
 
-  </div>
 
-  <script src="js/profile.js"></script>
+<script src="js/facultyprofile.js"></script>
+
 </body>
 </html>
+
+ 

@@ -1,27 +1,23 @@
-// Load faculty data when page loads
 window.onload = function () {
-    const facultyData = JSON.parse(localStorage.getItem("facultyProfile"));
 
-    if (facultyData) {
-        document.getElementById("facultyName").innerText = facultyData.name;
-        document.getElementById("email").value = facultyData.email;
-        document.getElementById("department").value = facultyData.department;
-        document.getElementById("designation").value = facultyData.designation;
-        document.getElementById("phone").value = facultyData.phone;
-    }
-};
-
-// Save profile data
-function saveProfile() {
-    const facultyProfile = {
-        name: document.getElementById("facultyName").innerText,
-        email: document.getElementById("email").value,
-        department: document.getElementById("department").value,
-        designation: document.getElementById("designation").value,
-        phone: document.getElementById("phone").value
+    let faculty = {
+        name: "Dr. Archana Rao",
+        department: "Computer Science & Engineering",
+        email: "archana@college.edu",
+        id: "FAC10234",
+        experience: "12 Years",
+        subjects: 5,
+        students: 120,
+        reports: 12
     };
 
-    localStorage.setItem("facultyProfile", JSON.stringify(facultyProfile));
+    document.getElementById("lecName").innerText = faculty.name;
+    document.getElementById("lecDept").innerText = faculty.department;
+    document.getElementById("lecEmail").innerText = faculty.email;
+    document.getElementById("lecID").innerText = faculty.id;
+    document.getElementById("lecExp").innerText = faculty.experience;
 
-    alert("Faculty profile saved successfully ✅");
-}
+    document.getElementById("subjects").innerText = faculty.subjects;
+    document.getElementById("students").innerText = faculty.students;
+    document.getElementById("reports").innerText = faculty.reports + " Generated";
+};
