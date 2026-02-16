@@ -95,7 +95,7 @@ class ForgotPassword {
         // Move to next input
         if (value && index < 5) {
             const nextInput = document.querySelector(`.otp-input[data-index="${index + 2}"]`);
-            nextInput.focus();
+            if (nextInput) nextInput.focus();
         }
         
         // Check if all inputs are filled
@@ -106,7 +106,7 @@ class ForgotPassword {
         // Handle backspace
         if (event.key === 'Backspace' && !event.target.value && index > 0) {
             const prevInput = document.querySelector(`.otp-input[data-index="${index}"]`);
-            prevInput.focus();
+            if (prevInput) prevInput.focus();
         }
     }
     
@@ -129,6 +129,13 @@ class ForgotPassword {
     async verifyOtp() {
         if (this.otp.length !== 6) {
             this.showMessage(document.getElementById('step2Message'), 'Please enter a 6-digit code', 'error');
+            return;
+        }
+        
+        // Safety: email must be set
+        if (!this.userEmail) {
+            this.showMessage(document.getElementById('step2Message'), 'Session expired. Please start again.', 'error');
+            setTimeout(() => this.goToStep(1), 2000);
             return;
         }
         
@@ -163,6 +170,12 @@ class ForgotPassword {
     }
     
     async resendOtp() {
+        if (!this.userEmail) {
+            this.showMessage(document.getElementById('step2Message'), 'Session expired. Please start again.', 'error');
+            setTimeout(() => this.goToStep(1), 2000);
+            return;
+        }
+        
         const resendLink = document.getElementById('resendOtp');
         
         // Prevent multiple clicks
@@ -277,6 +290,13 @@ class ForgotPassword {
     }
     
     async resetPassword() {
+        // Safety: email must be set
+        if (!this.userEmail) {
+            this.showMessage(document.getElementById('step3Message'), 'Session expired. Please start again.', 'error');
+            setTimeout(() => this.goToStep(1), 2000);
+            return;
+        }
+        
         const newPassword = document.getElementById('newPassword').value;
         const btn = document.getElementById('resetPasswordBtn');
         const messageDiv = document.getElementById('step3Message');

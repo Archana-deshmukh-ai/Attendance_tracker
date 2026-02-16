@@ -152,6 +152,14 @@ function validateForm() {
     const confirmPassword = document.getElementById('confirmPassword').value;
     const terms = document.getElementById('terms').checked;
     
+    // Password strength requirements
+    const hasLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[^A-Za-z0-9]/.test(password);
+    const passwordValid = hasLength && hasUpper && hasLower && hasNumber && hasSpecial;
+    
     // Basic validation
     let isValid = true;
     
@@ -171,12 +179,10 @@ function validateForm() {
         clearError('emailError');
     }
     
-    // Password validation
-    if (password.length < 8) {
-        showError('passwordError', 'Password must be at least 8 characters');
+    // Password validation (using all criteria)
+    if (!passwordValid) {
+        // We don't show a separate error; the requirement list is enough
         isValid = false;
-    } else {
-        clearError('passwordError');
     }
     
     // Confirm password
@@ -289,7 +295,7 @@ async function signup() {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="btn-icon">⏳</span><span>Creating Account...</span>';
     
-    // Prepare data
+    // Prepare data with correct field names for backend
     const data = {
         role: selectedRole,
         name: document.getElementById('name').value.trim(),
@@ -299,11 +305,11 @@ async function signup() {
     
     // Add role-specific data
     if (selectedRole === 'student') {
-        data.rollno = document.getElementById('rollno').value.trim();
+        data.student_id = document.getElementById('rollno').value.trim();   // map rollno to student_id
         data.batch = document.getElementById('batch').value;
         data.department = document.getElementById('department').value;
     } else {
-        data.empid = document.getElementById('empid').value.trim();
+        data.lecturer_id = document.getElementById('empid').value.trim();   // map empid to lecturer_id
         data.department = document.getElementById('lecturerDepartment').value;
     }
     
@@ -356,7 +362,7 @@ function showSuccessStep(userData) {
         </div>
         ${selectedRole === 'student' ? `
             <div class="account-detail">
-                <strong>Roll No:</strong> ${userData.rollno}
+                <strong>Roll No:</strong> ${userData.student_id}
             </div>
             <div class="account-detail">
                 <strong>Batch:</strong> ${userData.batch}
@@ -366,7 +372,7 @@ function showSuccessStep(userData) {
             </div>
         ` : `
             <div class="account-detail">
-                <strong>Employee ID:</strong> ${userData.empid}
+                <strong>Employee ID:</strong> ${userData.lecturer_id}
             </div>
             <div class="account-detail">
                 <strong>Department:</strong> ${userData.department}

@@ -5,3 +5,23 @@ subject_id,code,name,credits,department,lecturer_id
 4,ME301,Thermodynamics,4,ME,L203
 5,CE401,Structural Analysis,3,CE,L204
 6,EE501,Power Systems,4,EEE,L205
+7,CS103,Operating Systems,4,CSE,L211
+8,CS104,Database Systems,4,CSE,L216
+9,CS105,Computer Networks,3,CSE,L221
+10,CS106,Machine Learning,4,CSE,L222
+11,EC202,Analog Circuits,3,ECE,L207
+12,EC203,Microprocessors,4,ECE,L212
+13,EC204,Communication Systems,4,ECE,L217
+14,EC205,VLSI Design,3,ECE,L231
+15,ME302,Fluid Mechanics,4,ME,L208
+16,ME303,Heat Transfer,4,ME,L213
+17,ME304,Manufacturing Processes,3,ME,L218
+18,ME305,Dynamics of Machines,3,ME,L241
+19,CE402,Geotechnical Engineering,4,CE,L209
+20,CE403,Environmental Engineering,3,CE,L214
+21,CE404,Transportation Engineering,4,CE,L219
+22,CE405,Hydraulics,3,CE,L251
+23,EE502,Control Systems,4,EEE,L210
+24,EE503,Electrical Machines,4,EEE,L215
+25,EE504,Power Electronics,3,EEE,L220
+26,EE505,Renewable Energy Systems,3,EEE,L261

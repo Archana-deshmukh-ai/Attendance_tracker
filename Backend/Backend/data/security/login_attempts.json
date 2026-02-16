@@ -2,110 +2,26 @@
   "aarav.sharma@uni.edu": {
     "attempts": [
       {
-        "timestamp": "2026-02-06T21:21:51.129923",
+        "timestamp": "2026-02-16T16:02:10.521936",
         "ip": "127.0.0.1",
         "success": true
       }
     ],
     "failed_count": 0,
-    "last_attempt": "2026-02-06T21:21:51.129923"
+    "last_attempt": "2026-02-16T16:02:10.521936"
   },
   "127.0.0.1": {
     "failed_attempts": 0
   },
-  "ar007chana@gmail.com": {
-    "attempts": [
-      {
-        "timestamp": "2026-02-07T00:21:06.833107",
-        "ip": "127.0.0.1",
-        "success": true
-      }
-    ],
-    "failed_count": 0,
-    "last_attempt": "2026-02-07T00:21:06.833107"
-  },
-  "sai.reddy@uni.edu": {
-    "attempts": [
-      {
-        "timestamp": "2026-02-11T19:10:20.058040",
-        "ip": "127.0.0.1",
-        "success": true
-      },
-      {
-        "timestamp": "2026-02-11T19:37:01.686546",
-        "ip": "127.0.0.1",
-        "success": true
-      },
-      {
-        "timestamp": "2026-02-14T10:00:56.906912",
-        "ip": "127.0.0.1",
-        "success": true
-      },
-      {
-        "timestamp": "2026-02-14T19:10:23.474632",
-        "ip": "127.0.0.1",
-        "success": false
-      },
-      {
-        "timestamp": "2026-02-14T19:10:51.952499",
-        "ip": "127.0.0.1",
-        "success": true
-      }
-    ],
-    "failed_count": 0,
-    "last_attempt": "2026-02-14T19:10:51.952499"
-  },
   "rajesh.iyer@uni.edu": {
     "attempts": [
       {
-        "timestamp": "2026-02-07T00:37:59.035601",
+        "timestamp": "2026-02-16T16:03:19.128078",
         "ip": "127.0.0.1",
         "success": true
       }
     ],
     "failed_count": 0,
-    "last_attempt": "2026-02-07T00:37:59.035601"
-  },
-  "anil.verma@uni.edu": {
-    "attempts": [
-      {
-        "timestamp": "2026-02-11T19:28:20.877087",
-        "ip": "127.0.0.1",
-        "success": true
-      },
-      {
-        "timestamp": "2026-02-14T18:49:47.889526",
-        "ip": "127.0.0.1",
-        "success": true
-      }
-    ],
-    "failed_count": 0,
-    "last_attempt": "2026-02-14T18:49:47.889526"
-  },
-  "kiranmaivanapalli07@gmail.com": {
-    "attempts": [
-      {
-        "timestamp": "2026-02-14T19:06:21.257539",
-        "ip": "127.0.0.1",
-        "success": true
-      },
-      {
-        "timestamp": "2026-02-14T19:09:39.175545",
-        "ip": "127.0.0.1",
-        "success": false
-      },
-      {
-        "timestamp": "2026-02-14T19:09:52.930280",
-        "ip": "127.0.0.1",
-        "success": false
-      },
-      {
-        "timestamp": "2026-02-14T19:09:52.933538",
-        "ip": "127.0.0.1",
-        "success": false
-      }
-    ],
-    "failed_count": 3,
-    "last_attempt": "2026-02-14T19:09:52.933538"
+    "last_attempt": "2026-02-16T16:03:19.128078"
   }
 }

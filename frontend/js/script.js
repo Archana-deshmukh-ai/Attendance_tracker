@@ -184,17 +184,27 @@ function initMiniChart() {
 function initFAQAccordion() {
     const faqQuestions = document.querySelectorAll('.faq-question');
     
+    // Initially collapse all answers
+    faqQuestions.forEach(question => {
+        const answer = question.nextElementSibling;
+        const toggle = question.querySelector('.faq-toggle');
+        if (answer) {
+            answer.style.maxHeight = '0';
+            answer.style.overflow = 'hidden';
+        }
+        if (toggle) toggle.textContent = '+';
+    });
+
     faqQuestions.forEach(question => {
         question.addEventListener('click', () => {
             const answer = question.nextElementSibling;
             const toggle = question.querySelector('.faq-toggle');
+            if (!answer || !toggle) return;
             
-            // Toggle active class
             question.parentElement.classList.toggle('active');
             
-            // Toggle answer visibility
-            if (answer.style.maxHeight) {
-                answer.style.maxHeight = null;
+            if (answer.style.maxHeight !== '0px') {
+                answer.style.maxHeight = '0';
                 toggle.textContent = '+';
             } else {
                 answer.style.maxHeight = answer.scrollHeight + 'px';
@@ -210,9 +220,6 @@ function initHomePageFeatures() {
     initDemoTabs();
     initMiniChart();
     initFAQAccordion();
-    
-    // Auto-rotate testimonials (optional)
-    // initTestimonialRotation();
 }
 
 // ================= AUTH / NAVBAR =================
@@ -226,10 +233,11 @@ async function updateAuthArea() {
         const data = await response.json();
 
         if (data.logged_in) {
-            // User is logged in
+            // User is logged in – link to dashboard instead of /profile
+            const dashboardUrl = data.role === 'student' ? '/student-dashboard' : '/lecturer-dashboard';
             authArea.innerHTML = `
                 <span class="user-name">👤 ${data.name} (${data.role})</span>
-                <a href="/profile" class="nav-btn">Profile</a>
+                <a href="${dashboardUrl}" class="nav-btn">Dashboard</a>
                 <button class="logout-btn" id="logoutBtn">Logout</button>
             `;
 
@@ -431,8 +439,8 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeLoginPage();
     }
     
-    // Update navbar on all pages
-    setInterval(updateAuthArea, 60000); // Update every minute
+    // Update auth area every minute (keeps session info fresh)
+    setInterval(updateAuthArea, 60000);
 });
 
 // Make functions available globally

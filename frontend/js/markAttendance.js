@@ -46,18 +46,29 @@ document.addEventListener('DOMContentLoaded', function() {
     // Submit button
     document.getElementById('submitBtn').addEventListener('click', submitAttendance);
     
-    // Department filter buttons
-    document.querySelectorAll('.dept-filter').forEach(button => {
-        button.addEventListener('click', function() {
-            const dept = this.dataset.dept;
-            filterByDepartment(dept);
-            
-            // Update active state
-            document.querySelectorAll('.dept-filter').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            this.classList.add('active');
-        });
+    // Department filter dropdown
+    document.getElementById('deptFilter').addEventListener('change', function() {
+        const dept = this.value;
+        filterByDepartment(dept);
+    });
+    
+    // View toggle (list/grid)
+    document.getElementById('listViewBtn').addEventListener('click', function() {
+        setViewMode('list');
+    });
+    document.getElementById('gridViewBtn').addEventListener('click', function() {
+        setViewMode('grid');
+    });
+    
+    // Clear search button
+    document.getElementById('clearSearch').addEventListener('click', function() {
+        document.getElementById('studentSearch').value = '';
+        filterStudents();
+    });
+    
+    // Items per page change
+    document.getElementById('itemsPerPage').addEventListener('change', function() {
+        // You can implement pagination here if needed
     });
     
     // Functions
@@ -74,8 +85,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function displayStudents(students) {
-        const container = document.getElementById('studentList');
+        // ✅ FIXED: Use correct container ID
+        const container = document.getElementById('studentListContainer');
         const loading = document.getElementById('loadingIndicator');
+        
+        // If container not found, show error
+        if (!container) {
+            console.error('Student list container not found!');
+            showError('UI error: student list container missing.');
+            return;
+        }
         
         // Hide loading indicator
         loading.style.display = 'none';
@@ -117,6 +136,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show total count
         document.getElementById('totalCount').textContent = students.length;
+        document.getElementById('totalStudents').textContent = students.length;
+        document.getElementById('startIndex').textContent = students.length ? 1 : 0;
+        document.getElementById('endIndex').textContent = students.length;
     }
     
     function updateSummary() {
@@ -129,6 +151,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('presentCount').textContent = presentCount;
         document.getElementById('absentCount').textContent = absentCount;
         document.getElementById('percentage').textContent = `${percentage}%`;
+        
+        // Update quick stats
+        document.getElementById('quickTotal').textContent = totalCount;
+        document.getElementById('quickPresent').textContent = presentCount;
+        document.getElementById('quickAbsent').textContent = absentCount;
+        document.getElementById('quickPercentage').textContent = `${percentage}%`;
         
         // Update percentage color
         const percentageElement = document.getElementById('percentage');
@@ -146,9 +174,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const students = document.querySelectorAll('.student');
         
         students.forEach(student => {
-            const id = student.dataset.id;
+            const id = student.dataset.id.toLowerCase();
             const name = student.querySelector('.student-name').textContent.toLowerCase();
-            const text = `${id} ${name}`;
+            const dept = student.dataset.dept.toLowerCase();
+            const text = `${id} ${name} ${dept}`;
             
             if (text.includes(searchTerm)) {
                 student.style.display = 'flex';
@@ -171,6 +200,24 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update summary for visible students only
         setTimeout(updateSummary, 100);
+    }
+    
+    function setViewMode(mode) {
+        const container = document.getElementById('studentListContainer');
+        const listBtn = document.getElementById('listViewBtn');
+        const gridBtn = document.getElementById('gridViewBtn');
+        
+        if (mode === 'list') {
+            container.classList.remove('grid-view');
+            container.classList.add('list-view');
+            listBtn.classList.add('active');
+            gridBtn.classList.remove('active');
+        } else {
+            container.classList.remove('list-view');
+            container.classList.add('grid-view');
+            gridBtn.classList.add('active');
+            listBtn.classList.remove('active');
+        }
     }
     
     function selectAllStudents() {
