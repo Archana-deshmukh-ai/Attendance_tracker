@@ -393,3 +393,5 @@ window.prevStep = prevStep;
 window.signup = signup;
 window.goToLogin = goToLogin;
 window.goToHome = goToHome;
+
+ 
