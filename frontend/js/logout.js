@@ -91,7 +91,7 @@ function clearSessionCookies() {
         const eqPos = cookie.indexOf('=');
         const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
         
-        // Don't clear essential cookies
+        // Don't clear essential cookies (e.g., those starting with 'essential_')
         if (!name.startsWith('essential_')) {
             document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
         }
@@ -100,14 +100,14 @@ function clearSessionCookies() {
 
 function clearTemporaryData() {
     // Clear any indexedDB or other storage
-    if ('indexedDB' in window) {
+    if ('indexedDB' in window && 'databases' in indexedDB) {
         indexedDB.databases().then(databases => {
             databases.forEach(db => {
-                if (db.name.includes('temp_') || db.name.includes('user_')) {
+                if (db.name && (db.name.includes('temp_') || db.name.includes('user_'))) {
                     indexedDB.deleteDatabase(db.name);
                 }
             });
-        });
+        }).catch(err => console.warn('IndexedDB cleanup skipped:', err));
     }
     
     // Clear service worker caches if exists
@@ -118,26 +118,26 @@ function clearTemporaryData() {
                     caches.delete(cacheName);
                 }
             });
-        });
+        }).catch(err => console.warn('Cache cleanup skipped:', err));
     }
 }
 
 function showDataClearedMessage() {
     const activityList = document.querySelector('.activity-list');
-    if (activityList) {
-        const activityItem = document.createElement('div');
-        activityItem.className = 'activity-item';
-        activityItem.innerHTML = `
-            <div class="activity-icon">
-                <i class="fas fa-database"></i>
-            </div>
-            <div class="activity-content">
-                <p>Local data cleared</p>
-                <small>Session data removed from browser</small>
-            </div>
-        `;
-        activityList.appendChild(activityItem);
-    }
+    if (!activityList) return;
+    
+    const activityItem = document.createElement('div');
+    activityItem.className = 'activity-item';
+    activityItem.innerHTML = `
+        <div class="activity-icon">
+            <i class="fas fa-database"></i>
+        </div>
+        <div class="activity-content">
+            <p>Local data cleared</p>
+            <small>Session data removed from browser</small>
+        </div>
+    `;
+    activityList.appendChild(activityItem);
 }
 
 // ================= COUNTDOWN TIMER =================
@@ -277,7 +277,7 @@ async function submitFeedback() {
         elements.submitFeedback.disabled = true;
         elements.submitFeedback.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
         
-        // Simulate API call
+        // Simulate API call (replace with actual endpoint if needed)
         await new Promise(resolve => setTimeout(resolve, 1500));
         
         // Show success message
@@ -300,6 +300,8 @@ function showFeedbackSuccess() {
     
     // Show success message
     const feedbackSection = document.querySelector('.feedback-section');
+    if (!feedbackSection) return;
+    
     const successMessage = document.createElement('div');
     successMessage.className = 'feedback-success';
     successMessage.innerHTML = `
@@ -310,7 +312,8 @@ function showFeedbackSuccess() {
     feedbackSection.appendChild(successMessage);
     
     // Hide stars
-    document.querySelector('.rating').style.opacity = '0.5';
+    const rating = document.querySelector('.rating');
+    if (rating) rating.style.opacity = '0.5';
 }
 
 function showFeedbackError() {

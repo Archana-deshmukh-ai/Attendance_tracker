@@ -14,6 +14,14 @@ let currentUser = {
     id: ''
 };
 
+// Store chart instances to destroy before recreating
+let chartInstances = {
+    statusChart: null,
+    trendChart: null,
+    subjectChart: null,
+    departmentChart: null
+};
+
 // Initialize reports page
 window.initializeReportsPage = async function(role, userData) {
     console.log('Initializing reports page for:', role);
@@ -170,6 +178,12 @@ function updateStatistics(attendanceData) {
     document.getElementById('total-present').textContent = present;
     document.getElementById('total-absent').textContent = absent;
     document.getElementById('attendance-percent').textContent = percentage + '%';
+    
+    // Update progress bar
+    const progressFill = document.getElementById('progressFill');
+    if (progressFill) {
+        progressFill.style.width = percentage + '%';
+    }
 }
 
 // Populate data table
@@ -225,14 +239,26 @@ function populateTable(data) {
     });
 }
 
+// Helper to destroy existing charts
+function destroyCharts() {
+    Object.keys(chartInstances).forEach(key => {
+        if (chartInstances[key]) {
+            chartInstances[key].destroy();
+            chartInstances[key] = null;
+        }
+    });
+}
+
 // Load charts for students
 function loadStudentCharts(attendanceData) {
-    // Status Chart
+    destroyCharts(); // Destroy previous charts
+    
+    // Status Chart (doughnut)
     const statusCtx = document.getElementById('statusChart').getContext('2d');
     const presentCount = attendanceData.filter(r => r.status === 'present').length;
     const absentCount = attendanceData.filter(r => r.status === 'absent').length;
     
-    new Chart(statusCtx, {
+    chartInstances.statusChart = new Chart(statusCtx, {
         type: 'doughnut',
         data: {
             labels: ['Present', 'Absent'],
@@ -243,6 +269,7 @@ function loadStudentCharts(attendanceData) {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     position: 'bottom'
@@ -261,7 +288,7 @@ function loadStudentCharts(attendanceData) {
     });
     
     const trendCtx = document.getElementById('trendChart').getContext('2d');
-    new Chart(trendCtx, {
+    chartInstances.trendChart = new Chart(trendCtx, {
         type: 'line',
         data: {
             labels: dates,
@@ -270,11 +297,13 @@ function loadStudentCharts(attendanceData) {
                 data: dateCounts,
                 borderColor: '#102094',
                 backgroundColor: 'rgba(16, 32, 148, 0.1)',
-                fill: true
+                fill: true,
+                tension: 0.4
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true,
@@ -284,7 +313,7 @@ function loadStudentCharts(attendanceData) {
         }
     });
     
-    // Subject-wise chart
+    // Subject-wise chart (bar)
     const subjectMap = {};
     attendanceData.forEach(record => {
         if (!subjectMap[record.subject_id]) {
@@ -305,7 +334,7 @@ function loadStudentCharts(attendanceData) {
         s.total > 0 ? Math.round((s.present / s.total) * 100) : 0
     );
     
-    new Chart(subjectCtx, {
+    chartInstances.subjectChart = new Chart(subjectCtx, {
         type: 'bar',
         data: {
             labels: subjectLabels,
@@ -317,6 +346,7 @@ function loadStudentCharts(attendanceData) {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true,
@@ -329,10 +359,10 @@ function loadStudentCharts(attendanceData) {
 
 // Load charts for lecturers
 function loadLecturerCharts(attendanceData) {
-    // Similar implementation for lecturers
-    loadStudentCharts(attendanceData); // For now, use same charts
+    // First load the same student charts (status, trend, subject)
+    loadStudentCharts(attendanceData);
     
-    // Department chart for lecturers
+    // Department chart (additional for lecturers)
     const deptCtx = document.getElementById('departmentChart').getContext('2d');
     
     // Group by department
@@ -356,7 +386,12 @@ function loadLecturerCharts(attendanceData) {
         return stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0;
     });
     
-    new Chart(deptCtx, {
+    // Destroy previous department chart if exists
+    if (chartInstances.departmentChart) {
+        chartInstances.departmentChart.destroy();
+    }
+    
+    chartInstances.departmentChart = new Chart(deptCtx, {
         type: 'bar',
         data: {
             labels: deptLabels,
@@ -368,6 +403,7 @@ function loadLecturerCharts(attendanceData) {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true,
@@ -396,7 +432,7 @@ function populateStudentFilter() {
     const studentFilter = document.getElementById('studentFilter');
     studentFilter.innerHTML = '<option value="all">All Students</option>';
     
-    // Show only first 100 students
+    // Show only first 100 students for performance
     const displayStudents = reportData.students.slice(0, 100);
     
     displayStudents.forEach(student => {
@@ -415,12 +451,16 @@ function setupEventListeners() {
     // Reset filters button
     document.getElementById('resetFilters').addEventListener('click', resetFilters);
     
-    // Download buttons
-    document.querySelectorAll('.download-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const type = this.dataset.type;
-            downloadReport(type);
-        });
+    // Export buttons (CSV, PDF, Excel, Print, Email)
+    document.getElementById('exportCsv').addEventListener('click', () => downloadReport('csv'));
+    document.getElementById('exportPdf').addEventListener('click', () => downloadReport('pdf'));
+    document.getElementById('exportExcel').addEventListener('click', () => downloadReport('excel'));
+    document.getElementById('printReport').addEventListener('click', () => window.print());
+    document.getElementById('emailReport').addEventListener('click', () => downloadReport('email'));
+    
+    // Refresh button
+    document.getElementById('refreshReports').addEventListener('click', () => {
+        loadAllData().then(() => loadRoleBasedReports());
     });
 }
 
@@ -482,10 +522,19 @@ function resetFilters() {
 
 // Download report
 function downloadReport(type) {
-    alert(`${type.toUpperCase()} report download feature coming soon!\n\nFiltered data: ${reportData.filteredData.length} records`);
+    const data = reportData.filteredData;
+    const filename = `attendance_report_${new Date().toISOString().slice(0,10)}.${type === 'csv' ? 'csv' : type}`;
+    
+    if (type === 'csv') {
+        const csvContent = convertToCSV(data);
+        downloadCSV(csvContent, filename);
+    } else {
+        // For other formats, you can integrate a library or show a message
+        alert(`${type.toUpperCase()} export feature coming soon!\n\nFiltered data: ${data.length} records`);
+    }
 }
 
-// Download student report
+// Download student report (called from button)
 window.downloadStudentReport = function() {
     const data = reportData.filteredData;
     const csvContent = convertToCSV(data);
@@ -543,28 +592,4 @@ function downloadCSV(content, filename) {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-}
-
-// Show error message
-function showError(message) {
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message';
-    errorDiv.style.cssText = `
-        background: #fee2e2;
-        color: #dc2626;
-        padding: 15px;
-        border-radius: 8px;
-        margin: 15px 0;
-        text-align: center;
-    `;
-    errorDiv.textContent = message;
-    
-    const container = document.querySelector('.container');
-    if (container) {
-        container.insertBefore(errorDiv, container.firstChild);
-        
-        setTimeout(() => {
-            errorDiv.remove();
-        }, 5000);
-    }
 }

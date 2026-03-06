@@ -57,10 +57,10 @@
                 </button>
             </div>
         </div>
-        <div class="date-time">
+        <!--div class="date-time">
             <div id="currentDate" class="date-display">Loading...</div>
             <div id="currentTime" class="time-display">--:--:--</div>
-        </div>
+        </div-->
     </div>
 
     <!-- Dashboard Grid -->
@@ -70,7 +70,7 @@
         <div class="stats-section">
             <div class="section-header">
                 <h2><i class="fas fa-chart-bar"></i> Dashboard Overview</h2>
-                <select id="statPeriod" class="period-select" onchange="updateStatistics()">
+                <select id="statPeriod" class="period-select" onchange="loadStatistics()">
                     <option value="today">Today</option>
                     <option value="week" selected>This Week</option>
                     <option value="month">This Month</option>

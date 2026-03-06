@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, session, redirect, url_for
+from flask import Flask, jsonify, request, render_template, session, redirect, url_for, send_file
 from flask_cors import CORS
 import pandas as pd
 import csv, os, random, string, hashlib, time, json
@@ -7,6 +7,14 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 from functools import wraps
+import sqlite3
+import io
+# ================= CERTIFICATE ROUTES =================
+
+from flask import jsonify, request
+import uuid
+from datetime import datetime
+
 
 # CORRECTED Flask configuration
 app = Flask(__name__, 
@@ -19,10 +27,7 @@ CORS(app)
 
 # FIXED: Correct file paths
 DATA_DIR = os.path.join("Backend", "data")
-STUDENTS_FILE = os.path.join(DATA_DIR, "students.csv")
-LECTURERS_FILE = os.path.join(DATA_DIR, "lecturers.csv")
-SUBJECTS_FILE = os.path.join(DATA_DIR, "subjects.csv")
-ATTENDANCE_FILE = os.path.join(DATA_DIR, "attendance.csv")
+DB_PATH = os.path.join(DATA_DIR, "institute.db")
 
 # Add these constants for password reset
 PASSWORD_RESET_FILE = os.path.join(DATA_DIR, "password_resets.json")
@@ -48,6 +53,109 @@ SECURITY_CONFIG = {
     'ip_block_threshold': 10, # Max attempts from same IP
     'ip_block_duration': 30,  # IP block duration in minutes
 }
+
+def get_db():
+    """Get a database connection with row factory enabled."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")   # Enforce foreign keys
+    return conn
+
+def init_db():
+    """Create all tables if they don't exist, and import from CSV if empty."""
+    with get_db() as conn:
+        # --- Students table ---
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS students (
+                student_id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                batch TEXT,
+                department TEXT
+            )
+        ''')
+        # --- Lecturers table ---
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS lecturers (
+                lecturer_id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                department TEXT
+            )
+        ''')
+        # --- Subjects table ---
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS subjects (
+                subject_id INTEGER PRIMARY KEY,
+                code TEXT UNIQUE NOT NULL,
+                name TEXT NOT NULL,
+                credits INTEGER,
+                department TEXT,
+                lecturer_id TEXT,
+                FOREIGN KEY (lecturer_id) REFERENCES lecturers(lecturer_id)
+            )
+        ''')
+        # --- Attendance table ---
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS attendance (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                subject_id INTEGER NOT NULL,
+                student_id TEXT NOT NULL,
+                date TEXT NOT NULL,
+                status TEXT CHECK(status IN ('present','absent','late')),
+                marked_by TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(subject_id, student_id, date)
+            )
+        ''')
+        conn.commit()
+
+def import_csv_to_db():
+    """If tables are empty, import data from existing CSV files."""
+    # Check if students table is empty
+    with get_db() as conn:
+        cur = conn.execute("SELECT COUNT(*) as count FROM students")
+        if cur.fetchone()['count'] == 0:
+            # Import students.csv if it exists
+            students_csv = os.path.join(DATA_DIR, "students.csv")
+            if os.path.exists(students_csv):
+                import pandas as pd
+                df = pd.read_csv(students_csv)
+                for _, row in df.iterrows():
+                    conn.execute(
+                        "INSERT OR IGNORE INTO students (student_id, name, email, password, batch, department) VALUES (?,?,?,?,?,?)",
+                        (str(row['student_id']), row['name'], row['email'], row['password'], row.get('batch',''), row.get('department',''))
+                    )
+                conn.commit()
+                print(f"Imported {len(df)} students from CSV.")
+
+        cur = conn.execute("SELECT COUNT(*) as count FROM lecturers")
+        if cur.fetchone()['count'] == 0:
+            lecturers_csv = os.path.join(DATA_DIR, "lecturers.csv")
+            if os.path.exists(lecturers_csv):
+                df = pd.read_csv(lecturers_csv)
+                for _, row in df.iterrows():
+                    conn.execute(
+                        "INSERT OR IGNORE INTO lecturers (lecturer_id, name, email, password, department) VALUES (?,?,?,?,?)",
+                        (row['lecturer_id'], row['name'], row['email'], row['password'], row.get('department',''))
+                    )
+                conn.commit()
+                print(f"Imported {len(df)} lecturers from CSV.")
+
+        cur = conn.execute("SELECT COUNT(*) as count FROM subjects")
+        if cur.fetchone()['count'] == 0:
+            subjects_csv = os.path.join(DATA_DIR, "subjects.csv")
+            if os.path.exists(subjects_csv):
+                df = pd.read_csv(subjects_csv)
+                for _, row in df.iterrows():
+                    conn.execute(
+                        "INSERT OR IGNORE INTO subjects (subject_id, code, name, credits, department, lecturer_id) VALUES (?,?,?,?,?,?)",
+                        (row['subject_id'], row['code'], row['name'], row['credits'], row['department'], row.get('lecturer_id',''))
+                    )
+                conn.commit()
+                print(f"Imported {len(df)} subjects from CSV.")
 
 # ========== HTML PAGES ==========
 
@@ -424,140 +532,122 @@ def signup():
     data = request.json
     role = data["role"]
 
-    file_path = STUDENTS_FILE if role == "student" else LECTURERS_FILE
-    file_exists = os.path.isfile(file_path)
-
-    with open(file_path, "a", newline="") as f:
-        writer = csv.writer(f)
-
-        if not file_exists:
+    try:
+        with get_db() as conn:
             if role == "student":
-                writer.writerow(["student_id", "name", "email", "password", "batch", "department"])
-            else:
-                writer.writerow(["lecturer_id", "name", "email", "password", "department"])
-
-        if role == "student":
-            writer.writerow([
-                data.get("student_id", ""),
-                data["name"], 
-                data["email"], 
-                data["password"], 
-                data.get("batch", ""),
-                data.get("department", "")
-            ])
-        else:
-            writer.writerow([
-                data.get("lecturer_id", ""),
-                data["name"], 
-                data["email"], 
-                data["password"], 
-                data.get("department", "")
-            ])
-
-    return jsonify(success=True, message="Account created successfully")
+                conn.execute('''
+                    INSERT INTO students (student_id, name, email, password, batch, department)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', (
+                    data.get("student_id", ""),
+                    data["name"],
+                    data["email"],
+                    data["password"],
+                    data.get("batch", ""),
+                    data.get("department", "")
+                ))
+            else:  # lecturer
+                conn.execute('''
+                    INSERT INTO lecturers (lecturer_id, name, email, password, department)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (
+                    data.get("lecturer_id", ""),
+                    data["name"],
+                    data["email"],
+                    data["password"],
+                    data.get("department", "")
+                ))
+            conn.commit()
+        return jsonify(success=True, message="Account created successfully")
+    except sqlite3.IntegrityError as e:
+        return jsonify(success=False, message="Email or ID already exists"), 400
+    except Exception as e:
+        return jsonify(success=False, message=str(e)), 500
 
 @app.route("/login", methods=["POST"])
 @check_login_attempts
 def login():
-    """Login endpoint with brute force protection"""
     data = request.json
     role = data["role"]
     email = data["email"]
     password = data["password"]
     ip_address = request.remote_addr
-    
+
     print(f"Login attempt - Role: {role}, Email: {email}, IP: {ip_address}")
-    
-    file_path = STUDENTS_FILE if role == "student" else LECTURERS_FILE
-    
-    # Check if file exists
-    if not os.path.isfile(file_path):
-        # Record failed attempt (even if user doesn't exist for security)
-        record_login_attempt(email, ip_address, success=False)
-        return jsonify(success=False, message="Invalid credentials"), 401
-    
+
     try:
-        with open(file_path, "r") as f:
-            reader = csv.DictReader(f)
-            users = list(reader)
-            
-            for row in users:
-                if 'email' in row and 'password' in row:
-                    if row["email"] == email and row["password"] == password:
-                        # ✅ SUCCESSFUL LOGIN
-                        
-                        # Clear any locks or blocks
-                        clear_account_lock(email)
-                        clear_ip_block(ip_address)
-                        
-                        # Record successful attempt
-                        record_login_attempt(email, ip_address, success=True)
-                        
-                        # Store session info
-                        session["logged_in"] = True
-                        session["email"] = row["email"]
-                        session["role"] = role
-                        session["name"] = row["name"]
-                        session["login_time"] = datetime.now().isoformat()
-                        session["ip_address"] = ip_address
-                        
-                        if role == "student":
-                            session["student_id"] = row.get("student_id", "")
-                            session["rollno"] = row.get("student_id", "")
-                        else:
-                            session["lecturer_id"] = row.get("lecturer_id", "")
-                            session["empid"] = row.get("lecturer_id", "")
-                        
-                        print(f"Login successful for {row['name']}")
-                        
-                        # Return additional security info
-                        failed_attempts = get_failed_attempts_count(email, ip_address)
-                        
-                        return jsonify({
-                            "success": True, 
-                            "role": role,
-                            "security": {
-                                "previous_failed_attempts": failed_attempts['email'],
-                                "message": "Login successful"
-                            }
-                        })
-        
-        # ❌ FAILED LOGIN (wrong password)
-        record_login_attempt(email, ip_address, success=False)
-        
-        # Get current attempt count
-        failed_attempts = get_failed_attempts_count(email, ip_address)
-        remaining_attempts = SECURITY_CONFIG['max_login_attempts'] - failed_attempts['email']
-        
-        if remaining_attempts <= 0:
+        with get_db() as conn:
+            if role == "student":
+                row = conn.execute(
+                    "SELECT * FROM students WHERE email = ? AND password = ?",
+                    (email, password)
+                ).fetchone()
+            else:
+                row = conn.execute(
+                    "SELECT * FROM lecturers WHERE email = ? AND password = ?",
+                    (email, password)
+                ).fetchone()
+
+            if row:
+                # Successful login
+                clear_account_lock(email)
+                clear_ip_block(ip_address)
+                record_login_attempt(email, ip_address, success=True)
+
+                # Convert row to dict
+                user = dict(row)
+
+                session["logged_in"] = True
+                session["email"] = user["email"]
+                session["role"] = role
+                session["name"] = user["name"]
+                session["login_time"] = datetime.now().isoformat()
+                session["ip_address"] = ip_address
+
+                if role == "student":
+                    session["student_id"] = user["student_id"]
+                    session["rollno"] = user["student_id"]
+                else:
+                    session["lecturer_id"] = user["lecturer_id"]
+                    session["empid"] = user["lecturer_id"]
+
+                print(f"Login successful for {user['name']}")
+                return jsonify({"success": True, "role": role})
+
+            # Failed login
+            record_login_attempt(email, ip_address, success=False)
+            failed_attempts = get_failed_attempts_count(email, ip_address)
+            remaining_attempts = SECURITY_CONFIG['max_login_attempts'] - failed_attempts['email']
+
+            if remaining_attempts <= 0:
+                return jsonify({
+                    "success": False,
+                    "message": "Account locked due to too many failed attempts.",
+                    "locked": True,
+                    "unlock_time": get_account_unlock_time(email)
+                }), 423
+
             return jsonify({
                 "success": False,
-                "message": "Account locked due to too many failed attempts.",
-                "locked": True,
-                "unlock_time": get_account_unlock_time(email)
-            }), 423
-        
-        return jsonify({
-            "success": False,
-            "message": f"Invalid credentials. {remaining_attempts} attempts remaining.",
-            "remaining_attempts": remaining_attempts
-        }), 401
-    
+                "message": f"Invalid credentials. {remaining_attempts} attempts remaining.",
+                "remaining_attempts": remaining_attempts
+            }), 401
+
     except Exception as e:
-        print(f"Error reading CSV: {str(e)}")
+        print(f"Login error: {str(e)}")
         record_login_attempt(email, ip_address, success=False)
-        return jsonify(success=False, message=f"Error reading user data: {str(e)}"), 500
+        return jsonify(success=False, message="Database error"), 500
 
 @app.route("/logout")
 def logout():
     session.clear()
-    return render_template("logout.html")
+    return render_template("logout.html")       #goes to logout.html
 
 # ========== PASSWORD RESET ENDPOINTS ==========
 
 @app.route('/api/forgot-password', methods=['POST'])
 def forgot_password():
-    """Send password reset OTP to email"""
+    """Send password reset OTP to email (using database)"""
     try:
         data = request.json
         email = data.get('email')
@@ -565,25 +655,22 @@ def forgot_password():
         if not email:
             return jsonify({"success": False, "message": "Email is required"}), 400
         
-        # Check if email exists in students or lecturers
+        # Check if email exists in students or lecturers using database
         user = None
         role = None
         
-        # Check students
-        if os.path.exists(STUDENTS_FILE):
-            df_students = pd.read_csv(STUDENTS_FILE)
-            student = df_students[df_students['email'] == email]
-            if not student.empty:
-                user = student.iloc[0].to_dict()
+        with get_db() as conn:
+            # Check students
+            student = conn.execute("SELECT * FROM students WHERE email = ?", (email,)).fetchone()
+            if student:
+                user = dict(student)
                 role = 'student'
-        
-        # Check lecturers
-        if not user and os.path.exists(LECTURERS_FILE):
-            df_lecturers = pd.read_csv(LECTURERS_FILE)
-            lecturer = df_lecturers[df_lecturers['email'] == email]
-            if not lecturer.empty:
-                user = lecturer.iloc[0].to_dict()
-                role = 'lecturer'
+            else:
+                # Check lecturers
+                lecturer = conn.execute("SELECT * FROM lecturers WHERE email = ?", (email,)).fetchone()
+                if lecturer:
+                    user = dict(lecturer)
+                    role = 'lecturer'
         
         if not user:
             # For security, don't reveal that email doesn't exist
@@ -692,75 +779,60 @@ def verify_otp():
 
 @app.route('/api/reset-password', methods=['POST'])
 def reset_password():
-    """Reset password with new password"""
     try:
         data = request.json
         email = data.get('email')
         new_password = data.get('newPassword')
-        
+
         if not email or not new_password:
             return jsonify({"success": False, "message": "Email and new password are required"}), 400
-        
-        # Validate password strength
+
         if len(new_password) < 8:
             return jsonify({"success": False, "message": "Password must be at least 8 characters"}), 400
-        
+
         # Load resets to check if OTP was verified
         if not os.path.exists(PASSWORD_RESET_FILE):
             return jsonify({"success": False, "message": "No reset request found"}), 400
-        
+
         with open(PASSWORD_RESET_FILE, 'r') as f:
             resets = json.load(f)
-        
-        # Find verified reset
+
         verified_reset = None
         for reset in resets:
-            if (reset['email'] == email and 
-                reset.get('verified') and 
+            if (reset['email'] == email and
+                reset.get('verified') and
                 not reset.get('password_reset')):
                 verified_reset = reset
                 break
-        
+
         if not verified_reset:
             return jsonify({"success": False, "message": "Please verify OTP first"}), 400
-        
-        # Determine which file to update
+
         role = verified_reset['role']
-        file_path = STUDENTS_FILE if role == 'student' else LECTURERS_FILE
-        
-        if not os.path.exists(file_path):
-            return jsonify({"success": False, "message": "User data file not found"}), 500
-        
-        # Update password in CSV
-        if role == 'student':
-            df = pd.read_csv(STUDENTS_FILE)
-            if email not in df['email'].values:
-                return jsonify({"success": False, "message": "User not found"}), 404
-            df.loc[df['email'] == email, 'password'] = new_password
-            df.to_csv(STUDENTS_FILE, index=False)
-        else:
-            df = pd.read_csv(LECTURERS_FILE)
-            if email not in df['email'].values:
-                return jsonify({"success": False, "message": "User not found"}), 404
-            df.loc[df['email'] == email, 'password'] = new_password
-            df.to_csv(LECTURERS_FILE, index=False)
-        
-        # Mark password as reset
+
+        # Update password in database
+        with get_db() as conn:
+            if role == 'student':
+                conn.execute(
+                    "UPDATE students SET password = ? WHERE email = ?",
+                    (new_password, email)
+                )
+            else:
+                conn.execute(
+                    "UPDATE lecturers SET password = ? WHERE email = ?",
+                    (new_password, email)
+                )
+            conn.commit()
+
+        # Mark as reset
         verified_reset['password_reset'] = True
         verified_reset['reset_at'] = datetime.now().isoformat()
-        
-        # Save updated resets
         with open(PASSWORD_RESET_FILE, 'w') as f:
             json.dump(resets, f, indent=2)
-        
-        # Send confirmation email
+
         send_password_changed_email(email)
-        
-        return jsonify({
-            "success": True,
-            "message": "Password reset successfully"
-        })
-        
+        return jsonify({"success": True, "message": "Password reset successfully"})
+
     except Exception as e:
         print(f"Reset password error: {str(e)}")
         return jsonify({"success": False, "message": "Error resetting password"}), 500
@@ -1193,7 +1265,7 @@ def get_time_ago(timestamp_str):
     except:
         return "Unknown time"
 
-# ========== API ENDPOINTS ==========
+# ========== GENERAL API ENDPOINTS ==========
 
 @app.route('/api/health')
 def health():
@@ -1201,40 +1273,31 @@ def health():
 
 @app.route('/api/students')
 def get_students():
-    """Get all students from CSV"""
     try:
-        df = pd.read_csv(STUDENTS_FILE)
-        return jsonify({
-            "success": True,
-            "count": len(df),
-            "students": df.to_dict('records')
-        })
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-
-@app.route('/api/subjects')
-def get_subjects():
-    """Get all subjects from CSV"""
-    try:
-        df = pd.read_csv(SUBJECTS_FILE)
-        return jsonify({
-            "success": True,
-            "count": len(df),
-            "subjects": df.to_dict('records')
-        })
+        with get_db() as conn:
+            rows = conn.execute("SELECT * FROM students").fetchall()
+            students = [dict(row) for row in rows]
+            return jsonify({"success": True, "count": len(students), "students": students})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/lecturers')
 def get_lecturers():
-    """Get all lecturers from CSV"""
     try:
-        df = pd.read_csv(LECTURERS_FILE)
-        return jsonify({
-            "success": True,
-            "count": len(df),
-            "lecturers": df.to_dict('records')
-        })
+        with get_db() as conn:
+            rows = conn.execute("SELECT * FROM lecturers").fetchall()
+            lecturers = [dict(row) for row in rows]
+            return jsonify({"success": True, "count": len(lecturers), "lecturers": lecturers})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/subjects')
+def get_subjects():
+    try:
+        with get_db() as conn:
+            rows = conn.execute("SELECT * FROM subjects").fetchall()
+            subjects = [dict(row) for row in rows]
+            return jsonify({"success": True, "count": len(subjects), "subjects": subjects})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
@@ -1257,143 +1320,475 @@ def login_status():
 
 @app.route('/api/mark_attendance', methods=['POST'])
 def mark_attendance():
-    """Record attendance for a subject"""
+    """Record attendance using SQLite."""
     try:
         data = request.json
         subject_id = data.get('subject_id')
         date = data.get('date')
         present_ids = data.get('present', [])
         absent_ids = data.get('absent', [])
-        
-        # Read existing attendance or create new file
-        file_exists = os.path.exists(ATTENDANCE_FILE)
-        
-        new_records = []
-        for student_id in present_ids:
-            new_records.append({
-                'subject_id': subject_id,
-                'student_id': student_id,
-                'date': date,
-                'status': 'present'
-            })
-        
-        for student_id in absent_ids:
-            new_records.append({
-                'subject_id': subject_id,
-                'student_id': student_id,
-                'date': date,
-                'status': 'absent'
-            })
-        
-        # Save to CSV
-        if new_records:
-            df_new = pd.DataFrame(new_records)
-            if file_exists:
-                df_existing = pd.read_csv(ATTENDANCE_FILE)
-                df_combined = pd.concat([df_existing, df_new], ignore_index=True)
-                df_combined.to_csv(ATTENDANCE_FILE, index=False)
-            else:
-                df_new.to_csv(ATTENDANCE_FILE, index=False)
-        
+        lecturer_id = session.get('lecturer_id')   # who is marking
+
+        if not subject_id or not date:
+            return jsonify({"success": False, "error": "subject_id and date are required"}), 400
+
+        conn = get_db()
+        cursor = conn.cursor()
+        try:
+            # Insert present students
+            for student_id in present_ids:
+                cursor.execute(
+                    '''INSERT OR REPLACE INTO attendance 
+                       (subject_id, student_id, date, status, marked_by) 
+                       VALUES (?, ?, ?, ?, ?)''',
+                    (subject_id, student_id, date, 'present', lecturer_id)
+                )
+            # Insert absent students
+            for student_id in absent_ids:
+                cursor.execute(
+                    '''INSERT OR REPLACE INTO attendance 
+                       (subject_id, student_id, date, status, marked_by) 
+                       VALUES (?, ?, ?, ?, ?)''',
+                    (subject_id, student_id, date, 'absent', lecturer_id)
+                )
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            return jsonify({"success": False, "error": str(e)}), 500
+        finally:
+            conn.close()
+
         return jsonify({
             "success": True,
             "message": f"Attendance recorded for {len(present_ids) + len(absent_ids)} students",
             "present_count": len(present_ids),
             "absent_count": len(absent_ids)
         })
-        
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/attendance')
 def get_attendance():
-    """Get all attendance records"""
+    """Get all attendance records from SQLite."""
     try:
-        if os.path.exists(ATTENDANCE_FILE):
-            df = pd.read_csv(ATTENDANCE_FILE)
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM attendance ORDER BY date DESC, subject_id')
+        rows = cursor.fetchall()
+        # Convert rows to list of dicts
+        attendance_list = [dict(row) for row in rows]
+        conn.close()
+        return jsonify({
+            "success": True,
+            "count": len(attendance_list),
+            "attendance": attendance_list
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# ========== NEW LECTURER-SPECIFIC ENDPOINTS =================
+
+@app.route('/api/lecturer/profile')
+def lecturer_profile():
+    if not session.get("logged_in") or session.get("role") != "lecturer":
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+
+    lecturer_id = session.get("lecturer_id")
+    try:
+        with get_db() as conn:
+            row = conn.execute(
+                "SELECT lecturer_id, name, email, department FROM lecturers WHERE lecturer_id = ?",
+                (lecturer_id,)
+            ).fetchone()
+            if not row:
+                return jsonify({"success": False, "message": "Lecturer not found"}), 404
+
+            lecturer = dict(row)
+            lecturer['last_login'] = session.get('login_time', datetime.now().isoformat())
+            return jsonify(lecturer)
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/lecturer/statistics')
+def lecturer_statistics():
+    if not session.get("logged_in") or session.get("role") != "lecturer":
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+
+    lecturer_id = session.get("lecturer_id")
+    period = request.args.get('period', 'week')
+
+    try:
+        with get_db() as conn:
+            # Total subjects taught by this lecturer
+            total_subjects = conn.execute(
+                "SELECT COUNT(*) as cnt FROM subjects WHERE lecturer_id = ?",
+                (lecturer_id,)
+            ).fetchone()['cnt']
+
+            # Total students (distinct) across all subjects taught
+            total_students = conn.execute("""
+                SELECT COUNT(DISTINCT student_id) as cnt 
+                FROM attendance a
+                JOIN subjects s ON a.subject_id = s.subject_id
+                WHERE s.lecturer_id = ?
+            """, (lecturer_id,)).fetchone()['cnt'] or 0
+
+            # Today's attendance percentage
+            today = datetime.now().strftime('%Y-%m-%d')
+            today_stats = conn.execute("""
+                SELECT 
+                    COUNT(CASE WHEN status='present' THEN 1 END) as present,
+                    COUNT(*) as total
+                FROM attendance a
+                JOIN subjects s ON a.subject_id = s.subject_id
+                WHERE s.lecturer_id = ? AND a.date = ?
+            """, (lecturer_id, today)).fetchone()
+            today_attendance = round((today_stats['present'] / today_stats['total'] * 100) if today_stats['total'] > 0 else 0, 1)
+
+            # Average attendance overall
+            overall_stats = conn.execute("""
+                SELECT 
+                    COUNT(CASE WHEN status='present' THEN 1 END) as present,
+                    COUNT(*) as total
+                FROM attendance a
+                JOIN subjects s ON a.subject_id = s.subject_id
+                WHERE s.lecturer_id = ?
+            """, (lecturer_id,)).fetchone()
+            avg_attendance = round((overall_stats['present'] / overall_stats['total'] * 100) if overall_stats['total'] > 0 else 0, 1)
+
+            # Mock changes (you can compute actual differences later)
+            student_change = 5
+            attendance_change = 2
+            subjects_status = "All active"
+            performance_status = "Meeting target"
+
             return jsonify({
-                "success": True,
-                "count": len(df),
-                "attendance": df.to_dict('records')
+                "total_students": total_students,
+                "today_attendance": today_attendance,
+                "total_subjects": total_subjects,
+                "average_attendance": avg_attendance,
+                "student_change": student_change,
+                "attendance_change": attendance_change,
+                "subjects_status": subjects_status,
+                "performance_status": performance_status
             })
-        else:
-            return jsonify({
-                "success": True,
-                "count": 0,
-                "attendance": []
-            })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/lecturer/subjects')
+def lecturer_subjects():
+    if not session.get("logged_in") or session.get("role") != "lecturer":
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+
+    lecturer_id = session.get("lecturer_id")
+    try:
+        with get_db() as conn:
+            rows = conn.execute(
+                "SELECT subject_id, code, name, credits FROM subjects WHERE lecturer_id = ?",
+                (lecturer_id,)
+            ).fetchall()
+
+            subjects = []
+            for row in rows:
+                subj = dict(row)
+                # Count students enrolled (distinct) for this subject
+                student_count = conn.execute(
+                    "SELECT COUNT(DISTINCT student_id) as cnt FROM attendance WHERE subject_id = ?",
+                    (subj['subject_id'],)
+                ).fetchone()['cnt'] or 0
+
+                # Total classes conducted (distinct dates) for this subject
+                classes_count = conn.execute(
+                    "SELECT COUNT(DISTINCT date) as cnt FROM attendance WHERE subject_id = ?",
+                    (subj['subject_id'],)
+                ).fetchone()['cnt'] or 0
+
+                # Average attendance for this subject
+                att_stats = conn.execute(
+                    "SELECT COUNT(CASE WHEN status='present' THEN 1 END) as present, COUNT(*) as total FROM attendance WHERE subject_id = ?",
+                    (subj['subject_id'],)
+                ).fetchone()
+                avg_att = round((att_stats['present'] / att_stats['total'] * 100) if att_stats['total'] > 0 else 0, 1)
+
+                subj['students'] = student_count
+                subj['classes'] = classes_count
+                subj['attendance'] = avg_att
+                subj['description'] = f"{subj['code']} - {subj['name']}"
+                subjects.append(subj)
+
+            return jsonify({"subjects": subjects})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/lecturer/schedule')
+def lecturer_schedule():
+    if not session.get("logged_in") or session.get("role") != "lecturer":
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+
+    date = request.args.get('date')
+    if not date:
+        date = datetime.now().strftime('%Y-%m-%d')
+
+    lecturer_id = session.get("lecturer_id")
+    try:
+        with get_db() as conn:
+            # Get subjects taught by this lecturer
+            subjects = conn.execute(
+                "SELECT subject_id, code, name FROM subjects WHERE lecturer_id = ?",
+                (lecturer_id,)
+            ).fetchall()
+
+            schedule = []
+            for subj in subjects:
+                # For each subject, we need to know if there's a class on that date (i.e., attendance recorded)
+                # For demo, we'll generate a fixed time slot based on subject_id
+                class_time = f"{8 + (subj['subject_id'] % 8)}:00"  # mock hour
+                room = f"Room {100 + subj['subject_id']}"
+                batch = "2024"  # placeholder
+                in_progress = False  # you can compute based on current time
+
+                schedule.append({
+                    "subject": subj['name'],
+                    "code": subj['code'],
+                    "time": f"{date}T{class_time}:00",
+                    "room": room,
+                    "batch": batch,
+                    "in_progress": in_progress
+                })
+
+            return jsonify({"schedule": schedule})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/lecturer/activity')
+def lecturer_activity():
+    if not session.get("logged_in") or session.get("role") != "lecturer":
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+
+    lecturer_id = session.get("lecturer_id")
+    try:
+        with get_db() as conn:
+            # Recent attendance markings by this lecturer
+            rows = conn.execute("""
+                SELECT a.timestamp, s.name as subject_name, COUNT(*) as students_marked
+                FROM attendance a
+                JOIN subjects s ON a.subject_id = s.subject_id
+                WHERE a.marked_by = ?
+                GROUP BY a.timestamp, s.name
+                ORDER BY a.timestamp DESC
+                LIMIT 10
+            """, (lecturer_id,)).fetchall()
+
+            activities = []
+            for row in rows:
+                activities.append({
+                    "type": "attendance",
+                    "description": f"Marked attendance for {row['students_marked']} students in {row['subject_name']}",
+                    "timestamp": row['timestamp']
+                })
+
+            # If no activities yet, add some mock ones
+            if not activities:
+                activities = [
+                    {"type": "attendance", "description": "Marked attendance for Data Structures (32 students)", "timestamp": (datetime.now() - timedelta(hours=2)).isoformat()},
+                    {"type": "attendance", "description": "Marked attendance for Algorithms (28 students)", "timestamp": (datetime.now() - timedelta(hours=5)).isoformat()},
+                    {"type": "report", "description": "Generated weekly report", "timestamp": (datetime.now() - timedelta(days=1)).isoformat()}
+                ]
+
+            return jsonify({"activities": activities})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/lecturer/notifications')
+def lecturer_notifications():
+    if not session.get("logged_in") or session.get("role") != "lecturer":
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+
+    try:
+        # Mock notifications – replace with database table if needed
+        notifications = [
+            {"id": 1, "title": "New attendance deadline", "message": "Attendance for CS101 closes at 5 PM", "type": "deadline", "timestamp": (datetime.now() - timedelta(hours=1)).isoformat(), "unread": True},
+            {"id": 2, "title": "System update", "message": "Scheduled maintenance on Sunday", "type": "system", "timestamp": (datetime.now() - timedelta(days=1)).isoformat(), "unread": False}
+        ]
+        return jsonify({"notifications": notifications})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/lecturer/notifications/mark-read', methods=['POST'])
+def mark_notifications_read():
+    if not session.get("logged_in") or session.get("role") != "lecturer":
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+    # In a real system you'd update a database
+    return jsonify({"success": True})
+
+@app.route('/api/lecturer/deadlines')
+def lecturer_deadlines():
+    if not session.get("logged_in") or session.get("role") != "lecturer":
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+
+    try:
+        deadlines = [
+            {"id": 1, "title": "Submit grades", "description": "Final grades for CS101", "type": "report", "due_date": (datetime.now() + timedelta(days=2)).isoformat(), "priority": "high"},
+            {"id": 2, "title": "Attendance entry", "description": "Mark attendance for Algorithms lab", "type": "attendance", "due_date": (datetime.now() + timedelta(hours=5)).isoformat(), "priority": "medium"}
+        ]
+        return jsonify({"deadlines": deadlines})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/lecturer/chart-data')
+def lecturer_chart_data():
+    if not session.get("logged_in") or session.get("role") != "lecturer":
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+
+    chart_type = request.args.get('type', 'weekly')
+    lecturer_id = session.get("lecturer_id")
+
+    try:
+        with get_db() as conn:
+            if chart_type == 'weekly':
+                # Last 7 days attendance percentage
+                labels = []
+                values = []
+                for i in range(6, -1, -1):
+                    day = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
+                    labels.append((datetime.now() - timedelta(days=i)).strftime('%a'))
+                    stats = conn.execute("""
+                        SELECT 
+                            COUNT(CASE WHEN status='present' THEN 1 END) as present,
+                            COUNT(*) as total
+                        FROM attendance a
+                        JOIN subjects s ON a.subject_id = s.subject_id
+                        WHERE s.lecturer_id = ? AND a.date = ?
+                    """, (lecturer_id, day)).fetchone()
+                    pct = round((stats['present'] / stats['total'] * 100) if stats['total'] > 0 else 0, 1)
+                    values.append(pct)
+
+                data = {
+                    "labels": labels,
+                    "values": values,
+                    "label": "Attendance % (Weekly)"
+                }
+
+            elif chart_type == 'subject':
+                # Attendance per subject
+                rows = conn.execute("""
+                    SELECT s.name, 
+                           COUNT(CASE WHEN a.status='present' THEN 1 END) as present,
+                           COUNT(*) as total
+                    FROM attendance a
+                    JOIN subjects s ON a.subject_id = s.subject_id
+                    WHERE s.lecturer_id = ?
+                    GROUP BY s.subject_id
+                """, (lecturer_id,)).fetchall()
+                labels = []
+                values = []
+                for row in rows:
+                    labels.append(row['name'])
+                    pct = round((row['present'] / row['total'] * 100) if row['total'] > 0 else 0, 1)
+                    values.append(pct)
+
+                data = {
+                    "labels": labels,
+                    "values": values,
+                    "label": "Attendance by Subject"
+                }
+
+            else:
+                data = {"labels": [], "values": [], "label": "No data"}
+
+            return jsonify(data)
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/lecturer/export')
+def lecturer_export():
+    if not session.get("logged_in") or session.get("role") != "lecturer":
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+
+    lecturer_id = session.get("lecturer_id")
+    try:
+        with get_db() as conn:
+            # Get all attendance records for this lecturer's subjects
+            rows = conn.execute("""
+                SELECT a.date, s.code as subject_code, s.name as subject_name,
+                       st.student_id, st.name as student_name, a.status
+                FROM attendance a
+                JOIN subjects s ON a.subject_id = s.subject_id
+                JOIN students st ON a.student_id = st.student_id
+                WHERE s.lecturer_id = ?
+                ORDER BY a.date DESC, s.code
+            """, (lecturer_id,)).fetchall()
+
+            # Convert to CSV
+            output = io.StringIO()
+            writer = csv.writer(output)
+            writer.writerow(['Date', 'Subject Code', 'Subject Name', 'Student ID', 'Student Name', 'Status'])
+            for row in rows:
+                writer.writerow([row['date'], row['subject_code'], row['subject_name'], row['student_id'], row['student_name'], row['status']])
+
+            output.seek(0)
+            return send_file(
+                io.BytesIO(output.getvalue().encode('utf-8')),
+                mimetype='text/csv',
+                as_attachment=True,
+                download_name=f'attendance_export_{datetime.now().strftime("%Y%m%d")}.csv'
+            )
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
 # ========== INITIALIZATION ==========
 
 def initialize_data():
-    """Initialize data files if they don't exist"""
-    # Create data directory
+    """Initialize data directory, database, and import from CSVs."""
     os.makedirs(DATA_DIR, exist_ok=True)
-    
-    # Initialize security files
     initialize_security_files()
     
-    # Initialize students.csv if it doesn't exist
-    if not os.path.exists(STUDENTS_FILE):
-        print("Creating students.csv...")
-        students_data = [
-            ["student_id", "name", "email", "password", "batch", "department"],
-            [1001, "Aarav Sharma", "aarav.sharma@uni.edu", "student@1001", "2024", "CSE"],
-            [1002, "Vivaan Singh", "vivaan.singh@uni.edu", "student@1002", "2024", "CSE"],
-            [1003, "Aditya Kumar", "aditya.kumar@uni.edu", "student@1003", "2024", "ECE"],
-        ]
-        with open(STUDENTS_FILE, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerows(students_data)
+    # Create database tables
+    init_db()
     
-    # Initialize lecturers.csv if it doesn't exist
-    if not os.path.exists(LECTURERS_FILE):
-        print("Creating lecturers.csv...")
-        lecturers_data = [
-            ["lecturer_id", "name", "email", "password", "department"],
-            ["L201", "Dr. Rajesh Iyer", "rajesh.iyer@uni.edu", "prof@201", "CSE"],
-            ["L202", "Dr. Meera Nandakumar", "meera.n@uni.edu", "prof@202", "ECE"],
-            ["L203", "Dr. Anil Verma", "anil.verma@uni.edu", "prof@203", "ME"],
-        ]
-        with open(LECTURERS_FILE, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerows(lecturers_data)
+    # Import existing CSV data (if any)
+    import_csv_to_db()
     
-    # Initialize subjects.csv if it doesn't exist
-    if not os.path.exists(SUBJECTS_FILE):
-        print("Creating subjects.csv...")
-        subjects_data = [
-            ["subject_id", "code", "name", "credits", "department", "lecturer_id"],
-            [1, "CS101", "Data Structures", 4, "CSE", "L201"],
-            [2, "CS102", "Algorithms", 4, "CSE", "L206"],
-            [3, "EC201", "Digital Electronics", 3, "ECE", "L202"],
-            [4, "ME301", "Thermodynamics", 4, "ME", "L203"],
-            [5, "CE401", "Structural Analysis", 3, "CE", "L204"],
-            [6, "EE501", "Power Systems", 4, "EEE", "L205"],
-        ]
-        with open(SUBJECTS_FILE, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerows(subjects_data)
+    print(f"SQLite database initialized at: {DB_PATH}")
+
     
-    # Initialize attendance.csv if it doesn't exist
-    if not os.path.exists(ATTENDANCE_FILE):
-        print("Creating attendance.csv...")
-        attendance_data = [
-            ["attendance_id", "subject_id", "student_id", "date", "status"],
-            [1, 1, 1001, "2024-03-20", "present"],
-            [2, 1, 1002, "2024-03-20", "present"],
-            [3, 1, 1003, "2024-03-20", "absent"],
-        ]
-        with open(ATTENDANCE_FILE, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerows(attendance_data)
+# ================= CERTIFICATE ROUTES =================
+
+# Dummy certificate storage (later replace with database)
+certificates = []
+
+# Generate Certificate API
+@app.route("/api/generate_certificate", methods=["POST"])
+def generate_certificate():
+    data = request.json
     
-    # Initialize password resets file
-    if not os.path.exists(PASSWORD_RESET_FILE):
-        with open(PASSWORD_RESET_FILE, 'w') as f:
-            json.dump([], f)
+    cert_id = str(uuid.uuid4())[:8]
+    
+    certificate = {
+        "certificate_id": cert_id,
+        "student_name": data["name"],
+        "student_id": data["student_id"],
+        "attendance": data["attendance"],
+        "type": data["type"],
+        "issue_date": datetime.now().strftime("%Y-%m-%d")
+    }
+    
+    certificates.append(certificate)
+    
+    return jsonify({"message": "Certificate Generated", "certificate": certificate})
+
+# Get All Certificates
+@app.route("/api/get_certificates")
+def get_certificates():
+    return jsonify(certificates)
+
+# Verify Certificate
+@app.route("/api/verify_certificate/<cert_id>")
+def verify_certificate(cert_id):
+    for c in certificates:
+        if c["certificate_id"] == cert_id:
+            return jsonify({"valid": True, "certificate": c})
+    return jsonify({"valid": False})
 
 if __name__ == '__main__':
     # Initialize data files
@@ -1403,10 +1798,7 @@ if __name__ == '__main__':
     print("ATTENDANCE ATLAS SERVER STARTING...")
     print("=" * 60)
     print(f"Data directory: {DATA_DIR}")
-    print(f"Students file: {STUDENTS_FILE}")
-    print(f"Lecturers file: {LECTURERS_FILE}")
-    print(f"Subjects file: {SUBJECTS_FILE}")
-    print(f"Attendance file: {ATTENDANCE_FILE}")
+    print(f"Database path: {DB_PATH}")
     print(f"Password reset file: {PASSWORD_RESET_FILE}")
     print(f"Security directory: {SECURITY_DIR}")
     print("=" * 60)
@@ -1436,4 +1828,3 @@ if __name__ == '__main__':
     print("=" * 60)
     
     app.run(debug=True, port=5000)
-    

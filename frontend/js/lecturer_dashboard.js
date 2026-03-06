@@ -114,11 +114,13 @@ function initDashboard() {
     // Setup event listeners
     setupEventListeners();
     
-    // Update navigation
-    updateNavigation();
-    
-    // Update auth area
-    updateAuthArea();
+    // Use global navigation functions from script.js
+    if (typeof window.updateNavigation === 'function') {
+        window.updateNavigation();
+    }
+    if (typeof window.updateAuthArea === 'function') {
+        window.updateAuthArea();
+    }
     
     // Highlight current page
     highlightCurrentPage();
@@ -165,8 +167,9 @@ async function loadLecturerData() {
         if (elements.lecturerName && data.name) {
             elements.lecturerName.textContent = data.name;
         }
-        if (elements.lecturerId && data.id) {
-            elements.lecturerId.textContent = data.id;
+        // Use lecturer_id, not id
+        if (elements.lecturerId && data.lecturer_id) {
+            elements.lecturerId.textContent = data.lecturer_id;
         }
         if (elements.lecturerDept && data.department) {
             elements.lecturerDept.textContent = data.department;
@@ -291,8 +294,9 @@ function renderSubjectsList() {
         return;
     }
     
+    // Fixed: use subject.subject_id instead of subject.id
     const subjectsHTML = dashboardState.subjects.map(subject => `
-        <div class="subject-card" data-subject-id="${subject.id}">
+        <div class="subject-card" data-subject-id="${subject.subject_id}">
             <div class="subject-header">
                 <div>
                     <div class="subject-code">${subject.code}</div>
@@ -315,7 +319,7 @@ function renderSubjectsList() {
                     <div class="subject-stat-label">Credits</div>
                 </div>
             </div>
-            <button class="subject-action" onclick="viewSubjectDetails('${subject.id}')">
+            <button class="subject-action" onclick="viewSubjectDetails('${subject.subject_id}')">
                 View Details
             </button>
         </div>
@@ -671,22 +675,6 @@ function updateChart(data) {
     window.attendanceChartInstance.data.labels = data.labels || [];
     window.attendanceChartInstance.data.datasets[0].data = data.values || [];
     window.attendanceChartInstance.data.datasets[0].label = data.label || 'Attendance';
-    
-    // Update colors based on chart type
-    if (data.type === 'subject') {
-        window.attendanceChartInstance.data.datasets[0].backgroundColor = [
-            'rgba(16, 32, 148, 0.2)',
-            'rgba(56, 189, 248, 0.2)',
-            'rgba(16, 185, 129, 0.2)',
-            'rgba(245, 158, 11, 0.2)',
-            'rgba(139, 92, 246, 0.2)'
-        ];
-        window.attendanceChartInstance.type = 'bar';
-    } else {
-        window.attendanceChartInstance.data.datasets[0].backgroundColor = 'rgba(16, 32, 148, 0.1)';
-        window.attendanceChartInstance.type = 'line';
-    }
-    
     window.attendanceChartInstance.update();
 }
 
@@ -775,7 +763,8 @@ function setupEventListeners() {
     // Statistics period change
     const statPeriod = document.getElementById('statPeriod');
     if (statPeriod) {
-        statPeriod.addEventListener('change', updateStatistics);
+        // Fix: change from updateStatistics to loadStatistics
+        statPeriod.addEventListener('change', loadStatistics);
     }
     
     // Chart type buttons
@@ -949,7 +938,8 @@ async function exportData() {
 }
 
 function viewSubjectDetails(subjectId) {
-    window.location.href = `/subject/${subjectId}`;
+    // You can redirect to a subject-specific report page
+    window.location.href = `/report?subject=${subjectId}`;
 }
 
 function viewFullSchedule() {
@@ -1052,37 +1042,7 @@ function setupAutoRefresh() {
     }, DASHBOARD_CONFIG.refreshInterval);
 }
 
-// ================= NAVIGATION HELPERS =================
-function updateNavigation() {
-    const navLinks = document.getElementById('nav-links');
-    if (!navLinks) return;
-    
-    navLinks.innerHTML = `
-        <a href="/">Home</a>
-        <a href="/mark-attendance">Mark Attendance</a>
-        <a href="/report">Reports</a>
-        <a href="/about">About</a>
-    `;
-}
-
-function updateAuthArea() {
-    const authArea = document.getElementById('auth-area');
-    if (!authArea) return;
-    
-    authArea.innerHTML = `
-        <span class="user-name">👤 Lecturer Dashboard</span>
-        <a href="/profile" class="nav-btn">Profile</a>
-        <button class="logout-btn" id="logoutBtn">Logout</button>
-    `;
-    
-    // Add logout event listener
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            window.location.href = '/logout';
-        });
-    }
-}
+// ================= NAVIGATION HELPERS (removed - using global ones) =================
 
 function highlightCurrentPage() {
     const currentPath = window.location.pathname;
@@ -1142,12 +1102,17 @@ function showMessage(message, type) {
     }, 5000);
 }
 
+// Define refreshActivity as an alias for loadRecentActivity
+function refreshActivity() {
+    loadRecentActivity();
+}
+
 // ================= INITIALIZE DASHBOARD =================
 document.addEventListener('DOMContentLoaded', initDashboard);
 
 // ================= EXPORT FUNCTIONS =================
-window.updateStatistics = loadStatistics;
-window.refreshActivity = loadRecentActivity;
+window.updateStatistics = loadStatistics; // for backward compatibility
+window.refreshActivity = refreshActivity;
 window.refreshDashboard = refreshDashboard;
 window.exportData = exportData;
 window.markAttendanceQuick = markAttendanceQuick;

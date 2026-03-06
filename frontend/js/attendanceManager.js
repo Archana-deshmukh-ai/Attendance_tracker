@@ -1,4 +1,4 @@
-// markAttendance.js - Enhanced Version with Real-time Features
+// attendanceManager.js - Enhanced Version with Real-time Features
 class AttendanceManager {
     constructor() {
         this.students = [];
@@ -130,26 +130,39 @@ class AttendanceManager {
         const absent = Array.from(this.attendanceData.values()).filter(s => s === 'absent').length;
         const late = Array.from(this.attendanceData.values()).filter(s => s === 'late').length;
         const total = this.filteredStudents.length;
-        const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+        const percentage = total > 0 ? Math.round((present + late) / total * 100) : 0; // late counts as present for percentage
         
         return { present, absent, late, total, percentage };
     }
     
     async submitAttendance(subjectId, date, lectureType, timeSlot) {
         try {
-            const attendanceRecords = this.filteredStudents.map(student => ({
-                student_id: student.student_id,
+            // Prepare present and absent arrays as expected by backend
+            const presentIds = [];
+            const absentIds = [];
+            
+            this.filteredStudents.forEach(student => {
+                const status = this.getAttendance(student.student_id);
+                if (status === 'present' || status === 'late') {
+                    presentIds.push(student.student_id);
+                } else {
+                    absentIds.push(student.student_id);
+                }
+            });
+            
+            const payload = {
                 subject_id: subjectId,
                 date: date,
-                status: this.getAttendance(student.student_id),
+                present: presentIds,
+                absent: absentIds,
                 lecture_type: lectureType,
                 time_slot: timeSlot
-            }));
+            };
             
-            const response = await fetch('/api/attendance/submit', {
+            const response = await fetch('/api/mark_attendance', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ attendance: attendanceRecords })
+                body: JSON.stringify(payload)
             });
             
             const data = await response.json();
@@ -707,7 +720,7 @@ function showSubmitConfirmation() {
             <p><strong>Time Slot:</strong> ${timeSlot.replace('-', ' to ')}</p>
             <hr>
             <p><strong>Attendance Summary:</strong></p>
-            <p>✅ Present: ${stats.present} students</p>
+            <p>✅ Present: ${stats.present + stats.late} students (including late)</p>
             <p>❌ Absent: ${stats.absent} students</p>
             <p>⏰ Late: ${stats.late} students</p>
             <p>📊 Total: ${stats.total} students (${stats.percentage}%)</p>

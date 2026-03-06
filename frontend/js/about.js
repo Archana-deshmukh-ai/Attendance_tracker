@@ -15,8 +15,7 @@ const elements = {
     sessionsCount: document.getElementById('sessionsCount'),
     tabButtons: document.querySelectorAll('.tab-btn'),
     tabPanels: document.querySelectorAll('.tab-panel'),
-    contactForm: document.getElementById('contactForm'),
-    starRating: null
+    contactForm: document.getElementById('contactForm')
 };
 
 // ================= INITIALIZATION =================
@@ -39,15 +38,6 @@ function initAboutPage() {
     
     // Initialize contact form
     initContactForm();
-    
-    // Update navigation
-    updateNavigation();
-    
-    // Update auth area
-    updateAuthArea();
-    
-    // Highlight current page
-    highlightCurrentPage();
     
     // Add scroll animations
     initScrollAnimations();
@@ -243,60 +233,5 @@ function initScrollAnimations() {
     });
 }
 
-// ================= NAVIGATION HELPERS =================
-function updateNavigation() {
-    const navLinks = document.getElementById('nav-links');
-    if (!navLinks) return;
-    
-    // Set navigation for non-logged in state
-    navLinks.innerHTML = `
-        <a href="/">Home</a>
-        <a href="/about">About Us</a>
-        <a href="/login.html">Login</a>
-        <a href="/signup.html">Sign Up</a>
-    `;
-}
-
-function updateAuthArea() {
-    const authArea = document.getElementById('auth-area');
-    if (!authArea) return;
-    
-    // Show login/signup buttons
-    authArea.innerHTML = `
-        <a href="/login.html" class="nav-btn">Sign In</a>
-        <a href="/signup.html" class="nav-btn signup">Sign Up</a>
-    `;
-}
-
-function highlightCurrentPage() {
-    const currentPath = window.location.pathname;
-    const navLinks = document.getElementById('nav-links');
-    
-    if (navLinks) {
-        navLinks.querySelectorAll('a').forEach(link => {
-            if (link.getAttribute('href') === currentPath) {
-                link.classList.add('active');
-            }
-        });
-    }
-}
-
-// ================= UTILITY FUNCTIONS =================
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
 // ================= INITIALIZE ON LOAD =================
 document.addEventListener('DOMContentLoaded', initAboutPage);
-
-// ================= EXPORT FUNCTIONS =================
-window.initAboutPage = initAboutPage;
-window.animateStatistics = animateStatistics;

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Student Certificates</title>
+<link rel="stylesheet" href="css/certificates.css">
+</head>
+<body>
+
+<header>
+<h2>🎓 Student Certificate Dashboard</h2>
+</header>
+
+<div class="dashboard">
+    <div class="card">Total Certificates: <span id="totalCert">0</span></div>
+    <div class="card">Attendance %: <span id="attendance">0%</span></div>
+    <div class="card">Next Goal: 95% Excellence</div>
+</div>
+
+<input type="text" id="searchBox" placeholder="Search Certificate ID...">
+
+<div id="certificatesContainer"></div>
+<button onclick="generateCertificate()">Generate Certificate</button>
+
+<script src="js/certificates.js"></script>
+</body>
+</html>

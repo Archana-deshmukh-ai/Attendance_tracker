@@ -129,7 +129,7 @@ function loadSecurityState() {
             if (state.cooldownEnd && state.cooldownEnd > now) {
                 securityState.isCooldown = true;
                 securityState.cooldownEnd = state.cooldownEnd;
-                showCooldownMessage();
+                showCooldownMessage('Please wait before trying again.', Math.ceil((state.cooldownEnd - now) / 1000));
             }
         } catch (error) {
             console.error('Error loading security state:', error);
@@ -203,19 +203,19 @@ async function checkAccountStatus(email) {
     if (!email) return;
     
     try {
-        const response = await fetch('/api/security/check-status', {
+        const response = await fetch('/api/security/check-lock', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
         });
         
-        if (response.ok) {
+        if (response.status === 423) {
             const data = await response.json();
-            if (data.locked) {
-                showAccountLockedMessage('Account is locked', data.unlock_time);
-                disableLoginForm();
-            }
+            // Account is locked
+            showAccountLockedMessage(data.message || 'Account is locked', data.unlock_time);
+            disableLoginForm();
         }
+        // else: account not locked – do nothing
     } catch (error) {
         console.error('Error checking account status:', error);
     }
@@ -315,7 +315,7 @@ function handleFailedLogin(data) {
         // IP cooldown
         securityState.isCooldown = true;
         securityState.cooldownEnd = Date.now() + (data.wait_time || SECURITY_CONFIG.cooldownDuration);
-        showCooldownMessage(data.message, data.wait_time || 30);
+        showCooldownMessage(data.message || 'Please wait before trying again.', data.wait_time || 30);
     } else {
         // Normal failure
         showStatusMessage(data.message || 'Invalid credentials', 'error');

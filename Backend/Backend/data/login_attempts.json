@@ -2,43 +2,74 @@
   "aarav.sharma@uni.edu": {
     "attempts": [
       {
-        "timestamp": "2026-02-16T16:02:10.521936",
+        "timestamp": "2026-02-06T21:21:51.129923",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-02-15T20:39:22.582492",
         "ip": "127.0.0.1",
         "success": true
       }
     ],
     "failed_count": 0,
-    "last_attempt": "2026-02-16T16:02:10.521936"
+    "last_attempt": "2026-02-15T20:39:22.582492"
   },
   "127.0.0.1": {
     "failed_attempts": 0
   },
-  "rajesh.iyer@uni.edu": {
+  "ar007chana@gmail.com": {
     "attempts": [
       {
-        "timestamp": "2026-02-16T16:03:19.128078",
-        "ip": "127.0.0.1",
-        "success": true
-      },
-      {
-        "timestamp": "2026-02-16T21:04:17.415858",
-        "ip": "127.0.0.1",
-        "success": true
-      },
-      {
-        "timestamp": "2026-02-17T19:49:33.331856",
-        "ip": "127.0.0.1",
-        "success": true
-      },
-      {
-        "timestamp": "2026-02-17T19:49:33.358237",
+        "timestamp": "2026-02-07T00:21:06.833107",
         "ip": "127.0.0.1",
         "success": true
       }
     ],
     "failed_count": 0,
-<<<<<<< HEAD
-    "last_attempt": "2026-02-17T19:49:33.358237"
+    "last_attempt": "2026-02-07T00:21:06.833107"
+  },
+  "sai.reddy@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-02-11T19:10:20.058040",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-02-11T19:37:01.686546",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-02-14T10:00:56.906912",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-02-14T19:10:23.474632",
+        "ip": "127.0.0.1",
+        "success": false
+      },
+      {
+        "timestamp": "2026-02-14T19:10:51.952499",
+        "ip": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "failed_count": 0,
+    "last_attempt": "2026-02-14T19:10:51.952499"
+  },
+  "rajesh.iyer@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-02-07T00:37:59.035601",
+        "ip": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "failed_count": 0,
+    "last_attempt": "2026-02-07T00:37:59.035601"
   },
   "anil.verma@uni.edu": {
     "attempts": [
@@ -81,8 +112,5 @@
     ],
     "failed_count": 3,
     "last_attempt": "2026-02-14T19:09:52.933538"
-=======
-    "last_attempt": "2026-02-16T16:03:19.128078"
->>>>>>> d47e46afbc813a379f29a75f50cb4b8af4928ae1
   }
 }
