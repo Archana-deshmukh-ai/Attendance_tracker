@@ -1790,6 +1790,31 @@ def verify_certificate(cert_id):
             return jsonify({"valid": True, "certificate": c})
     return jsonify({"valid": False})
 
+#certificate link
+@app.route("/certificates")
+def certificates():
+
+    students = pd.read_csv("Backend/Backend/data/students.csv")
+    attendance = pd.read_csv("Backend/Backend/data/attendance_summary.csv")
+
+    # merge student data
+    data = pd.merge(students, attendance, on="student_id")
+
+    # filter eligible students
+    eligible_students = data[data["eligible"] == True]
+
+    students_list = eligible_students.to_dict(orient="records")
+
+    return render_template("certificates.html", students=students_list)
+
+
+@app.route("/download_certificate/<name>")
+def download_certificate(name):
+
+    file_path = f"certificates/{name}_certificate.pdf"
+
+    return send_file(file_path, as_attachment=True)
+
 if __name__ == '__main__':
     # Initialize data files
     initialize_data()
