@@ -6,220 +6,297 @@ class ForgotPassword {
         this.userEmail = '';
         this.otp = '';
         this.timerInterval = null;
-        this.timeLeft = 120; // 2 minutes in seconds
-        
+        this.timeLeft = 120;
         this.init();
     }
     
-    init() {
-        this.bindEvents();
+    init() { 
+        this.bindEvents(); 
         this.startTimer();
+        // Add initial state for step 2
+        document.getElementById('step2Content')?.classList.add('hidden');
     }
     
     bindEvents() {
         // Step 1: Send Reset Link
-        document.getElementById('sendResetBtn').addEventListener('click', () => this.sendResetLink());
+        document.getElementById('sendResetBtn')?.addEventListener('click', () => this.sendResetLink());
         
-        // Step 2: OTP Input
-        const otpInputs = document.querySelectorAll('.otp-input');
-        otpInputs.forEach((input, index) => {
-            input.addEventListener('input', (e) => this.handleOtpInput(e, index));
-            input.addEventListener('keydown', (e) => this.handleOtpKeydown(e, index));
+        // OTP Inputs
+        document.querySelectorAll('.otp-input').forEach((input, i) => {
+            input.addEventListener('input', (e) => this.handleOtpInput(e, i));
+            input.addEventListener('keydown', (e) => this.handleOtpKeydown(e, i));
+            input.addEventListener('paste', (e) => this.handleOtpPaste(e));
         });
         
-        // Verify OTP Button
-        document.getElementById('verifyOtpBtn').addEventListener('click', () => this.verifyOtp());
+        // Step 2: Verify OTP
+        document.getElementById('verifyOtpBtn')?.addEventListener('click', () => this.verifyOtp());
+        document.getElementById('resendOtp')?.addEventListener('click', () => this.resendOtp());
         
-        // Resend OTP Link
-        document.getElementById('resendOtp').addEventListener('click', () => this.resendOtp());
+        // Step 3: Reset Password
+        document.getElementById('newPassword')?.addEventListener('input', () => this.checkPasswordStrength());
+        document.getElementById('confirmPassword')?.addEventListener('input', () => this.checkPasswordMatch());
+        document.getElementById('resetPasswordBtn')?.addEventListener('click', () => this.resetPassword());
         
-        // Step 3: Password Input
-        document.getElementById('newPassword').addEventListener('input', () => this.checkPasswordStrength());
-        document.getElementById('confirmPassword').addEventListener('input', () => this.checkPasswordMatch());
+        // Navigation
+        document.getElementById('backToStep1')?.addEventListener('click', () => this.goToStep(1));
+        document.getElementById('backToStep2')?.addEventListener('click', () => this.goToStep(2));
         
-        // Reset Password Button
-        document.getElementById('resetPasswordBtn').addEventListener('click', () => this.resetPassword());
+        // Enter key handlers
+        const emailInput = document.getElementById('resetEmail');
+        if (emailInput) {
+            emailInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.sendResetLink();
+            });
+        }
         
-        // Navigation Buttons
-        document.getElementById('backToStep1').addEventListener('click', () => this.goToStep(1));
+        const otpInputs = document.querySelectorAll('.otp-input');
+        otpInputs.forEach((input, index) => {
+            if (index === otpInputs.length - 1) {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && this.checkOtpComplete()) {
+                        this.verifyOtp();
+                    }
+                });
+            }
+        });
+        
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        if (newPassword && confirmPassword) {
+            confirmPassword.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const btn = document.getElementById('resetPasswordBtn');
+                    if (btn && !btn.disabled) this.resetPassword();
+                }
+            });
+        }
     }
     
-    // Step 1: Send Reset Link
     async sendResetLink() {
-        const email = document.getElementById('resetEmail').value.trim();
-        const messageDiv = document.getElementById('step1Message');
+        const email = document.getElementById('resetEmail')?.value.trim();
+        const msgDiv = document.getElementById('step1Message');
         
-        if (!this.validateEmail(email)) {
-            this.showMessage(messageDiv, 'Please enter a valid email address', 'error');
-            return;
+        if (!this.validateEmail(email)) { 
+            this.showMessage(msgDiv, 'Please enter a valid email address', 'error'); 
+            return; 
         }
         
         const btn = document.getElementById('sendResetBtn');
-        btn.disabled = true;
-        btn.textContent = 'Sending...';
+        if (btn) { 
+            btn.disabled = true; 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        }
         
         try {
-            const response = await fetch('/api/forgot-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
+            const res = await fetch('/api/forgot-password', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ email }) 
             });
+            const data = await res.json();
             
-            const data = await response.json();
-            
-            if (data.success) {
-                this.userEmail = email;
-                this.showMessage(messageDiv, 'Reset link sent to your email!', 'success');
-                setTimeout(() => this.goToStep(2), 1500);
+            if (data.success) { 
+                this.userEmail = email; 
+                this.showMessage(msgDiv, data.message || 'Reset link sent! Check your email.', 'success'); 
+                setTimeout(() => this.goToStep(2), 2000);
             } else {
-                this.showMessage(messageDiv, data.message || 'Failed to send reset link', 'error');
+                // For security, don't reveal if email exists or not
+                this.showMessage(msgDiv, data.message || 'If the email exists, reset instructions will be sent', 'info');
+                // Don't proceed to step 2 if email doesn't exist
+                if (!data.email) {
+                    setTimeout(() => {
+                        if (btn) btn.disabled = false;
+                        btn.innerHTML = 'Send Reset Link';
+                    }, 3000);
+                } else {
+                    setTimeout(() => this.goToStep(2), 2000);
+                }
             }
-        } catch (error) {
-            this.showMessage(messageDiv, 'Network error. Please try again.', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'Send Reset Link';
+        } catch(e) { 
+            this.showMessage(msgDiv, 'Network error. Please try again.', 'error'); 
+        } finally { 
+            if (btn && btn.disabled) {
+                setTimeout(() => {
+                    btn.disabled = false; 
+                    btn.innerHTML = 'Send Reset Link';
+                }, 3000);
+            }
         }
     }
     
-    // Step 2: OTP Verification
-    handleOtpInput(event, index) {
-        const value = event.target.value;
-        
+    handleOtpInput(e, index) {
         // Only allow numbers
-        if (!/^\d*$/.test(value)) {
-            event.target.value = '';
+        if (!/^\d*$/.test(e.target.value)) {
+            e.target.value = '';
             return;
         }
         
-        // Move to next input
-        if (value && index < 5) {
-            const nextInput = document.querySelector(`.otp-input[data-index="${index + 2}"]`);
-            if (nextInput) nextInput.focus();
+        // Auto-advance to next input
+        if (e.target.value && index < 5) {
+            const next = document.querySelector(`.otp-input[data-index="${index + 2}"]`);
+            if (next) next.focus();
         }
         
-        // Check if all inputs are filled
         this.checkOtpComplete();
     }
     
-    handleOtpKeydown(event, index) {
-        // Handle backspace
-        if (event.key === 'Backspace' && !event.target.value && index > 0) {
-            const prevInput = document.querySelector(`.otp-input[data-index="${index}"]`);
-            if (prevInput) prevInput.focus();
+    handleOtpKeydown(e, index) {
+        // Handle backspace to move to previous input
+        if (e.key === 'Backspace' && !e.target.value && index > 0) {
+            const prev = document.querySelector(`.otp-input[data-index="${index}"]`);
+            if (prev) {
+                prev.focus();
+                prev.value = '';
+            }
+        }
+        
+        // Handle delete key
+        if (e.key === 'Delete' && !e.target.value && index < 5) {
+            const next = document.querySelector(`.otp-input[data-index="${index + 2}"]`);
+            if (next) next.focus();
+        }
+    }
+    
+    handleOtpPaste(e) {
+        e.preventDefault();
+        const pastedData = e.clipboardData.getData('text');
+        const otpDigits = pastedData.replace(/\D/g, '').slice(0, 6);
+        
+        const inputs = document.querySelectorAll('.otp-input');
+        for (let i = 0; i < otpDigits.length && i < inputs.length; i++) {
+            inputs[i].value = otpDigits[i];
+        }
+        
+        this.checkOtpComplete();
+        
+        // Focus the next empty input or last input
+        const lastFilled = Math.min(otpDigits.length, inputs.length - 1);
+        if (lastFilled < inputs.length - 1 && otpDigits.length === 6) {
+            inputs[lastFilled + 1]?.focus();
+        } else if (otpDigits.length === 6) {
+            inputs[inputs.length - 1].focus();
         }
     }
     
     checkOtpComplete() {
-        const otpInputs = document.querySelectorAll('.otp-input');
+        const inputs = document.querySelectorAll('.otp-input');
         let otp = '';
         let allFilled = true;
         
-        otpInputs.forEach(input => {
-            otp += input.value;
-            if (!input.value) allFilled = false;
+        inputs.forEach(i => {
+            otp += i.value;
+            if (!i.value) allFilled = false;
         });
         
         this.otp = otp;
-        document.getElementById('verifyOtpBtn').disabled = !allFilled;
+        const btn = document.getElementById('verifyOtpBtn');
+        if (btn) btn.disabled = !allFilled;
         
         return allFilled;
     }
     
     async verifyOtp() {
-        if (this.otp.length !== 6) {
-            this.showMessage(document.getElementById('step2Message'), 'Please enter a 6-digit code', 'error');
-            return;
+        if (this.otp.length !== 6) { 
+            this.showMessage(document.getElementById('step2Message'), 'Please enter the 6-digit verification code', 'error'); 
+            return; 
         }
         
-        // Safety: email must be set
-        if (!this.userEmail) {
-            this.showMessage(document.getElementById('step2Message'), 'Session expired. Please start again.', 'error');
+        if (!this.userEmail) { 
+            this.showMessage(document.getElementById('step2Message'), 'Session expired. Please start again.', 'error'); 
             setTimeout(() => this.goToStep(1), 2000);
-            return;
+            return; 
         }
         
         const btn = document.getElementById('verifyOtpBtn');
-        btn.disabled = true;
-        btn.textContent = 'Verifying...';
+        if (btn) { 
+            btn.disabled = true; 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+        }
         
         try {
-            const response = await fetch('/api/verify-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    email: this.userEmail, 
-                    otp: this.otp 
-                })
+            const res = await fetch('/api/verify-otp', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ email: this.userEmail, otp: this.otp }) 
             });
+            const data = await res.json();
             
-            const data = await response.json();
-            
-            if (data.success) {
-                this.showMessage(document.getElementById('step2Message'), 'Code verified successfully!', 'success');
+            if (data.success) { 
+                this.showMessage(document.getElementById('step2Message'), 'Code verified successfully!', 'success'); 
                 setTimeout(() => this.goToStep(3), 1500);
-            } else {
+            } else { 
                 this.showMessage(document.getElementById('step2Message'), data.message || 'Invalid verification code', 'error');
+                // Clear OTP inputs on error
+                document.querySelectorAll('.otp-input').forEach(input => input.value = '');
+                this.otp = '';
+                document.getElementById('verifyOtpBtn').disabled = true;
             }
-        } catch (error) {
-            this.showMessage(document.getElementById('step2Message'), 'Network error. Please try again.', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'Verify Code';
+        } catch(e) { 
+            this.showMessage(document.getElementById('step2Message'), 'Network error. Please try again.', 'error'); 
+        } finally { 
+            if (btn) { 
+                btn.disabled = false; 
+                btn.innerHTML = 'Verify Code';
+            }
         }
     }
     
     async resendOtp() {
-        if (!this.userEmail) {
-            this.showMessage(document.getElementById('step2Message'), 'Session expired. Please start again.', 'error');
+        if (!this.userEmail) { 
+            this.showMessage(document.getElementById('step2Message'), 'Session expired. Please start again.', 'error'); 
             setTimeout(() => this.goToStep(1), 2000);
-            return;
+            return; 
         }
         
-        const resendLink = document.getElementById('resendOtp');
+        const link = document.getElementById('resendOtp');
+        if (link?.classList.contains('disabled')) return;
         
-        // Prevent multiple clicks
-        if (resendLink.classList.contains('disabled')) return;
-        
-        resendLink.classList.add('disabled');
-        resendLink.textContent = 'Resending...';
+        if (link) { 
+            link.classList.add('disabled'); 
+            link.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resending...';
+        }
         
         try {
-            const response = await fetch('/api/resend-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: this.userEmail })
+            const res = await fetch('/api/resend-otp', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ email: this.userEmail }) 
             });
+            const data = await res.json();
             
-            const data = await response.json();
-            
-            if (data.success) {
-                this.showMessage(document.getElementById('step2Message'), 'New code sent to your email!', 'success');
+            if (data.success) { 
+                this.showMessage(document.getElementById('step2Message'), 'New code sent to your email!', 'success'); 
                 this.resetTimer();
-            } else {
-                this.showMessage(document.getElementById('step2Message'), data.message || 'Failed to resend code', 'error');
+                // Clear OTP inputs
+                document.querySelectorAll('.otp-input').forEach(input => input.value = '');
+                this.otp = '';
+                document.getElementById('verifyOtpBtn').disabled = true;
+            } else { 
+                this.showMessage(document.getElementById('step2Message'), data.message || 'Failed to resend code', 'error'); 
             }
-        } catch (error) {
-            this.showMessage(document.getElementById('step2Message'), 'Network error. Please try again.', 'error');
-        } finally {
-            setTimeout(() => {
-                resendLink.classList.remove('disabled');
-                resendLink.textContent = "Didn't receive code? Resend";
-            }, 30000); // 30 seconds cooldown
+        } catch(e) { 
+            this.showMessage(document.getElementById('step2Message'), 'Network error. Please try again.', 'error'); 
+        } finally { 
+            setTimeout(() => { 
+                if (link) { 
+                    link.classList.remove('disabled'); 
+                    link.innerHTML = "Didn't receive code? Resend";
+                } 
+            }, 30000);
         }
     }
     
-    // Step 3: Password Reset
     checkPasswordStrength() {
-        const password = document.getElementById('newPassword').value;
+        const pwd = document.getElementById('newPassword')?.value || '';
         const strengthBar = document.getElementById('strengthBar');
+        const strengthText = document.getElementById('strengthText');
         
         // Check requirements
-        const hasLength = password.length >= 8;
-        const hasUpper = /[A-Z]/.test(password);
-        const hasLower = /[a-z]/.test(password);
-        const hasNumber = /[0-9]/.test(password);
-        const hasSpecial = /[^A-Za-z0-9]/.test(password);
+        const hasLength = pwd.length >= 8;
+        const hasUpper = /[A-Z]/.test(pwd);
+        const hasLower = /[a-z]/.test(pwd);
+        const hasNumber = /[0-9]/.test(pwd);
+        const hasSpecial = /[^A-Za-z0-9]/.test(pwd);
         
         // Update requirement indicators
         this.updateRequirement('reqLength', hasLength);
@@ -237,44 +314,55 @@ class ForgotPassword {
         if (hasSpecial) strength++;
         
         // Update strength bar
-        strengthBar.className = 'strength-bar';
-        if (strength <= 2) {
-            strengthBar.classList.add('weak');
-        } else if (strength <= 4) {
-            strengthBar.classList.add('medium');
-        } else {
-            strengthBar.classList.add('strong');
+        if (strengthBar) {
+            strengthBar.className = 'strength-bar';
+            if (strength <= 2) {
+                strengthBar.classList.add('weak');
+                if (strengthText) strengthText.textContent = 'Weak password';
+            } else if (strength <= 4) {
+                strengthBar.classList.add('medium');
+                if (strengthText) strengthText.textContent = 'Medium password';
+            } else {
+                strengthBar.classList.add('strong');
+                if (strengthText) strengthText.textContent = 'Strong password';
+            }
         }
         
-        // Enable/disable reset button
         this.checkResetButton();
     }
     
     checkPasswordMatch() {
-        const password = document.getElementById('newPassword').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
+        const password = document.getElementById('newPassword')?.value || '';
+        const confirmPassword = document.getElementById('confirmPassword')?.value || '';
         const matchDiv = document.getElementById('passwordMatch');
         
-        if (!password) return;
+        if (!password) {
+            if (matchDiv) matchDiv.textContent = '';
+            return;
+        }
         
         if (confirmPassword) {
             if (password === confirmPassword) {
-                matchDiv.textContent = '✓ Passwords match';
-                matchDiv.style.color = '#10b981';
+                if (matchDiv) {
+                    matchDiv.textContent = '✓ Passwords match';
+                    matchDiv.style.color = '#10b981';
+                }
             } else {
-                matchDiv.textContent = '✗ Passwords do not match';
-                matchDiv.style.color = '#ef4444';
+                if (matchDiv) {
+                    matchDiv.textContent = '✗ Passwords do not match';
+                    matchDiv.style.color = '#ef4444';
+                }
             }
         } else {
-            matchDiv.textContent = '';
+            if (matchDiv) matchDiv.textContent = '';
         }
         
         this.checkResetButton();
     }
     
     checkResetButton() {
-        const password = document.getElementById('newPassword').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
+        const password = document.getElementById('newPassword')?.value || '';
+        const confirmPassword = document.getElementById('confirmPassword')?.value || '';
         const btn = document.getElementById('resetPasswordBtn');
         
         // Check all requirements
@@ -286,26 +374,53 @@ class ForgotPassword {
         const passwordsMatch = password === confirmPassword && password.length > 0;
         
         const isValid = hasLength && hasUpper && hasLower && hasNumber && hasSpecial && passwordsMatch;
-        btn.disabled = !isValid;
+        
+        if (btn) btn.disabled = !isValid;
+        return isValid;
+    }
+    
+    updateRequirement(elementId, isValid) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.classList.remove('valid', 'invalid');
+            element.classList.add(isValid ? 'valid' : 'invalid');
+            if (isValid) {
+                element.innerHTML = element.innerHTML.replace('❌', '✓').replace('✗', '✓');
+            } else {
+                element.innerHTML = element.innerHTML.replace('✓', '❌').replace('✓', '✗');
+            }
+        }
     }
     
     async resetPassword() {
-        // Safety: email must be set
-        if (!this.userEmail) {
-            this.showMessage(document.getElementById('step3Message'), 'Session expired. Please start again.', 'error');
+        if (!this.userEmail) { 
+            this.showMessage(document.getElementById('step3Message'), 'Session expired. Please start again.', 'error'); 
             setTimeout(() => this.goToStep(1), 2000);
+            return; 
+        }
+        
+        const newPassword = document.getElementById('newPassword')?.value;
+        const confirmPassword = document.getElementById('confirmPassword')?.value;
+        const btn = document.getElementById('resetPasswordBtn');
+        const msgDiv = document.getElementById('step3Message');
+        
+        if (newPassword !== confirmPassword) {
+            this.showMessage(msgDiv, 'Passwords do not match', 'error');
             return;
         }
         
-        const newPassword = document.getElementById('newPassword').value;
-        const btn = document.getElementById('resetPasswordBtn');
-        const messageDiv = document.getElementById('step3Message');
+        if (newPassword.length < 8) {
+            this.showMessage(msgDiv, 'Password must be at least 8 characters', 'error');
+            return;
+        }
         
-        btn.disabled = true;
-        btn.textContent = 'Resetting...';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resetting...';
+        }
         
         try {
-            const response = await fetch('/api/reset-password', {
+            const res = await fetch('/api/reset-password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -314,24 +429,31 @@ class ForgotPassword {
                 })
             });
             
-            const data = await response.json();
+            const data = await res.json();
             
             if (data.success) {
-                this.showMessage(messageDiv, 'Password reset successfully!', 'success');
-                setTimeout(() => this.showSuccess(), 1500);
+                this.showMessage(msgDiv, 'Password reset successfully! Redirecting to login...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 3000);
             } else {
-                this.showMessage(messageDiv, data.message || 'Failed to reset password', 'error');
-                btn.disabled = false;
-                btn.textContent = 'Reset Password';
+                this.showMessage(msgDiv, data.message || 'Failed to reset password', 'error');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = 'Reset Password';
+                }
             }
         } catch (error) {
-            this.showMessage(messageDiv, 'Network error. Please try again.', 'error');
-            btn.disabled = false;
-            btn.textContent = 'Reset Password';
+            console.error('Reset password error:', error);
+            this.showMessage(msgDiv, 'Network error. Please try again.', 'error');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = 'Reset Password';
+            }
         }
     }
     
-    // Navigation
+    // Navigation methods
     goToStep(step) {
         this.currentStep = step;
         
@@ -346,11 +468,17 @@ class ForgotPassword {
         });
         
         // Show/hide content
-        document.getElementById('step1Content').style.display = step === 1 ? 'block' : 'none';
-        document.getElementById('step2Content').style.display = step === 2 ? 'block' : 'none';
-        document.getElementById('step3Content').style.display = step === 3 ? 'block' : 'none';
+        const step1Content = document.getElementById('step1Content');
+        const step2Content = document.getElementById('step2Content');
+        const step3Content = document.getElementById('step3Content');
+        const successContent = document.getElementById('successContent');
         
-        // Clear messages
+        if (step1Content) step1Content.style.display = step === 1 ? 'block' : 'none';
+        if (step2Content) step2Content.style.display = step === 2 ? 'block' : 'none';
+        if (step3Content) step3Content.style.display = step === 3 ? 'block' : 'none';
+        if (successContent) successContent.style.display = 'none';
+        
+        // Clear messages when changing steps
         ['step1Message', 'step2Message', 'step3Message'].forEach(id => {
             const div = document.getElementById(id);
             if (div) {
@@ -362,22 +490,34 @@ class ForgotPassword {
         // Reset timer when going to step 2
         if (step === 2) {
             this.resetTimer();
-        }
-        
-        // Clear OTP inputs when leaving step 2
-        if (step !== 2) {
+            // Clear OTP inputs
             document.querySelectorAll('.otp-input').forEach(input => {
                 input.value = '';
             });
             this.otp = '';
+            document.getElementById('verifyOtpBtn').disabled = true;
+        }
+        
+        // Focus on first input of step
+        if (step === 1) {
+            document.getElementById('resetEmail')?.focus();
+        } else if (step === 2) {
+            document.querySelector('.otp-input')?.focus();
+        } else if (step === 3) {
+            document.getElementById('newPassword')?.focus();
         }
     }
     
     showSuccess() {
-        document.getElementById('step1Content').style.display = 'none';
-        document.getElementById('step2Content').style.display = 'none';
-        document.getElementById('step3Content').style.display = 'none';
-        document.getElementById('successContent').style.display = 'block';
+        const step1Content = document.getElementById('step1Content');
+        const step2Content = document.getElementById('step2Content');
+        const step3Content = document.getElementById('step3Content');
+        const successContent = document.getElementById('successContent');
+        
+        if (step1Content) step1Content.style.display = 'none';
+        if (step2Content) step2Content.style.display = 'none';
+        if (step3Content) step3Content.style.display = 'none';
+        if (successContent) successContent.style.display = 'block';
         
         // Update progress steps to show all completed
         document.querySelectorAll('.step').forEach(stepEl => {
@@ -386,7 +526,7 @@ class ForgotPassword {
         });
     }
     
-    // Timer Functions
+    // Timer functions
     startTimer() {
         this.updateTimerDisplay();
         
@@ -396,9 +536,16 @@ class ForgotPassword {
             
             if (this.timeLeft <= 0) {
                 clearInterval(this.timerInterval);
-                document.getElementById('timer').textContent = 'Code expired';
-                document.getElementById('verifyOtpBtn').disabled = true;
-                document.getElementById('resendOtp').classList.remove('disabled');
+                const timerEl = document.getElementById('timer');
+                if (timerEl) timerEl.textContent = 'Code expired';
+                
+                const verifyBtn = document.getElementById('verifyOtpBtn');
+                if (verifyBtn) verifyBtn.disabled = true;
+                
+                const resendLink = document.getElementById('resendOtp');
+                if (resendLink) resendLink.classList.remove('disabled');
+                
+                this.showMessage(document.getElementById('step2Message'), 'Code expired. Please resend.', 'warning');
             }
         }, 1000);
     }
@@ -407,37 +554,52 @@ class ForgotPassword {
         clearInterval(this.timerInterval);
         this.timeLeft = 120;
         this.startTimer();
-        document.getElementById('resendOtp').classList.add('disabled');
+        
+        const resendLink = document.getElementById('resendOtp');
+        if (resendLink) resendLink.classList.add('disabled');
+        
+        const timerEl = document.getElementById('timer');
+        if (timerEl) timerEl.style.color = '#102094';
     }
     
     updateTimerDisplay() {
         const minutes = Math.floor(this.timeLeft / 60);
         const seconds = this.timeLeft % 60;
-        document.getElementById('timer').textContent = 
-            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        const timerEl = document.getElementById('timer');
+        
+        if (timerEl) {
+            timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Change color when time is low
+            if (this.timeLeft < 30) {
+                timerEl.style.color = '#f59e0b';
+            } else if (this.timeLeft < 10) {
+                timerEl.style.color = '#ef4444';
+            } else {
+                timerEl.style.color = '#102094';
+            }
+        }
     }
     
-    // Helper Functions
+    // Helper functions
     validateEmail(email) {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(email);
     }
     
-    updateRequirement(elementId, isValid) {
-        const element = document.getElementById(elementId);
-        element.classList.remove('valid', 'invalid');
-        element.classList.add(isValid ? 'valid' : 'invalid');
-    }
-    
     showMessage(element, message, type) {
+        if (!element) return;
+        
         element.textContent = message;
         element.className = `reset-message ${type}`;
         element.style.display = 'block';
         
-        // Auto-hide success messages after 5 seconds
-        if (type === 'success') {
+        // Auto-hide messages after 5 seconds (except errors on critical steps)
+        if (type !== 'error' || this.currentStep !== 2) {
             setTimeout(() => {
-                element.style.display = 'none';
+                if (element.style.display !== 'none') {
+                    element.style.display = 'none';
+                }
             }, 5000);
         }
     }

@@ -2,15 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mark Attendance - Attendance Atlas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Mark Attendance | Attendance Atlas</title>
     <link rel="stylesheet" href="css/mark_attendance.css">
-    <!-- Font Awesome for icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 </head>
-<body>
+<body class="js-loading">
 
-<header class="navbar">
+<!-- ================= HEADER ================= -->
+<header class="navbar" data-aos="fade-down">
     <div class="logo">
         <i class="fas fa-chart-line"></i> Attendance Atlas
     </div>
@@ -22,45 +29,60 @@
     <div class="header-right" id="auth-area">
         <!-- JS will inject User info here -->
     </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+        <i class="fas fa-bars"></i>
+    </button>
 </header>
 
+<!-- ================= MAIN CONTENT ================= -->
 <main class="content">
     <!-- Access Control Message -->
     <div id="access-message" class="access-message" style="display: none;">
-        <div class="access-card">
+        <div class="access-card" data-aos="zoom-in">
             <i class="fas fa-ban"></i>
             <h3>Access Denied</h3>
             <p>Only lecturers can mark attendance.</p>
             <p>Redirecting to home page...</p>
+            <div class="loading-spinner-small"></div>
         </div>
     </div>
     
     <div id="attendance-content" style="display: none;">
         <!-- Quick Stats Bar -->
-        <div class="quick-stats-bar">
-            <div class="stat-card">
-                <i class="fas fa-users"></i>
+        <div class="quick-stats-bar" data-aos="fade-up">
+            <div class="stat-card" data-aos="zoom-in" data-aos-delay="100">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
                 <div class="stat-info">
                     <span class="stat-label">Total Students</span>
                     <span class="stat-value" id="quickTotal">0</span>
                 </div>
             </div>
-            <div class="stat-card">
-                <i class="fas fa-user-check"></i>
+            <div class="stat-card" data-aos="zoom-in" data-aos-delay="200">
+                <div class="stat-icon present-icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
                 <div class="stat-info">
                     <span class="stat-label">Present Today</span>
                     <span class="stat-value" id="quickPresent">0</span>
                 </div>
             </div>
-            <div class="stat-card">
-                <i class="fas fa-user-times"></i>
+            <div class="stat-card" data-aos="zoom-in" data-aos-delay="300">
+                <div class="stat-icon absent-icon">
+                    <i class="fas fa-user-times"></i>
+                </div>
                 <div class="stat-info">
                     <span class="stat-label">Absent Today</span>
                     <span class="stat-value" id="quickAbsent">0</span>
                 </div>
             </div>
-            <div class="stat-card">
-                <i class="fas fa-chart-pie"></i>
+            <div class="stat-card" data-aos="zoom-in" data-aos-delay="400">
+                <div class="stat-icon percentage-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
                 <div class="stat-info">
                     <span class="stat-label">Attendance %</span>
                     <span class="stat-value" id="quickPercentage">0%</span>
@@ -70,7 +92,7 @@
         
         <div class="attendance-container">
             <!-- Left Panel: Controls & Info -->
-            <div class="left-panel">
+            <div class="left-panel" data-aos="fade-right">
                 <h2><i class="fas fa-edit"></i> Mark Attendance</h2>
                 
                 <!-- Session Info Card -->
@@ -91,24 +113,26 @@
                     <div class="form-group">
                         <label for="lectureType"><i class="fas fa-chalkboard-teacher"></i> Lecture Type:</label>
                         <select id="lectureType" class="dropdown">
-                            <option value="regular">Regular Lecture</option>
-                            <option value="lab">Lab Session</option>
-                            <option value="tutorial">Tutorial</option>
-                            <option value="seminar">Seminar</option>
+                            <option value="regular">📚 Regular Lecture</option>
+                            <option value="lab">🔬 Lab Session</option>
+                            <option value="tutorial">📖 Tutorial</option>
+                            <option value="seminar">🎤 Seminar</option>
+                            <option value="workshop">🛠️ Workshop</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label for="timeSlot"><i class="fas fa-clock"></i> Time Slot:</label>
                         <select id="timeSlot" class="dropdown">
-                            <option value="8-9">8:00 AM - 9:00 AM</option>
-                            <option value="9-10">9:00 AM - 10:00 AM</option>
-                            <option value="10-11">10:00 AM - 11:00 AM</option>
-                            <option value="11-12">11:00 AM - 12:00 PM</option>
-                            <option value="12-1">12:00 PM - 1:00 PM</option>
-                            <option value="1-2">1:00 PM - 2:00 PM</option>
-                            <option value="2-3">2:00 PM - 3:00 PM</option>
-                            <option value="3-4">3:00 PM - 4:00 PM</option>
+                            <option value="8-9">🕗 8:00 AM - 9:00 AM</option>
+                            <option value="9-10">🕘 9:00 AM - 10:00 AM</option>
+                            <option value="10-11">🕙 10:00 AM - 11:00 AM</option>
+                            <option value="11-12">🕚 11:00 AM - 12:00 PM</option>
+                            <option value="12-1">🕛 12:00 PM - 1:00 PM</option>
+                            <option value="1-2">🕐 1:00 PM - 2:00 PM</option>
+                            <option value="2-3">🕑 2:00 PM - 3:00 PM</option>
+                            <option value="3-4">🕒 3:00 PM - 4:00 PM</option>
+                            <option value="4-5">🕓 4:00 PM - 5:00 PM</option>
                         </select>
                     </div>
                     
@@ -121,10 +145,10 @@
                 <div class="actions-card">
                     <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
                     <div class="action-buttons">
-                        <button id="selectAllBtn" class="action-btn">
+                        <button id="selectAllBtn" class="action-btn select-all">
                             <i class="fas fa-check-circle"></i> Select All
                         </button>
-                        <button id="clearAllBtn" class="action-btn">
+                        <button id="clearAllBtn" class="action-btn clear-all">
                             <i class="fas fa-times-circle"></i> Clear All
                         </button>
                         <button id="markPresentBtn" class="action-btn present">
@@ -133,11 +157,17 @@
                         <button id="markAbsentBtn" class="action-btn absent">
                             <i class="fas fa-user-times"></i> Mark All Absent
                         </button>
+                        <button id="markLateBtn" class="action-btn late">
+                            <i class="fas fa-clock"></i> Mark All Late
+                        </button>
                         <button id="exportBtn" class="action-btn export">
                             <i class="fas fa-file-export"></i> Export List
                         </button>
                         <button id="saveDraftBtn" class="action-btn draft">
                             <i class="fas fa-save"></i> Save Draft
+                        </button>
+                        <button id="clearDraftBtn" class="action-btn clear-draft">
+                            <i class="fas fa-trash-alt"></i> Clear Draft
                         </button>
                     </div>
                 </div>
@@ -151,26 +181,27 @@
                     <div class="submit-info">
                         <p><i class="fas fa-shield-alt"></i> Data will be securely stored</p>
                         <p><i class="fas fa-history"></i> Can be modified until 24 hours</p>
+                        <p><i class="fas fa-clock"></i> Auto-save every 30 seconds</p>
                     </div>
                 </div>
             </div>
             
             <!-- Right Panel: Students List -->
-            <div class="right-panel">
+            <div class="right-panel" data-aos="fade-left">
                 <!-- Search & Filter Bar -->
                 <div class="search-filter-bar">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
                         <input type="text" id="studentSearch" class="student-search" 
-                               placeholder="Search students by name, ID, or department...">
-                        <button id="clearSearch" class="clear-search">
+                               placeholder="Search by name, ID, or department..." autocomplete="off">
+                        <button id="clearSearch" class="clear-search" aria-label="Clear search">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
                     
                     <div class="filter-controls">
                         <div class="filter-group">
-                            <label><i class="fas fa-filter"></i> Filters:</label>
+                            <label><i class="fas fa-filter"></i> Status:</label>
                             <div class="filter-buttons">
                                 <button class="filter-btn active" data-filter="all">All</button>
                                 <button class="filter-btn" data-filter="present">Present</button>
@@ -183,19 +214,19 @@
                             <label><i class="fas fa-building"></i> Department:</label>
                             <select id="deptFilter" class="dropdown-sm">
                                 <option value="all">All Departments</option>
-                                <option value="CSE">CSE</option>
-                                <option value="ECE">ECE</option>
-                                <option value="ME">ME</option>
-                                <option value="CE">CE</option>
-                                <option value="EEE">EEE</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Mechanical">Mechanical</option>
+                                <option value="Civil">Civil</option>
+                                <option value="Mathematics">Mathematics</option>
                             </select>
                         </div>
                         
                         <div class="view-controls">
-                            <button id="listViewBtn" class="view-btn active" data-view="list">
+                            <button id="listViewBtn" class="view-btn active" data-view="list" title="List View">
                                 <i class="fas fa-list"></i>
                             </button>
-                            <button id="gridViewBtn" class="view-btn" data-view="grid">
+                            <button id="gridViewBtn" class="view-btn" data-view="grid" title="Grid View">
                                 <i class="fas fa-th-large"></i>
                             </button>
                         </div>
@@ -205,23 +236,23 @@
                 <!-- Attendance Summary -->
                 <div class="detailed-summary">
                     <div class="summary-item">
-                        <span class="summary-label">Total Students:</span>
+                        <span class="summary-label"><i class="fas fa-users"></i> Total</span>
                         <span class="summary-value" id="totalCount">0</span>
                     </div>
                     <div class="summary-item present">
-                        <span class="summary-label">Present:</span>
+                        <span class="summary-label"><i class="fas fa-user-check"></i> Present</span>
                         <span class="summary-value" id="presentCount">0</span>
                     </div>
                     <div class="summary-item absent">
-                        <span class="summary-label">Absent:</span>
+                        <span class="summary-label"><i class="fas fa-user-times"></i> Absent</span>
                         <span class="summary-value" id="absentCount">0</span>
                     </div>
                     <div class="summary-item late">
-                        <span class="summary-label">Late:</span>
+                        <span class="summary-label"><i class="fas fa-clock"></i> Late</span>
                         <span class="summary-value" id="lateCount">0</span>
                     </div>
                     <div class="summary-item percentage">
-                        <span class="summary-label">Attendance %:</span>
+                        <span class="summary-label"><i class="fas fa-chart-line"></i> Attendance</span>
                         <span class="summary-value" id="percentage">0%</span>
                     </div>
                 </div>
@@ -230,6 +261,7 @@
                 <div id="loadingIndicator" class="loading-container">
                     <div class="spinner"></div>
                     <p>Loading students from database...</p>
+                    <small>Please wait while we fetch student data</small>
                 </div>
                 
                 <!-- Students List Container -->
@@ -238,10 +270,10 @@
                 </div>
                 
                 <!-- Bulk Edit Panel -->
-                <div class="bulk-edit-panel" id="bulkEditPanel">
+                <div class="bulk-edit-panel" id="bulkEditPanel" style="display: none;">
                     <div class="bulk-edit-header">
-                        <h4><i class="fas fa-users"></i> Bulk Edit (2 selected)</h4>
-                        <button class="close-bulk-edit">
+                        <h4><i class="fas fa-users"></i> Bulk Edit (<span id="bulkCount">0</span> selected)</h4>
+                        <button class="close-bulk-edit" aria-label="Close">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -264,7 +296,7 @@
                 <!-- Pagination & Info -->
                 <div class="list-footer">
                     <div class="page-info">
-                        Showing <span id="startIndex">1</span>-<span id="endIndex">20</span> of 
+                        <i class="fas fa-table"></i> Showing <span id="startIndex">1</span>-<span id="endIndex">20</span> of 
                         <span id="totalStudents">0</span> students
                     </div>
                     <div class="pagination" id="pagination">
@@ -304,8 +336,28 @@
             </div>
         </div>
     </div>
+    
+    <!-- Note Modal -->
+    <div id="noteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-sticky-note"></i> Add Note</h3>
+                <button class="close-note-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="noteModalMessage">Add a note for selected student:</p>
+                <textarea id="noteText" class="note-textarea" rows="4" placeholder="Enter note here..."></textarea>
+                <small class="note-hint"><i class="fas fa-info-circle"></i> Notes will be saved with attendance records</small>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel-note">Cancel</button>
+                <button class="modal-btn confirm-note">Save Note</button>
+            </div>
+        </div>
+    </div>
 </main>
 
+<!-- ================= FOOTER ================= -->
 <footer class="footer">
     <div class="footer-container">
         <div class="footer-section">
@@ -321,7 +373,7 @@
             <h4><i class="fas fa-link"></i> Quick Links</h4>
             <ul>
                 <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
-                <li><a href="/lecturer-dashboard"><i class="fas fa-tachometer-alt"></i> Lecturer Dashboard</a></li>
+                <li><a href="/lecturer-dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                 <li><a href="/report"><i class="fas fa-chart-bar"></i> Reports</a></li>
                 <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
             </ul>
@@ -330,7 +382,7 @@
             <h4><i class="fas fa-envelope"></i> Contact</h4>
             <p><i class="fas fa-envelope"></i> faculty.support@attendanceatlas.com</p>
             <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
-            <p><i class="fas fa-calendar-alt"></i> Attendance Atlas - 2026</p>
+            <p><i class="fas fa-calendar-alt"></i> Support: Mon-Fri, 9AM-6PM</p>
         </div>
         <div class="footer-section">
             <h4><i class="fas fa-shield-alt"></i> System Status</h4>
@@ -340,6 +392,7 @@
             </div>
             <div class="update-info">
                 <p><i class="fas fa-sync-alt"></i> Last sync: <span id="lastSync">Just now</span></p>
+                <p><i class="fas fa-clock"></i> Auto-save enabled</p>
             </div>
         </div>
     </div>
@@ -353,13 +406,40 @@
     </div>
 </footer>
 
-<!-- JavaScript Files -->
+<!-- ================= SCRIPTS ================= -->
 <script src="js/attendanceManager.js"></script>
 <script src="js/markAttendance.js"></script>
-<script src="js/navigation.js"></script>
+<script src="js/script.js"></script>
 <script>
-// Check access before loading attendance functionality
-document.addEventListener('DOMContentLoaded', async function() {
+    // Initialize AOS animations
+    AOS.init({
+        duration: 600,
+        once: true,
+        offset: 50,
+        easing: 'ease-in-out'
+    });
+    
+    // Remove loading class after page load
+    window.addEventListener('load', () => {
+        document.body.classList.remove('js-loading');
+        document.body.classList.add('js-loaded');
+    });
+    
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('mobileMenuToggle');
+    const navLinks = document.getElementById('nav-links');
+    
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('show');
+            const icon = menuToggle.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            }
+        });
+    }
+    
     // Update date time in footer
     function updateDateTime() {
         const now = new Date();
@@ -372,66 +452,71 @@ document.addEventListener('DOMContentLoaded', async function() {
             minute: '2-digit',
             second: '2-digit'
         });
-        document.getElementById('currentDateTime').textContent = dateTimeStr;
+        const dateTimeElement = document.getElementById('currentDateTime');
+        if (dateTimeElement) dateTimeElement.textContent = dateTimeStr;
     }
     
-    // Update every second
     updateDateTime();
     setInterval(updateDateTime, 1000);
     
-    try {
-        const response = await fetch('/api/login-status');
-        const data = await response.json();
-        
-        if (!data.logged_in) {
-            // Not logged in
-            document.getElementById('access-message').style.display = 'block';
-            document.getElementById('attendance-content').style.display = 'none';
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 3000);
-        } else if (data.role !== 'lecturer') {
-            // Logged in but not as lecturer
-            document.getElementById('access-message').innerHTML = `
-                <div class="access-card">
-                    <i class="fas fa-ban"></i>
-                    <h3>Access Denied</h3>
-                    <p>Only lecturers can mark attendance.</p>
-                    <p>You are logged in as ${data.name} (${data.role})</p>
-                    <p>Redirecting to your dashboard...</p>
-                </div>
-            `;
-            document.getElementById('access-message').style.display = 'block';
-            document.getElementById('attendance-content').style.display = 'none';
+    // Check access before loading attendance functionality
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const response = await fetch('/api/login-status');
+            const data = await response.json();
             
-            setTimeout(() => {
-                if (data.role === 'student') {
-                    window.location.href = '/student-dashboard';
-                } else {
+            if (!data.logged_in) {
+                document.getElementById('access-message').style.display = 'flex';
+                document.getElementById('attendance-content').style.display = 'none';
+                setTimeout(() => {
                     window.location.href = '/';
+                }, 3000);
+            } else if (data.role !== 'lecturer') {
+                const accessMessage = document.getElementById('access-message');
+                accessMessage.innerHTML = `
+                    <div class="access-card" data-aos="zoom-in">
+                        <i class="fas fa-ban"></i>
+                        <h3>Access Denied</h3>
+                        <p>Only lecturers can mark attendance.</p>
+                        <p>You are logged in as ${data.name} (${data.role})</p>
+                        <p>Redirecting to your dashboard...</p>
+                        <div class="loading-spinner-small"></div>
+                    </div>
+                `;
+                accessMessage.style.display = 'flex';
+                document.getElementById('attendance-content').style.display = 'none';
+                
+                setTimeout(() => {
+                    window.location.href = data.role === 'student' ? '/student-dashboard' : '/';
+                }, 3000);
+            } else {
+                document.getElementById('access-message').style.display = 'none';
+                document.getElementById('attendance-content').style.display = 'block';
+                
+                if (typeof window.updateNavigation === 'function') {
+                    window.updateNavigation();
+                    window.updateAuthArea();
                 }
-            }, 3000);
-        } else {
-            // Valid lecturer - show attendance content
-            document.getElementById('access-message').style.display = 'none';
-            document.getElementById('attendance-content').style.display = 'block';
-            
-            // Initialize navigation
-            if (typeof window.updateNavigation === 'function') {
-                window.updateNavigation();
-                window.updateAuthArea();
+                
+                if (typeof window.initializeAttendancePage === 'function') {
+                    window.initializeAttendancePage();
+                }
             }
-            
-            // Initialize attendance page
-            if (typeof window.initializeAttendancePage === 'function') {
-                window.initializeAttendancePage();
-            }
+        } catch (error) {
+            console.error('Error checking login status:', error);
+            showError('Connection error. Please check your internet connection.');
         }
-    } catch (error) {
-        console.error('Error checking login status:', error);
-        showError('Connection error. Please check your internet connection.');
+    });
+    
+    function showError(message) {
+        const statusDiv = document.getElementById('statusMessage');
+        if (statusDiv) {
+            statusDiv.textContent = message;
+            statusDiv.className = 'status-message error';
+            statusDiv.style.display = 'block';
+            setTimeout(() => { statusDiv.style.display = 'none'; }, 5000);
+        }
     }
-});
 </script>
 </body>
 </html>

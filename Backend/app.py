@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 import sqlite3
 import io
+import bcrypt  # Add this for password hashing
 
 # CORRECTED Flask configuration
 app = Flask(__name__, 
@@ -47,6 +48,31 @@ SECURITY_CONFIG = {
     'ip_block_threshold': 10, # Max attempts from same IP
     'ip_block_duration': 30,  # IP block duration in minutes
 }
+
+# ========== PASSWORD HASHING FUNCTIONS ==========
+
+def hash_password(password):
+    """Hash a password using bcrypt"""
+    if not password:
+        return None
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+
+def check_password(password, hashed):
+    """Verify a password against its hash"""
+    if not hashed or not password:
+        return False
+    try:
+        # Check if it's a bcrypt hash (starts with $2b$)
+        if hashed.startswith('$2b$'):
+            return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+        else:
+            # For plain text passwords (legacy), compare directly
+            # This helps during migration
+            return password == hashed
+    except Exception as e:
+        print(f"Password check error: {str(e)}")
+        return False
 
 def get_db():
     """Get a database connection with row factory enabled."""
@@ -92,22 +118,24 @@ def init_db():
             )
         ''')
         # --- Attendance table ---
+        # --- Attendance table ---
         conn.execute('''
             CREATE TABLE IF NOT EXISTS attendance (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                subject_id INTEGER NOT NULL,
-                student_id TEXT NOT NULL,
-                date TEXT NOT NULL,
-                status TEXT CHECK(status IN ('present','absent','late')),
-                marked_by TEXT,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(subject_id, student_id, date)
+            subject_id INTEGER NOT NULL,
+            student_id TEXT NOT NULL,
+            date TEXT NOT NULL,
+            status TEXT CHECK(status IN ('present','absent','late')),
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            marked_by TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            remarks TEXT,
+            UNIQUE(subject_id, student_id, date)
             )
         ''')
         conn.commit()
 
 def import_csv_to_db():
-    """If tables are empty, import data from existing CSV files."""
+    """If tables are empty, import data from existing CSV files and hash passwords."""
     # Check if students table is empty
     with get_db() as conn:
         cur = conn.execute("SELECT COUNT(*) as count FROM students")
@@ -118,12 +146,16 @@ def import_csv_to_db():
                 import pandas as pd
                 df = pd.read_csv(students_csv)
                 for _, row in df.iterrows():
+                    # Hash the password if it exists
+                    raw_password = row['password'] if 'password' in row else 'default123'
+                    hashed_password = hash_password(raw_password)
+                    
                     conn.execute(
                         "INSERT OR IGNORE INTO students (student_id, name, email, password, batch, department) VALUES (?,?,?,?,?,?)",
-                        (str(row['student_id']), row['name'], row['email'], row['password'], row.get('batch',''), row.get('department',''))
+                        (str(row['student_id']), row['name'], row['email'], hashed_password, row.get('batch',''), row.get('department',''))
                     )
                 conn.commit()
-                print(f"Imported {len(df)} students from CSV.")
+                print(f"Imported {len(df)} students from CSV with hashed passwords.")
 
         cur = conn.execute("SELECT COUNT(*) as count FROM lecturers")
         if cur.fetchone()['count'] == 0:
@@ -131,12 +163,16 @@ def import_csv_to_db():
             if os.path.exists(lecturers_csv):
                 df = pd.read_csv(lecturers_csv)
                 for _, row in df.iterrows():
+                    # Hash the password if it exists
+                    raw_password = row['password'] if 'password' in row else 'default123'
+                    hashed_password = hash_password(raw_password)
+                    
                     conn.execute(
                         "INSERT OR IGNORE INTO lecturers (lecturer_id, name, email, password, department) VALUES (?,?,?,?,?)",
-                        (row['lecturer_id'], row['name'], row['email'], row['password'], row.get('department',''))
+                        (row['lecturer_id'], row['name'], row['email'], hashed_password, row.get('department',''))
                     )
                 conn.commit()
-                print(f"Imported {len(df)} lecturers from CSV.")
+                print(f"Imported {len(df)} lecturers from CSV with hashed passwords.")
 
         cur = conn.execute("SELECT COUNT(*) as count FROM subjects")
         if cur.fetchone()['count'] == 0:
@@ -150,6 +186,46 @@ def import_csv_to_db():
                     )
                 conn.commit()
                 print(f"Imported {len(df)} subjects from CSV.")
+
+def migrate_existing_passwords():
+    """Migrate existing plain text passwords to hashed ones"""
+    print("\n" + "="*60)
+    print("CHECKING FOR PASSWORDS TO MIGRATE...")
+    print("="*60)
+    
+    with get_db() as conn:
+        # Migrate students
+        students = conn.execute("SELECT email, password FROM students WHERE password IS NOT NULL").fetchall()
+        migrated_count = 0
+        
+        for student in students:
+            password = student['password']
+            # Check if password is not already hashed (doesn't start with $2b$)
+            if password and not password.startswith('$2b$'):
+                hashed = hash_password(password)
+                conn.execute("UPDATE students SET password = ? WHERE email = ?", (hashed, student['email']))
+                migrated_count += 1
+                print(f"✓ Migrated student: {student['email']}")
+        
+        # Migrate lecturers
+        lecturers = conn.execute("SELECT email, password FROM lecturers WHERE password IS NOT NULL").fetchall()
+        
+        for lecturer in lecturers:
+            password = lecturer['password']
+            if password and not password.startswith('$2b$'):
+                hashed = hash_password(password)
+                conn.execute("UPDATE lecturers SET password = ? WHERE email = ?", (hashed, lecturer['email']))
+                migrated_count += 1
+                print(f"✓ Migrated lecturer: {lecturer['email']}")
+        
+        conn.commit()
+        
+        if migrated_count > 0:
+            print(f"\n✅ Successfully migrated {migrated_count} passwords to bcrypt hash!")
+        else:
+            print("\n✅ All passwords are already hashed. No migration needed.")
+    
+    print("="*60 + "\n")
 
 # ========== HTML PAGES ==========
 
@@ -188,6 +264,11 @@ def lecturer_dashboard():
 def forgot_password_page():
     """Serve the forgot password page"""
     return render_template('forgot_password.html')
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return render_template("logout.html")       #goes to logout.html
 
 # ========== SECURITY DECORATORS ==========
 
@@ -525,6 +606,10 @@ def get_failed_attempts_count(email, ip_address):
 def signup():
     data = request.json
     role = data["role"]
+    plain_password = data["password"]
+    
+    # Hash the password
+    hashed_password = hash_password(plain_password)
 
     try:
         with get_db() as conn:
@@ -536,7 +621,7 @@ def signup():
                     data.get("student_id", ""),
                     data["name"],
                     data["email"],
-                    data["password"],
+                    hashed_password,  # Use hashed password
                     data.get("batch", ""),
                     data.get("department", "")
                 ))
@@ -548,7 +633,7 @@ def signup():
                     data.get("lecturer_id", ""),
                     data["name"],
                     data["email"],
-                    data["password"],
+                    hashed_password,  # Use hashed password
                     data.get("department", "")
                 ))
             conn.commit()
@@ -573,41 +658,46 @@ def login():
         with get_db() as conn:
             if role == "student":
                 row = conn.execute(
-                    "SELECT * FROM students WHERE email = ? AND password = ?",
-                    (email, password)
+                    "SELECT * FROM students WHERE email = ?",
+                    (email,)
                 ).fetchone()
             else:
                 row = conn.execute(
-                    "SELECT * FROM lecturers WHERE email = ? AND password = ?",
-                    (email, password)
+                    "SELECT * FROM lecturers WHERE email = ?",
+                    (email,)
                 ).fetchone()
 
             if row:
-                # Successful login
-                clear_account_lock(email)
-                clear_ip_block(ip_address)
-                record_login_attempt(email, ip_address, success=True)
+                # Check password using bcrypt
+                stored_password = row['password']
+                if check_password(password, stored_password):
+                    # Successful login
+                    clear_account_lock(email)
+                    clear_ip_block(ip_address)
+                    record_login_attempt(email, ip_address, success=True)
 
-                # Convert row to dict
-                user = dict(row)
+                    # Convert row to dict
+                    user = dict(row)
 
-                session["logged_in"] = True
-                session["email"] = user["email"]
-                session["role"] = role
-                session["name"] = user["name"]
-                session["login_time"] = datetime.now().isoformat()
-                session["ip_address"] = ip_address
+                    session["logged_in"] = True
+                    session["email"] = user["email"]
+                    session["role"] = role
+                    session["name"] = user["name"]
+                    session["login_time"] = datetime.now().isoformat()
+                    session["ip_address"] = ip_address
 
-                if role == "student":
-                    session["student_id"] = user["student_id"]
-                    session["rollno"] = user["student_id"]
+                    if role == "student":
+                        session["student_id"] = user["student_id"]
+                        session["rollno"] = user["student_id"]
+                    else:
+                        session["lecturer_id"] = user["lecturer_id"]
+                        session["empid"] = user["lecturer_id"]
+
+                    print(f"Login successful for {user['name']}")
+                    return jsonify({"success": True, "role": role})
                 else:
-                    session["lecturer_id"] = user["lecturer_id"]
-                    session["empid"] = user["lecturer_id"]
-
-                print(f"Login successful for {user['name']}")
-                return jsonify({"success": True, "role": role})
-
+                    print(f"Password mismatch for {email}")
+            
             # Failed login
             record_login_attempt(email, ip_address, success=False)
             failed_attempts = get_failed_attempts_count(email, ip_address)
@@ -631,11 +721,6 @@ def login():
         print(f"Login error: {str(e)}")
         record_login_attempt(email, ip_address, success=False)
         return jsonify(success=False, message="Database error"), 500
-
-@app.route("/logout")
-def logout():
-    session.clear()
-    return render_template("logout.html")       #goes to logout.html
 
 # ========== PASSWORD RESET ENDPOINTS ==========
 
@@ -803,18 +888,21 @@ def reset_password():
             return jsonify({"success": False, "message": "Please verify OTP first"}), 400
 
         role = verified_reset['role']
+        
+        # Hash the new password
+        hashed_password = hash_password(new_password)
 
         # Update password in database
         with get_db() as conn:
             if role == 'student':
                 conn.execute(
                     "UPDATE students SET password = ? WHERE email = ?",
-                    (new_password, email)
+                    (hashed_password, email)
                 )
             else:
                 conn.execute(
                     "UPDATE lecturers SET password = ? WHERE email = ?",
-                    (new_password, email)
+                    (hashed_password, email)
                 )
             conn.commit()
 
@@ -889,7 +977,7 @@ def resend_otp():
 # ========== NEW SECURITY ENDPOINTS ==========
 
 @app.route("/api/security/login-attempts", methods=["GET"])
-def get_login_attempts():
+def get_login_attempts():       #checks the login attempts
     """Get login attempts for the current user (admin/self view)"""
     if not session.get("logged_in"):
         return jsonify({"success": False, "message": "Not logged in"}), 401
@@ -1294,6 +1382,26 @@ def get_subjects():
             return jsonify({"success": True, "count": len(subjects), "subjects": subjects})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+    
+@app.route('/api/attendance')
+def get_attendance():
+    """Get all attendance records from SQLite."""
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM attendance ORDER BY date DESC, subject_id')
+        rows = cursor.fetchall()
+        # Convert rows to list of dicts
+        attendance_list = [dict(row) for row in rows]
+        conn.close()
+        return jsonify({
+            "success": True,
+            "count": len(attendance_list),
+            "attendance": attendance_list
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 
 @app.route("/api/login-status")
 def login_status():
@@ -1357,25 +1465,6 @@ def mark_attendance():
             "message": f"Attendance recorded for {len(present_ids) + len(absent_ids)} students",
             "present_count": len(present_ids),
             "absent_count": len(absent_ids)
-        })
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-
-@app.route('/api/attendance')
-def get_attendance():
-    """Get all attendance records from SQLite."""
-    try:
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM attendance ORDER BY date DESC, subject_id')
-        rows = cursor.fetchall()
-        # Convert rows to list of dicts
-        attendance_list = [dict(row) for row in rows]
-        conn.close()
-        return jsonify({
-            "success": True,
-            "count": len(attendance_list),
-            "attendance": attendance_list
         })
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
@@ -1743,6 +1832,9 @@ def initialize_data():
     # Import existing CSV data (if any)
     import_csv_to_db()
     
+    # Migrate any existing plain text passwords to hashed ones
+    migrate_existing_passwords()
+    
     print(f"SQLite database initialized at: {DB_PATH}")
 
 if __name__ == '__main__':
@@ -1780,6 +1872,7 @@ if __name__ == '__main__':
     print("• Password reset with OTP verification")
     print("• Account unlock via email")
     print("• Login attempt tracking")
+    print("• Bcrypt password hashing for secure storage")
     print("=" * 60)
     
     app.run(debug=True, port=5000)

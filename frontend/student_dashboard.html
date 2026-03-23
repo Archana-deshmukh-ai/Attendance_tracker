@@ -2,19 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Student Dashboard | Attendance Atlas | Track Your Attendance</title>
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/student_dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 </head>
-<body>
+<body class="js-loading">
 
 <!-- ================= HEADER ================= -->
-<header class="navbar">
+<header class="navbar" data-aos="fade-down">
     <div class="logo">
         <i class="fas fa-user-graduate"></i> Student Dashboard
     </div>
@@ -26,13 +32,18 @@
     <div class="header-right" id="auth-area">
         <!-- Will be populated by JavaScript -->
     </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+        <i class="fas fa-bars"></i>
+    </button>
 </header>
 
 <!-- ================= MAIN CONTENT ================= -->
 <main class="dashboard-container">
 
     <!-- Welcome Banner -->
-    <div class="welcome-banner">
+    <div class="welcome-banner" data-aos="fade-up" data-aos-duration="800">
         <div class="banner-content">
             <div class="student-profile">
                 <div class="profile-avatar">
@@ -55,6 +66,10 @@
                 <button class="quick-action" onclick="downloadAttendanceCertificate()">
                     <i class="fas fa-file-certificate"></i>
                     <span>Get Certificate</span>
+                </button>
+                <button class="quick-action" onclick="downloadReport()">
+                    <i class="fas fa-download"></i>
+                    <span>Download Report</span>
                 </button>
             </div>
         </div>
@@ -79,7 +94,7 @@
     <div class="dashboard-grid">
         
         <!-- Attendance Overview -->
-        <div class="overview-section">
+        <div class="overview-section" data-aos="fade-up" data-aos-delay="100">
             <div class="section-header">
                 <h2><i class="fas fa-chart-pie"></i> Attendance Overview</h2>
                 <select id="overviewPeriod" class="period-select" onchange="updateOverview()">
@@ -90,7 +105,7 @@
                 </select>
             </div>
             <div class="overview-grid">
-                <div class="overview-card primary">
+                <div class="overview-card primary" data-aos="zoom-in" data-aos-delay="150">
                     <div class="overview-icon">
                         <i class="fas fa-calendar-check"></i>
                     </div>
@@ -101,7 +116,7 @@
                     </div>
                 </div>
                 
-                <div class="overview-card success">
+                <div class="overview-card success" data-aos="zoom-in" data-aos-delay="200">
                     <div class="overview-icon">
                         <i class="fas fa-check-circle"></i>
                     </div>
@@ -112,7 +127,7 @@
                     </div>
                 </div>
                 
-                <div class="overview-card warning">
+                <div class="overview-card warning" data-aos="zoom-in" data-aos-delay="250">
                     <div class="overview-icon">
                         <i class="fas fa-times-circle"></i>
                     </div>
@@ -123,7 +138,7 @@
                     </div>
                 </div>
                 
-                <div class="overview-card highlight">
+                <div class="overview-card highlight" data-aos="zoom-in" data-aos-delay="300">
                     <div class="overview-icon">
                         <i class="fas fa-percentage"></i>
                     </div>
@@ -137,10 +152,10 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="actions-section">
+        <div class="actions-section" data-aos="fade-up" data-aos-delay="200">
             <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
             <div class="actions-grid">
-                <a href="/report" class="action-card primary">
+                <a href="/report" class="action-card primary" data-aos="flip-left" data-aos-delay="250">
                     <div class="action-icon">
                         <i class="fas fa-chart-bar"></i>
                     </div>
@@ -149,7 +164,7 @@
                     <span class="action-badge">Analytics</span>
                 </a>
                 
-                <button class="action-card" onclick="downloadReport()">
+                <button class="action-card" onclick="downloadReport()" data-aos="flip-left" data-aos-delay="300">
                     <div class="action-icon">
                         <i class="fas fa-file-pdf"></i>
                     </div>
@@ -158,28 +173,28 @@
                     <span class="action-badge new">New</span>
                 </button>
                 
-                <button class="action-card" onclick="requestAttendanceCertificate()">
+                <button class="action-card" onclick="requestAttendanceCertificate()" data-aos="flip-left" data-aos-delay="350">
                     <div class="action-icon">
                         <i class="fas fa-award"></i>
                     </div>
                     <h4>Get Certificate</h4>
                     <p>Request attendance excellence certificate</p>
-                    <span class="action-badge">Eligible</span>
+                    <span class="action-badge" id="certEligibility">Check</span>
                 </button>
                 
-                <a href="/timetable" class="action-card">
+                <a href="/settings" class="action-card" data-aos="flip-left" data-aos-delay="400">
                     <div class="action-icon">
-                        <i class="fas fa-calendar-alt"></i>
+                        <i class="fas fa-cog"></i>
                     </div>
-                    <h4>View Timetable</h4>
-                    <p>Check your class schedule</p>
-                    <span class="action-badge">Today</span>
+                    <h4>Settings</h4>
+                    <p>Manage your profile preferences</p>
+                    <span class="action-badge">Profile</span>
                 </a>
             </div>
         </div>
 
         <!-- Attendance Chart -->
-        <div class="chart-section">
+        <div class="chart-section" data-aos="fade-up" data-aos-delay="300">
             <div class="section-header">
                 <h2><i class="fas fa-chart-line"></i> Attendance Trend</h2>
                 <div class="chart-controls">
@@ -191,10 +206,24 @@
             <div class="chart-container">
                 <canvas id="attendanceChart"></canvas>
             </div>
+            <div class="chart-stats">
+                <div class="chart-stat">
+                    <span class="stat-label">Your Average</span>
+                    <span class="stat-value" id="yourAvg">85%</span>
+                </div>
+                <div class="chart-stat">
+                    <span class="stat-label">Class Average</span>
+                    <span class="stat-value" id="classAvg">78%</span>
+                </div>
+                <div class="chart-stat">
+                    <span class="stat-label">Difference</span>
+                    <span class="stat-value" id="avgDiff">+7%</span>
+                </div>
+            </div>
         </div>
 
         <!-- Today's Classes -->
-        <div class="schedule-section">
+        <div class="schedule-section" data-aos="fade-up" data-aos-delay="400">
             <div class="section-header">
                 <h2><i class="fas fa-calendar-day"></i> Today's Classes</h2>
                 <button class="view-all" onclick="viewFullSchedule()">
@@ -211,10 +240,10 @@
         </div>
 
         <!-- Subject Performance -->
-        <div class="subjects-section">
+        <div class="subjects-section" data-aos="fade-up" data-aos-delay="500">
             <div class="section-header">
                 <h2><i class="fas fa-book-open"></i> Subject-wise Performance</h2>
-                <button class="refresh-btn" onclick="refreshSubjects()">
+                <button class="refresh-btn" onclick="refreshSubjects()" title="Refresh Subjects">
                     <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
@@ -224,7 +253,7 @@
         </div>
 
         <!-- Recent Attendance -->
-        <div class="recent-section">
+        <div class="recent-section" data-aos="fade-up" data-aos-delay="600">
             <div class="section-header">
                 <h2><i class="fas fa-history"></i> Recent Attendance</h2>
                 <div class="filter-options">
@@ -261,10 +290,10 @@
         </div>
 
         <!-- Attendance Goals -->
-        <div class="goals-section">
+        <div class="goals-section" data-aos="fade-up" data-aos-delay="700">
             <h2><i class="fas fa-bullseye"></i> Attendance Goals</h2>
             <div class="goals-container">
-                <div class="goal-card">
+                <div class="goal-card" data-aos="fade-right" data-aos-delay="750">
                     <div class="goal-header">
                         <h4>Minimum Requirement</h4>
                         <div class="goal-progress">
@@ -278,7 +307,7 @@
                     <p class="goal-desc">Minimum attendance required for eligibility</p>
                 </div>
                 
-                <div class="goal-card">
+                <div class="goal-card" data-aos="fade-up" data-aos-delay="800">
                     <div class="goal-header">
                         <h4>Good Standing</h4>
                         <div class="goal-progress">
@@ -292,7 +321,7 @@
                     <p class="goal-desc">Recommended for academic success</p>
                 </div>
                 
-                <div class="goal-card">
+                <div class="goal-card" data-aos="fade-left" data-aos-delay="850">
                     <div class="goal-header">
                         <h4>Excellence</h4>
                         <div class="goal-progress">
@@ -309,7 +338,7 @@
         </div>
 
         <!-- Notifications & Alerts -->
-        <div class="notifications-section">
+        <div class="notifications-section" data-aos="fade-up" data-aos-delay="900">
             <div class="section-header">
                 <h2><i class="fas fa-bell"></i> Notifications & Alerts</h2>
                 <div class="notification-actions">
@@ -323,7 +352,7 @@
         </div>
 
         <!-- Upcoming Deadlines -->
-        <div class="deadlines-section">
+        <div class="deadlines-section" data-aos="fade-up" data-aos-delay="1000">
             <h2><i class="fas fa-exclamation-circle"></i> Important Alerts</h2>
             <div class="alerts-list" id="importantAlerts">
                 <!-- Will be populated by JavaScript -->
@@ -343,10 +372,10 @@
     </div>
 
     <!-- Academic Performance Summary -->
-    <div class="performance-summary">
+    <div class="performance-summary" data-aos="fade-up" data-aos-delay="1100">
         <h3><i class="fas fa-trophy"></i> Academic Performance Summary</h3>
         <div class="summary-grid">
-            <div class="summary-card">
+            <div class="summary-card" data-aos="fade-right" data-aos-delay="1150">
                 <div class="summary-icon">
                     <i class="fas fa-chart-line"></i>
                 </div>
@@ -357,7 +386,7 @@
                 </div>
             </div>
             
-            <div class="summary-card">
+            <div class="summary-card" data-aos="fade-up" data-aos-delay="1200">
                 <div class="summary-icon">
                     <i class="fas fa-medal"></i>
                 </div>
@@ -368,7 +397,7 @@
                 </div>
             </div>
             
-            <div class="summary-card">
+            <div class="summary-card" data-aos="fade-left" data-aos-delay="1250">
                 <div class="summary-icon">
                     <i class="fas fa-calendar-alt"></i>
                 </div>
@@ -405,10 +434,9 @@
             <h4><i class="fas fa-tools"></i> Student Tools</h4>
             <ul>
                 <li><a href="/report"><i class="fas fa-chart-bar"></i> Attendance Reports</a></li>
-                <li><a href="/timetable"><i class="fas fa-calendar-alt"></i> Class Timetable</a></li>
-                <li><a href="/subjects"><i class="fas fa-book"></i> Subject Details</a></li>
-                <li><a href="/certificates"><i class="fas fa-award"></i> Certificates</a></li>
                 <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+                <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
+                <li><a href="/help"><i class="fas fa-question-circle"></i> Help Center</a></li>
             </ul>
         </div>
 
@@ -422,11 +450,14 @@
     </div>
 
     <div class="footer-bottom">
-        <p>© 2026 Attendance Atlas - Student Dashboard | <span id="sessionInfo">Active • Last updated: Just now</span></p>
-        <div class="footer-links">
-            <a href="/privacy"><i class="fas fa-lock"></i> Privacy Policy</a>
-            <a href="/terms"><i class="fas fa-file-contract"></i> Terms of Service</a>
-            <a href="/about"><i class="fas fa-question-circle"></i> Help Center</a>
+        <div class="footer-bottom-left">
+            <p>© 2026 Attendance Atlas - Student Dashboard</p>
+        </div>
+        <div class="footer-bottom-right">
+            <span id="sessionInfo">Active • Last updated: Just now</span>
+            <span class="separator">|</span>
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms of Service</a>
         </div>
     </div>
 </footer>
@@ -434,5 +465,64 @@
 <!-- ================= SCRIPTS ================= -->
 <script src="js/script.js"></script>
 <script src="js/student_dashboard.js"></script>
+<script>
+    // Initialize AOS animations
+    AOS.init({
+        duration: 600,
+        once: true,
+        offset: 50,
+        easing: 'ease-in-out'
+    });
+    
+    // Remove loading class after page load
+    window.addEventListener('load', () => {
+        document.body.classList.remove('js-loading');
+        document.body.classList.add('js-loaded');
+    });
+    
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('mobileMenuToggle');
+    const navLinks = document.getElementById('nav-links');
+    
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('show');
+            const icon = menuToggle.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            }
+        });
+    }
+    
+    // View full schedule function
+    window.viewFullSchedule = function() {
+        showInfoMessage('Full schedule view coming soon!');
+    };
+    
+    // Download attendance certificate function
+    window.downloadAttendanceCertificate = function() {
+        const att = studentState?.currentAttendance || 85;
+        if (att >= 95) {
+            showSuccessMessage('Certificate downloaded successfully!');
+        } else {
+            showInfoMessage(`You need 95% attendance to download certificate. Current: ${att}%`);
+        }
+    };
+    
+    // Info message
+    function showInfoMessage(message) {
+        const msgDiv = document.createElement('div');
+        msgDiv.style.cssText = 'position:fixed;top:20px;right:20px;background:#dbeafe;color:#1e40af;padding:15px;border-radius:10px;z-index:9999;max-width:300px;animation:slideIn 0.3s ease-out;';
+        msgDiv.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+        document.body.appendChild(msgDiv);
+        setTimeout(() => msgDiv.remove(), 3000);
+    }
+    
+    // Make functions available globally
+    window.showInfoMessage = showInfoMessage;
+    window.downloadAttendanceCertificate = downloadAttendanceCertificate;
+    window.viewFullSchedule = viewFullSchedule;
+</script>
 </body>
 </html>

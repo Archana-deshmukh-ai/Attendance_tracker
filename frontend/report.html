@@ -2,18 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Attendance Reports - Attendance Atlas</title>
     <link rel="stylesheet" href="css/report.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 </head>
-<body>
+<body class="js-loading">
 
 <!-- NAVBAR -->
-<header class="navbar">
+<header class="navbar" data-aos="fade-down">
     <div class="logo">
         <i class="fas fa-chart-line"></i> Attendance Atlas
     </div>
@@ -23,6 +29,10 @@
     <div class="header-right" id="auth-area">
         <!-- JS will inject User info here -->
     </div>
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+        <i class="fas fa-bars"></i>
+    </button>
 </header>
 
 <!-- MAIN CONTENT -->
@@ -30,40 +40,49 @@
     
     <!-- Access Control Message -->
     <div id="access-message" class="access-message" style="display: none;">
-        <div class="access-card">
+        <div class="access-card" data-aos="zoom-in">
             <i class="fas fa-exclamation-triangle"></i>
             <h3>Access Required</h3>
             <p>Please login to view reports.</p>
             <p>Redirecting to login page...</p>
+            <div class="loading-spinner-small"></div>
         </div>
     </div>
     
     <div id="report-content" style="display: none;">
         <!-- Quick Stats Dashboard -->
-        <div class="quick-stats-bar">
-            <div class="stat-card">
-                <i class="fas fa-chalkboard-teacher"></i>
+        <div class="quick-stats-bar" data-aos="fade-up">
+            <div class="stat-card" data-aos="zoom-in" data-aos-delay="100">
+                <div class="stat-icon">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
                 <div class="stat-info">
                     <span class="stat-label">Total Classes</span>
                     <span class="stat-value" id="quickTotalClasses">0</span>
                 </div>
             </div>
-            <div class="stat-card">
-                <i class="fas fa-user-check"></i>
+            <div class="stat-card" data-aos="zoom-in" data-aos-delay="200">
+                <div class="stat-icon present-icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
                 <div class="stat-info">
                     <span class="stat-label">Present</span>
                     <span class="stat-value" id="quickTotalPresent">0</span>
                 </div>
             </div>
-            <div class="stat-card">
-                <i class="fas fa-user-times"></i>
+            <div class="stat-card" data-aos="zoom-in" data-aos-delay="300">
+                <div class="stat-icon absent-icon">
+                    <i class="fas fa-user-times"></i>
+                </div>
                 <div class="stat-info">
                     <span class="stat-label">Absent</span>
                     <span class="stat-value" id="quickTotalAbsent">0</span>
                 </div>
             </div>
-            <div class="stat-card">
-                <i class="fas fa-chart-pie"></i>
+            <div class="stat-card" data-aos="zoom-in" data-aos-delay="400">
+                <div class="stat-icon percentage-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
                 <div class="stat-info">
                     <span class="stat-label">Attendance %</span>
                     <span class="stat-value" id="quickAttendancePercent">0%</span>
@@ -72,7 +91,7 @@
         </div>
         
         <!-- Welcome & Role Header -->
-        <div class="report-header">
+        <div class="report-header" data-aos="fade-up">
             <div class="welcome-section">
                 <h1><i class="fas fa-chart-bar"></i> Attendance Analytics</h1>
                 <div id="report-welcome">
@@ -82,9 +101,11 @@
             </div>
             
             <div class="report-actions" id="report-actions">
-                <!-- Action buttons based on role -->
                 <button class="action-btn refresh-btn" id="refreshReports">
                     <i class="fas fa-sync-alt"></i> Refresh Data
+                </button>
+                <button class="action-btn export-all-btn" id="exportAllReports">
+                    <i class="fas fa-download"></i> Export All
                 </button>
                 <div class="last-updated">
                     <i class="fas fa-clock"></i> Last updated: <span id="lastUpdated">Just now</span>
@@ -93,7 +114,7 @@
         </div>
         
         <!-- Filters & Controls Section -->
-        <section class="filters-section">
+        <section class="filters-section" data-aos="fade-up">
             <div class="section-header">
                 <h3><i class="fas fa-filter"></i> Filter Reports</h3>
                 <button class="collapse-toggle" data-target="filterControls">
@@ -113,7 +134,7 @@
                     </div>
                     
                     <div class="filter-group">
-                        <label for="periodFilter"><i class="fas fa-calendar-week"></i> Period:</label>
+                        <label for="periodFilter"><i class="fas fa-calendar-week"></i> Quick Select:</label>
                         <select id="periodFilter" class="dropdown">
                             <option value="custom">Custom Range</option>
                             <option value="today">Today</option>
@@ -146,11 +167,11 @@
                         <label for="departmentFilter"><i class="fas fa-building"></i> Department:</label>
                         <select id="departmentFilter" class="dropdown">
                             <option value="all">All Departments</option>
-                            <option value="CSE">CSE</option>
-                            <option value="ECE">ECE</option>
-                            <option value="ME">ME</option>
-                            <option value="CE">CE</option>
-                            <option value="EEE">EEE</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Mechanical">Mechanical</option>
+                            <option value="Civil">Civil</option>
+                            <option value="Mathematics">Mathematics</option>
                         </select>
                     </div>
                 </div>
@@ -170,14 +191,14 @@
         </section>
         
         <!-- Summary Statistics -->
-        <section class="summary-section">
+        <section class="summary-section" data-aos="fade-up">
             <div class="section-header">
                 <h3><i class="fas fa-chart-line"></i> Summary Statistics</h3>
                 <div class="time-period" id="selectedPeriod">Showing: All Time</div>
             </div>
             
             <div class="stats-grid" id="stats-grid">
-                <div class="stat-card">
+                <div class="stat-card" data-aos="zoom-in" data-aos-delay="100">
                     <div class="stat-icon">
                         <i class="fas fa-chalkboard-teacher"></i>
                     </div>
@@ -189,7 +210,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" data-aos="zoom-in" data-aos-delay="200">
                     <div class="stat-icon present">
                         <i class="fas fa-user-check"></i>
                     </div>
@@ -201,7 +222,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" data-aos="zoom-in" data-aos-delay="300">
                     <div class="stat-icon absent">
                         <i class="fas fa-user-times"></i>
                     </div>
@@ -213,7 +234,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" data-aos="zoom-in" data-aos-delay="400">
                     <div class="stat-icon percentage">
                         <i class="fas fa-percentage"></i>
                     </div>
@@ -231,7 +252,7 @@
         </section>
         
         <!-- Charts Dashboard -->
-        <section class="chart-dashboard">
+        <section class="chart-dashboard" data-aos="fade-up">
             <div class="section-header">
                 <h3><i class="fas fa-chart-area"></i> Visual Analytics</h3>
                 <div class="chart-controls">
@@ -254,13 +275,14 @@
                         <div class="chart-legend">
                             <span class="legend-item"><span class="legend-color present"></span> Present</span>
                             <span class="legend-item"><span class="legend-color absent"></span> Absent</span>
+                            <span class="legend-item"><span class="legend-color late"></span> Late</span>
                         </div>
                     </div>
                     <canvas id="trendChart"></canvas>
                     <div class="chart-footer">
-                        <span>Data updates in real-time</span>
+                        <span><i class="fas fa-chart-line"></i> Data updates in real-time</span>
                         <button class="chart-fullscreen" data-chart="trendChart">
-                            <i class="fas fa-expand"></i>
+                            <i class="fas fa-expand"></i> Fullscreen
                         </button>
                     </div>
                 </div>
@@ -279,6 +301,10 @@
                         <div class="chart-stat">
                             <span class="stat-label">Absent</span>
                             <span class="stat-value" id="absentStat">0%</span>
+                        </div>
+                        <div class="chart-stat">
+                            <span class="stat-label">Late</span>
+                            <span class="stat-value" id="lateStat">0%</span>
                         </div>
                     </div>
                 </div>
@@ -314,16 +340,19 @@
         </section>
         
         <!-- Data Table Section -->
-        <section class="table-section">
+        <section class="table-section" data-aos="fade-up">
             <div class="section-header">
                 <h3><i class="fas fa-table"></i> Detailed Records</h3>
                 <div class="table-controls">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="tableSearch" placeholder="Search records...">
+                        <input type="text" id="tableSearch" placeholder="Search records by name, ID, subject...">
+                        <button class="clear-table-search" id="clearTableSearch">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                     <div class="records-info">
-                        Showing <span id="recordsCount">0</span> of <span id="totalRecords">0</span> records
+                        <i class="fas fa-database"></i> Showing <span id="recordsCount">0</span> of <span id="totalRecords">0</span> records
                     </div>
                 </div>
             </div>
@@ -332,9 +361,6 @@
                 <div class="export-options">
                     <button id="exportCsv" class="export-btn">
                         <i class="fas fa-file-csv"></i> CSV
-                    </button>
-                    <button id="exportPdf" class="export-btn">
-                        <i class="fas fa-file-pdf"></i> PDF
                     </button>
                     <button id="exportExcel" class="export-btn">
                         <i class="fas fa-file-excel"></i> Excel
@@ -348,7 +374,7 @@
                 </div>
                 
                 <div class="table-settings">
-                    <label>Show:</label>
+                    <label><i class="fas fa-eye"></i> Show:</label>
                     <select id="rowsPerPage" class="dropdown-sm">
                         <option value="10">10 rows</option>
                         <option value="25" selected>25 rows</option>
@@ -391,7 +417,7 @@
         </section>
         
         <!-- Insights & Recommendations -->
-        <section class="insights-section">
+        <section class="insights-section" data-aos="fade-up">
             <div class="section-header">
                 <h3><i class="fas fa-lightbulb"></i> Insights & Recommendations</h3>
                 <div class="insights-refresh">
@@ -407,7 +433,7 @@
                     <div class="insight-content">
                         <h4>Low Attendance Alert</h4>
                         <p id="lowAttendanceText">No low attendance detected</p>
-                        <button class="insight-action">View Details</button>
+                        <button class="insight-action" id="viewLowAttendance">View Details</button>
                     </div>
                 </div>
                 
@@ -418,7 +444,7 @@
                     <div class="insight-content">
                         <h4>Attendance Trend</h4>
                         <p id="trendText">Loading trend analysis...</p>
-                        <button class="insight-action">See Chart</button>
+                        <button class="insight-action" id="viewTrend">See Chart</button>
                     </div>
                 </div>
                 
@@ -429,7 +455,7 @@
                     <div class="insight-content">
                         <h4>Top Performers</h4>
                         <p id="topPerformersText">Loading top performers...</p>
-                        <button class="insight-action">View List</button>
+                        <button class="insight-action" id="viewTopPerformers">View List</button>
                     </div>
                 </div>
                 
@@ -440,14 +466,14 @@
                     <div class="insight-content">
                         <h4>Schedule Optimization</h4>
                         <p id="scheduleText">Analyzing schedule patterns...</p>
-                        <button class="insight-action">Optimize</button>
+                        <button class="insight-action" id="optimizeSchedule">Optimize</button>
                     </div>
                 </div>
             </div>
         </section>
         
         <!-- Report Templates -->
-        <section class="templates-section">
+        <section class="templates-section" data-aos="fade-up">
             <div class="section-header">
                 <h3><i class="fas fa-file-alt"></i> Report Templates</h3>
                 <div class="templates-info">
@@ -456,7 +482,7 @@
             </div>
             
             <div class="templates-grid">
-                <div class="template-card">
+                <div class="template-card" data-aos="zoom-in" data-aos-delay="100">
                     <div class="template-icon">
                         <i class="fas fa-user-graduate"></i>
                     </div>
@@ -467,7 +493,7 @@
                     </button>
                 </div>
                 
-                <div class="template-card">
+                <div class="template-card" data-aos="zoom-in" data-aos-delay="200">
                     <div class="template-icon">
                         <i class="fas fa-chalkboard-teacher"></i>
                     </div>
@@ -478,7 +504,7 @@
                     </button>
                 </div>
                 
-                <div class="template-card">
+                <div class="template-card" data-aos="zoom-in" data-aos-delay="300">
                     <div class="template-icon">
                         <i class="fas fa-calendar-alt"></i>
                     </div>
@@ -489,7 +515,7 @@
                     </button>
                 </div>
                 
-                <div class="template-card">
+                <div class="template-card" data-aos="zoom-in" data-aos-delay="400">
                     <div class="template-icon">
                         <i class="fas fa-chart-bar"></i>
                     </div>
@@ -586,10 +612,37 @@
 
 <!-- JS -->
 <script src="js/report.js"></script>
-<script src="js/navigation.js"></script>
+<script src="js/script.js"></script>
 <script>
-// Check access before loading reports
-document.addEventListener('DOMContentLoaded', async function() {
+    // Initialize AOS animations
+    AOS.init({
+        duration: 600,
+        once: true,
+        offset: 50,
+        easing: 'ease-in-out'
+    });
+    
+    // Remove loading class after page load
+    window.addEventListener('load', () => {
+        document.body.classList.remove('js-loading');
+        document.body.classList.add('js-loaded');
+    });
+    
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('mobileMenuToggle');
+    const navLinks = document.getElementById('nav-links');
+    
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('show');
+            const icon = menuToggle.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            }
+        });
+    }
+    
     // Update date time in footer
     function updateDateTime() {
         const now = new Date();
@@ -601,76 +654,58 @@ document.addEventListener('DOMContentLoaded', async function() {
             hour: '2-digit',
             minute: '2-digit'
         });
-        document.getElementById('currentDateTime').textContent = dateTimeStr;
+        const dateTimeElement = document.getElementById('currentDateTime');
+        if (dateTimeElement) dateTimeElement.textContent = dateTimeStr;
     }
     
     updateDateTime();
     setInterval(updateDateTime, 60000);
     
-    try {
-        const response = await fetch('/api/login-status');
-        const data = await response.json();
-        
-        if (!data.logged_in) {
-            // Not logged in
-            document.getElementById('access-message').style.display = 'flex';
-            document.getElementById('report-content').style.display = 'none';
-            setTimeout(() => {
-                window.location.href = '/login.html';
-            }, 3000);
-        } else {
-            // Logged in - show report content
-            document.getElementById('access-message').style.display = 'none';
-            document.getElementById('report-content').style.display = 'block';
+    // Check access before loading reports
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const response = await fetch('/api/login-status');
+            const data = await response.json();
             
-            // Update welcome message
-            const welcomeDiv = document.getElementById('report-welcome');
-            const roleIcon = data.role === 'lecturer' ? 'fas fa-chalkboard-teacher' : 'fas fa-user-graduate';
-            welcomeDiv.innerHTML = `
-                <h2>Welcome, ${data.name}!</h2>
-                <p><i class="${roleIcon}"></i> Viewing attendance reports as ${data.role}</p>
-            `;
-            
-            // Initialize navigation
-            if (typeof window.updateNavigation === 'function') {
-                window.updateNavigation();
-                window.updateAuthArea();
+            if (!data.logged_in) {
+                document.getElementById('access-message').style.display = 'flex';
+                document.getElementById('report-content').style.display = 'none';
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 3000);
+            } else {
+                document.getElementById('access-message').style.display = 'none';
+                document.getElementById('report-content').style.display = 'block';
+                
+                const welcomeDiv = document.getElementById('report-welcome');
+                const roleIcon = data.role === 'lecturer' ? 'fas fa-chalkboard-teacher' : 'fas fa-user-graduate';
+                welcomeDiv.innerHTML = `
+                    <h2>Welcome, ${data.name}!</h2>
+                    <p><i class="${roleIcon}"></i> Viewing attendance reports as ${data.role}</p>
+                `;
+                
+                if (typeof window.updateNavigation === 'function') {
+                    window.updateNavigation();
+                    window.updateAuthArea();
+                }
+                
+                if (typeof window.initializeReportsPage === 'function') {
+                    window.initializeReportsPage(data.role, data);
+                }
             }
-            
-            // Initialize reports page
-            if (typeof window.initializeReportsPage === 'function') {
-                window.initializeReportsPage(data.role, data);
-            }
+        } catch (error) {
+            console.error('Error checking login status:', error);
+            showError('Connection error. Please try again later.');
         }
-    } catch (error) {
-        console.error('Error checking login status:', error);
-        showError('Connection error. Please try again later.');
+    });
+    
+    function showError(message) {
+        const statusDiv = document.getElementById('statusMessage');
+        statusDiv.textContent = message;
+        statusDiv.className = 'status-message error';
+        statusDiv.style.display = 'block';
+        setTimeout(() => { statusDiv.style.display = 'none'; }, 5000);
     }
-});
-
-// Utility functions
-function showError(message) {
-    const statusDiv = document.getElementById('statusMessage');
-    statusDiv.textContent = message;
-    statusDiv.className = 'status-message error';
-    statusDiv.style.display = 'block';
-    
-    setTimeout(() => {
-        statusDiv.style.display = 'none';
-    }, 5000);
-}
-
-function showSuccess(message) {
-    const statusDiv = document.getElementById('statusMessage');
-    statusDiv.textContent = message;
-    statusDiv.className = 'status-message success';
-    statusDiv.style.display = 'block';
-    
-    setTimeout(() => {
-        statusDiv.style.display = 'none';
-    }, 3000);
-}
 </script>
 </body>
 </html>
-

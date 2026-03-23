@@ -2,14 +2,15 @@
 
 // ================= CONFIGURATION =================
 const LOGOUT_CONFIG = {
-    redirectDelay: 10000, // 10 seconds
-    countdownInterval: 100, // Update every 100ms for smoother progress
+    redirectDelay: 10000,
+    countdownInterval: 100,
     localStorageKeys: [
         'user_token',
-        'login_security_state',
+        'loginSecurityState',
         'session_data',
         'temp_auth_data',
-        'form_data'
+        'form_data',
+        'loginSecurityState'
     ]
 };
 
@@ -23,17 +24,19 @@ let logoutState = {
 };
 
 // ================= DOM ELEMENTS =================
-const elements = {
-    countdown: document.getElementById('countdown'),
-    progressBar: document.getElementById('progressBar'),
-    submitFeedback: document.getElementById('submitFeedback'),
-    totalSessions: document.getElementById('totalSessions'),
-    stars: document.querySelectorAll('.star')
+let elements = {
+    countdown: null,
+    progressBar: null,
+    submitFeedback: null,
+    totalSessions: null,
+    stars: []
 };
 
 // ================= INITIALIZATION =================
 function initLogoutPage() {
     console.log('Logout page initialized');
+    
+    cacheElements();
     
     // Clear all user data
     clearUserData();
@@ -50,11 +53,19 @@ function initLogoutPage() {
     // Update auth area
     updateAuthArea();
     
-    // Update statistics (mock data for now)
+    // Update statistics
     updateStatistics();
     
     // Highlight current page
     highlightCurrentPage();
+}
+
+function cacheElements() {
+    elements.countdown = document.getElementById('countdown');
+    elements.progressBar = document.getElementById('progressBar');
+    elements.submitFeedback = document.getElementById('submitFeedback');
+    elements.totalSessions = document.getElementById('totalSessions');
+    elements.stars = document.querySelectorAll('.star');
 }
 
 // ================= DATA CLEARING =================
@@ -68,15 +79,10 @@ function clearUserData() {
         // Clear sessionStorage
         sessionStorage.clear();
         
-        // Clear cookies (except essential ones)
+        // Clear cookies
         clearSessionCookies();
         
-        // Clear any temporary data
-        clearTemporaryData();
-        
         console.log('User data cleared successfully');
-        
-        // Show success message in console
         showDataClearedMessage();
         
     } catch (error) {
@@ -85,41 +91,15 @@ function clearUserData() {
 }
 
 function clearSessionCookies() {
-    // Clear cookies by setting expiration to past
     const cookies = document.cookie.split(';');
     cookies.forEach(cookie => {
         const eqPos = cookie.indexOf('=');
         const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
         
-        // Don't clear essential cookies (e.g., those starting with 'essential_')
         if (!name.startsWith('essential_')) {
             document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
         }
     });
-}
-
-function clearTemporaryData() {
-    // Clear any indexedDB or other storage
-    if ('indexedDB' in window && 'databases' in indexedDB) {
-        indexedDB.databases().then(databases => {
-            databases.forEach(db => {
-                if (db.name && (db.name.includes('temp_') || db.name.includes('user_'))) {
-                    indexedDB.deleteDatabase(db.name);
-                }
-            });
-        }).catch(err => console.warn('IndexedDB cleanup skipped:', err));
-    }
-    
-    // Clear service worker caches if exists
-    if ('caches' in window) {
-        caches.keys().then(cacheNames => {
-            cacheNames.forEach(cacheName => {
-                if (cacheName.includes('user-') || cacheName.includes('auth-')) {
-                    caches.delete(cacheName);
-                }
-            });
-        }).catch(err => console.warn('Cache cleanup skipped:', err));
-    }
 }
 
 function showDataClearedMessage() {
@@ -153,7 +133,6 @@ function startCountdown() {
         logoutState.countdownValue -= interval / 1000;
         logoutState.progressPercentage -= decrement;
         
-        // Update display
         if (elements.countdown) {
             elements.countdown.textContent = Math.max(0, Math.ceil(logoutState.countdownValue));
         }
@@ -162,14 +141,12 @@ function startCountdown() {
             elements.progressBar.style.width = `${Math.max(0, logoutState.progressPercentage)}%`;
         }
         
-        // Redirect when countdown reaches 0
         if (logoutState.countdownValue <= 0) {
             clearInterval(countdownInterval);
             redirectToHome();
         }
     }, interval);
     
-    // Add cancel functionality
     setupCountdownControls(countdownInterval);
 }
 
@@ -178,17 +155,12 @@ function setupCountdownControls(interval) {
     actionButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
-            
-            // Clear the countdown
             clearInterval(interval);
             
-            // Get the target URL
             const targetUrl = button.getAttribute('href');
+            const logoutCard = document.querySelector('.logout-card');
+            if (logoutCard) logoutCard.style.opacity = '0.9';
             
-            // Add a smooth transition
-            document.querySelector('.logout-card').style.opacity = '0.9';
-            
-            // Redirect after a short delay
             setTimeout(() => {
                 window.location.href = targetUrl;
             }, 300);
@@ -201,7 +173,6 @@ function redirectToHome() {
     
     logoutState.isRedirecting = true;
     
-    // Add exit animation
     const logoutCard = document.querySelector('.logout-card');
     if (logoutCard) {
         logoutCard.style.transform = 'scale(0.95)';
@@ -209,7 +180,6 @@ function redirectToHome() {
         logoutCard.style.transition = 'all 0.5s ease';
     }
     
-    // Redirect after animation
     setTimeout(() => {
         window.location.href = '/';
     }, 500);
@@ -219,13 +189,11 @@ function redirectToHome() {
 function initFeedbackSystem() {
     if (!elements.stars.length || !elements.submitFeedback) return;
     
-    // Star rating
     elements.stars.forEach(star => {
         star.addEventListener('click', () => {
             const value = parseInt(star.dataset.value);
             logoutState.rating = value;
             
-            // Update star display
             elements.stars.forEach((s, index) => {
                 if (index < value) {
                     s.innerHTML = '<i class="fas fa-star"></i>';
@@ -236,11 +204,9 @@ function initFeedbackSystem() {
                 }
             });
             
-            // Enable submit button
             elements.submitFeedback.disabled = false;
         });
         
-        // Hover effect
         star.addEventListener('mouseover', () => {
             const value = parseInt(star.dataset.value);
             elements.stars.forEach((s, index) => {
@@ -259,7 +225,6 @@ function initFeedbackSystem() {
         });
     });
     
-    // Submit feedback
     elements.submitFeedback.addEventListener('click', submitFeedback);
 }
 
@@ -277,15 +242,11 @@ async function submitFeedback() {
         elements.submitFeedback.disabled = true;
         elements.submitFeedback.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
         
-        // Simulate API call (replace with actual endpoint if needed)
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Show success message
         showFeedbackSuccess();
-        
         logoutState.hasSubmittedFeedback = true;
         
-        // Store feedback locally
         localStorage.setItem('logout_feedback', JSON.stringify(feedbackData));
         
     } catch (error) {
@@ -295,10 +256,11 @@ async function submitFeedback() {
 }
 
 function showFeedbackSuccess() {
-    elements.submitFeedback.innerHTML = '<i class="fas fa-check"></i> Thank You!';
-    elements.submitFeedback.style.background = 'linear-gradient(135deg, #10b981 0%, #0da271 100%)';
+    if (elements.submitFeedback) {
+        elements.submitFeedback.innerHTML = '<i class="fas fa-check"></i> Thank You!';
+        elements.submitFeedback.style.background = 'linear-gradient(135deg, #10b981 0%, #0da271 100%)';
+    }
     
-    // Show success message
     const feedbackSection = document.querySelector('.feedback-section');
     if (!feedbackSection) return;
     
@@ -311,49 +273,40 @@ function showFeedbackSuccess() {
     `;
     feedbackSection.appendChild(successMessage);
     
-    // Hide stars
     const rating = document.querySelector('.rating');
     if (rating) rating.style.opacity = '0.5';
 }
 
 function showFeedbackError() {
-    elements.submitFeedback.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Try Again';
-    elements.submitFeedback.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
-    
-    setTimeout(() => {
-        elements.submitFeedback.disabled = false;
-        elements.submitFeedback.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Feedback';
-        elements.submitFeedback.style.background = 'linear-gradient(135deg, #10b981 0%, #0da271 100%)';
-    }, 2000);
+    if (elements.submitFeedback) {
+        elements.submitFeedback.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Try Again';
+        elements.submitFeedback.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        
+        setTimeout(() => {
+            elements.submitFeedback.disabled = false;
+            elements.submitFeedback.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Feedback';
+            elements.submitFeedback.style.background = 'linear-gradient(135deg, #10b981 0%, #0da271 100%)';
+        }, 2000);
+    }
 }
 
 // ================= STATISTICS =================
 function updateStatistics() {
     if (!elements.totalSessions) return;
     
-    // Get today's date
     const today = new Date().toDateString();
-    
-    // Get session count from localStorage (mock data for demo)
     let sessionData = JSON.parse(localStorage.getItem('session_statistics') || '{}');
     
     if (!sessionData[today]) {
-        sessionData[today] = {
-            count: 1,
-            lastLogout: new Date().toISOString()
-        };
+        sessionData[today] = { count: 1, lastLogout: new Date().toISOString() };
     } else {
         sessionData[today].count++;
         sessionData[today].lastLogout = new Date().toISOString();
     }
     
-    // Save updated data
     localStorage.setItem('session_statistics', JSON.stringify(sessionData));
     
-    // Display the count
     elements.totalSessions.textContent = sessionData[today].count;
-    
-    // Animate the number
     animateNumber(elements.totalSessions, sessionData[today].count);
 }
 
@@ -376,7 +329,6 @@ function updateNavigation() {
     const navLinks = document.getElementById('nav-links');
     if (!navLinks) return;
     
-    // Set navigation for logged out state
     navLinks.innerHTML = `
         <a href="/">Home</a>
         <a href="/about">About Us</a>
@@ -389,7 +341,6 @@ function updateAuthArea() {
     const authArea = document.getElementById('auth-area');
     if (!authArea) return;
     
-    // Show login/signup buttons
     authArea.innerHTML = `
         <a href="/login.html" class="nav-btn">Sign In</a>
         <a href="/signup.html" class="nav-btn signup">Sign Up</a>
@@ -408,10 +359,253 @@ function highlightCurrentPage() {
         });
     }
 }
+// Add these improvements to logout.js
+
+// Enhanced clearUserData with more thorough cleanup
+function clearUserData() {
+    try {
+        // Clear localStorage items
+        LOGOUT_CONFIG.localStorageKeys.forEach(key => {
+            localStorage.removeItem(key);
+        });
+        
+        // Clear any attendance drafts
+        localStorage.removeItem('attendance_draft');
+        localStorage.removeItem('notification_preferences');
+        localStorage.removeItem('appearance_preferences');
+        localStorage.removeItem('privacy_settings');
+        localStorage.removeItem('goal_settings');
+        localStorage.removeItem('teaching_settings');
+        localStorage.removeItem('academic_settings');
+        
+        // Clear sessionStorage
+        sessionStorage.clear();
+        
+        // Clear cookies
+        clearSessionCookies();
+        
+        // Clear IndexedDB if exists
+        clearIndexedDB();
+        
+        // Clear service worker caches if exists
+        clearCaches();
+        
+        console.log('User data cleared successfully');
+        showDataClearedMessage();
+        
+    } catch (error) {
+        console.error('Error clearing user data:', error);
+    }
+}
+
+// Clear IndexedDB databases
+function clearIndexedDB() {
+    if ('indexedDB' in window) {
+        indexedDB.databases().then(databases => {
+            databases.forEach(db => {
+                if (db.name && (db.name.includes('attendance') || db.name.includes('user_'))) {
+                    indexedDB.deleteDatabase(db.name);
+                }
+            });
+        }).catch(err => console.warn('IndexedDB cleanup skipped:', err));
+    }
+}
+
+// Clear service worker caches
+function clearCaches() {
+    if ('caches' in window) {
+        caches.keys().then(cacheNames => {
+            cacheNames.forEach(cacheName => {
+                if (cacheName.includes('attendance-') || cacheName.includes('user-')) {
+                    caches.delete(cacheName);
+                }
+            });
+        }).catch(err => console.warn('Cache cleanup skipped:', err));
+    }
+}
+
+// Enhanced showFeedbackSuccess with better animation
+function showFeedbackSuccess() {
+    if (elements.submitFeedback) {
+        elements.submitFeedback.innerHTML = '<i class="fas fa-check"></i> Thank You!';
+        elements.submitFeedback.style.background = 'linear-gradient(135deg, #10b981 0%, #0da271 100%)';
+    }
+    
+    const feedbackSection = document.querySelector('.feedback-section');
+    if (!feedbackSection) return;
+    
+    // Remove any existing success message
+    const existingMessage = feedbackSection.querySelector('.feedback-success');
+    if (existingMessage) existingMessage.remove();
+    
+    const successMessage = document.createElement('div');
+    successMessage.className = 'feedback-success';
+    successMessage.innerHTML = `
+        <div style="background: #d1fae5; color: #065f46; padding: 12px; border-radius: 8px; margin-top: 15px; text-align: center; border-left: 4px solid #10b981;">
+            <i class="fas fa-check-circle"></i> Feedback submitted successfully! Thank you for helping us improve.
+        </div>
+    `;
+    feedbackSection.appendChild(successMessage);
+    
+    const rating = document.querySelector('.rating');
+    if (rating) rating.style.opacity = '0.6';
+    
+    // Animate the success message
+    successMessage.style.animation = 'slideDown 0.5s ease-out';
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (successMessage.parentNode) successMessage.remove();
+    }, 5000);
+}
+
+// Enhanced showFeedbackError
+function showFeedbackError() {
+    if (elements.submitFeedback) {
+        elements.submitFeedback.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Try Again';
+        elements.submitFeedback.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        
+        setTimeout(() => {
+            elements.submitFeedback.disabled = false;
+            elements.submitFeedback.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Feedback';
+            elements.submitFeedback.style.background = 'linear-gradient(135deg, #10b981 0%, #0da271 100%)';
+        }, 2000);
+    }
+    
+    // Show error message
+    const feedbackSection = document.querySelector('.feedback-section');
+    if (feedbackSection) {
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'feedback-error';
+        errorMessage.innerHTML = `
+            <div style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; margin-top: 15px; text-align: center; border-left: 4px solid #ef4444;">
+                <i class="fas fa-exclamation-circle"></i> Failed to submit feedback. Please try again.
+            </div>
+        `;
+        feedbackSection.appendChild(errorMessage);
+        setTimeout(() => errorMessage.remove(), 3000);
+    }
+}
+
+// Enhanced updateStatistics with real data simulation
+function updateStatistics() {
+    if (!elements.totalSessions) return;
+    
+    const today = new Date().toDateString();
+    let sessionData = JSON.parse(localStorage.getItem('session_statistics') || '{}');
+    
+    if (!sessionData[today]) {
+        sessionData[today] = { count: 1, lastLogout: new Date().toISOString() };
+    } else {
+        sessionData[today].count++;
+        sessionData[today].lastLogout = new Date().toISOString();
+    }
+    
+    localStorage.setItem('session_statistics', JSON.stringify(sessionData));
+    
+    animateNumber(elements.totalSessions, sessionData[today].count);
+}
+
+// Enhanced animateNumber with easing
+function animateNumber(element, target) {
+    let current = 0;
+    const duration = 1000;
+    const steps = 60;
+    const increment = target / steps;
+    let startTime = null;
+    
+    function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+    }
+    
+    function update(currentTime) {
+        if (!startTime) startTime = currentTime;
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        const easedProgress = easeOutCubic(progress);
+        const value = Math.floor(target * easedProgress);
+        
+        element.textContent = value;
+        
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            element.textContent = target;
+        }
+    }
+    
+    requestAnimationFrame(update);
+}
+
+// Add keyboard navigation for stars
+function setupStarKeyboardNavigation() {
+    const stars = document.querySelectorAll('.star');
+    stars.forEach((star, index) => {
+        star.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                const nextStar = stars[index + 1];
+                if (nextStar) nextStar.focus();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                const prevStar = stars[index - 1];
+                if (prevStar) prevStar.focus();
+            } else if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                star.click();
+            }
+        });
+    });
+}
+
+// Add screen reader announcements
+function announce(message) {
+    const announcement = document.createElement('div');
+    announcement.setAttribute('aria-live', 'polite');
+    announcement.classList.add('sr-only');
+    announcement.textContent = message;
+    document.body.appendChild(announcement);
+    setTimeout(() => announcement.remove(), 1000);
+}
+
+// Update initLogoutPage to include new features
+function initLogoutPage() {
+    console.log('Logout page initialized');
+    
+    cacheElements();
+    clearUserData();
+    startCountdown();
+    initFeedbackSystem();
+    updateNavigation();
+    updateAuthArea();
+    updateStatistics();
+    highlightCurrentPage();
+    setupStarKeyboardNavigation();
+    
+    // Announce to screen readers
+    setTimeout(() => announce('You have been successfully logged out. Redirecting to home page in 10 seconds.'), 1000);
+}
+
+// Add sr-only class if not exists
+const srStyle = document.createElement('style');
+srStyle.textContent = `
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
+`;
+document.head.appendChild(srStyle);
 
 // ================= INITIALIZE ON LOAD =================
 document.addEventListener('DOMContentLoaded', initLogoutPage);
 
-// ================= EXPORT FUNCTIONS =================
+// Make functions available globally
 window.clearUserData = clearUserData;
 window.submitFeedback = submitFeedback;

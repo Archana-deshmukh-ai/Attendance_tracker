@@ -393,3 +393,506 @@ a {
         justify-content: center;
     }
 }
+/* ================= ADDITIONAL STYLES ================= */
+
+/* Loading State */
+.js-loading {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.js-loaded {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease;
+}
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+/* Signup Header Icon */
+.signup-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.signup-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #102094, #38bdf8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    font-size: 28px;
+    color: white;
+}
+
+/* Role Features */
+.role-features {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.role-features span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Password Wrapper */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    padding-right: 45px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.toggle-password:hover {
+    color: #102094;
+    background: #f1f5f9;
+}
+
+/* Password Strength Bar */
+.password-strength {
+    margin-top: 8px;
+}
+
+.strength-bar {
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    transition: all 0.3s;
+    width: 0%;
+}
+
+.strength-bar.weak {
+    width: 33%;
+    background: #ef4444;
+}
+
+.strength-bar.medium {
+    width: 66%;
+    background: #f59e0b;
+}
+
+.strength-bar.strong {
+    width: 100%;
+    background: #10b981;
+}
+
+/* Password Requirements */
+.password-requirements {
+    margin-top: 10px;
+}
+
+.password-requirements ul {
+    list-style: none;
+    padding: 0;
+    font-size: 12px;
+}
+
+.password-requirements li {
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #6b7280;
+}
+
+.password-requirements li.valid {
+    color: #10b981;
+}
+
+.password-requirements li.invalid {
+    color: #ef4444;
+}
+
+.password-requirements li i {
+    font-size: 10px;
+}
+
+/* Checkbox Container */
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    user-select: none;
+}
+
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: relative;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+    border-color: #102094;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+    background: #102094;
+    border-color: #102094;
+}
+
+.checkmark:after {
+    content: '';
+    position: absolute;
+    display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkbox-container .checkmark:after {
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Form Group with Icons */
+.form-group label i {
+    margin-right: 6px;
+    color: #102094;
+}
+
+/* Help Text */
+.help-text {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Footer Bottom */
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.footer-bottom-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.footer-bottom-right a {
+    color: #9ca3af;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-bottom-right a:hover {
+    color: #38bdf8;
+}
+
+.separator {
+    color: #9ca3af;
+}
+
+/* Account Info Styling */
+.account-info {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.account-detail {
+    padding: 8px 0;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    gap: 10px;
+}
+
+.account-detail:last-child {
+    border-bottom: none;
+}
+
+.account-detail strong {
+    color: #102094;
+    min-width: 100px;
+}
+
+.account-note {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.account-note p {
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Responsive Mobile Menu */
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background: var(--dark-color);
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        z-index: 999;
+    }
+    
+    .nav-links.show {
+        display: flex;
+    }
+    
+    .nav-links a {
+        padding: 12px 20px;
+    }
+    
+    .signup-box {
+        margin: 20px;
+        padding: 25px;
+    }
+    
+    .role-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .step-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .account-detail {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .account-detail strong {
+        min-width: auto;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .footer-bottom-right {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .signup-box {
+        padding: 20px;
+    }
+    
+    .signup-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+    
+    .role-icon {
+        font-size: 2rem;
+    }
+    
+    .role-option {
+        padding: 15px;
+    }
+    
+    .role-features {
+        flex-direction: column;
+        gap: 5px;
+        align-items: center;
+    }
+    
+    .password-requirements ul {
+        font-size: 11px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .navbar,
+    .footer,
+    .step-actions,
+    .signup-footer,
+    .mobile-menu-toggle {
+        display: none !important;
+    }
+    
+    .signup-container {
+        background: white;
+        padding: 20px;
+    }
+    
+    .signup-box {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}
+
+/* Dark Theme Support */
+body.dark-theme {
+    background: #0f172a;
+    color: #f1f5f9;
+}
+
+body.dark-theme .signup-box {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark-theme .role-option,
+body.dark-theme .account-info {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+body.dark-theme .role-option.selected {
+    background: #102094;
+}
+
+body.dark-theme .form-group input,
+body.dark-theme .form-group select {
+    background: #0f172a;
+    border-color: #334155;
+    color: #f1f5f9;
+}
+
+body.dark-theme .form-group input:focus,
+body.dark-theme .form-group select:focus {
+    border-color: #38bdf8;
+}
+
+body.dark-theme .password-requirements li {
+    color: #94a3b8;
+}
+
+body.dark-theme .help-text {
+    color: #94a3b8;
+}
+
+body.dark-theme .account-detail {
+    border-color: #334155;
+}
+
+body.dark-theme .account-note {
+    border-color: #334155;
+    color: #94a3b8;
+}
+
+body.dark-theme .toggle-password {
+    color: #94a3b8;
+}
+
+body.dark-theme .toggle-password:hover {
+    background: #334155;
+    color: #38bdf8;
+}
+
+/* Focus Visible for Accessibility */
+.btn:focus-visible,
+.form-group input:focus-visible,
+.form-group select:focus-visible,
+.toggle-password:focus-visible,
+.role-option:focus-visible {
+    outline: 2px solid #102094;
+    outline-offset: 2px;
+}
+
+/* Button Hover Effects */
+.btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::after {
+    width: 300px;
+    height: 300px;
+}

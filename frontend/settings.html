@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | Attendance Atlas</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/settings.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="navbar">
+    <div class="logo">
+        <i class="fas fa-cog"></i> Settings
+    </div>
+
+    <nav class="nav-links" id="nav-links">
+        <!-- Will be populated by JavaScript -->
+    </nav>
+
+    <div class="header-right" id="auth-area">
+        <!-- Will be populated by JavaScript -->
+    </div>
+</header>
+
+<!-- ================= MAIN CONTENT ================= -->
+<main class="settings-container">
+
+    <!-- Settings Header -->
+    <div class="settings-header">
+        <div class="header-content">
+            <h1><i class="fas fa-sliders-h"></i> Settings</h1>
+            <p>Manage your account preferences and customize your experience</p>
+        </div>
+        <div class="header-actions">
+            <button class="save-all-btn" onclick="saveAllSettings()">
+                <i class="fas fa-save"></i> Save All Changes
+            </button>
+        </div>
+    </div>
+
+    <!-- Settings Grid -->
+    <div class="settings-grid">
+        
+        <!-- Settings Navigation Sidebar -->
+        <div class="settings-sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-user-cog"></i> Settings Menu</h3>
+            </div>
+            <div class="settings-nav" id="settingsNav">
+                <a href="#profile" class="settings-nav-item active" data-section="profile">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profile Information</span>
+                </a>
+                <a href="#account" class="settings-nav-item" data-section="account">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Account & Security</span>
+                </a>
+                <a href="#notifications" class="settings-nav-item" data-section="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                </a>
+                <!-- Student-specific sections -->
+                <div class="role-section student-only" id="studentNav">
+                    <a href="#academic" class="settings-nav-item" data-section="academic">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Academic Settings</span>
+                    </a>
+                    <a href="#goals" class="settings-nav-item" data-section="goals">
+                        <i class="fas fa-bullseye"></i>
+                        <span>Attendance Goals</span>
+                    </a>
+                </div>
+                <!-- Lecturer-specific sections -->
+                <div class="role-section lecturer-only" id="lecturerNav">
+                    <a href="#teaching" class="settings-nav-item" data-section="teaching">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <span>Teaching Settings</span>
+                    </a>
+                    <a href="#subjects" class="settings-nav-item" data-section="subjects">
+                        <i class="fas fa-book-open"></i>
+                        <span>Subject Management</span>
+                    </a>
+                </div>
+                <!-- Common sections -->
+                <a href="#appearance" class="settings-nav-item" data-section="appearance">
+                    <i class="fas fa-palette"></i>
+                    <span>Appearance</span>
+                </a>
+                <a href="#privacy" class="settings-nav-item" data-section="privacy">
+                    <i class="fas fa-lock"></i>
+                    <span>Privacy & Data</span>
+                </a>
+                <a href="#integrations" class="settings-nav-item" data-section="integrations">
+                    <i class="fas fa-plug"></i>
+                    <span>Integrations</span>
+                </a>
+            </div>
+            <div class="sidebar-footer">
+                <button class="danger-btn" onclick="deleteAccount()">
+                    <i class="fas fa-trash-alt"></i> Delete Account
+                </button>
+            </div>
+        </div>
+
+        <!-- Settings Content Area -->
+        <div class="settings-content">
+            
+            <!-- Profile Information Section -->
+            <section id="profile" class="settings-section active">
+                <div class="section-header">
+                    <h2><i class="fas fa-user-circle"></i> Profile Information</h2>
+                    <span class="section-badge">Public</span>
+                </div>
+                
+                <div class="profile-header">
+                    <div class="profile-avatar-large">
+                        <img id="profileAvatar" src="https://via.placeholder.com/100" alt="Profile">
+                        <button class="avatar-edit" onclick="editAvatar()">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+                    <div class="profile-info">
+                        <h3 id="displayName">Loading...</h3>
+                        <p class="profile-role" id="userRole">Student</p>
+                        <p class="profile-email" id="userEmail">user@example.com</p>
+                    </div>
+                </div>
+
+                <div class="settings-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fullName">
+                                <i class="fas fa-user"></i> Full Name
+                            </label>
+                            <input type="text" id="fullName" class="form-input" value="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="displayName">
+                                <i class="fas fa-tag"></i> Display Name
+                            </label>
+                            <input type="text" id="displayNameInput" class="form-input" value="John">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">
+                                <i class="fas fa-envelope"></i> Email Address
+                            </label>
+                            <input type="email" id="email" class="form-input" value="john.doe@uni.edu">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">
+                                <i class="fas fa-phone"></i> Phone Number
+                            </label>
+                            <input type="tel" id="phone" class="form-input" placeholder="+1 234 567 890">
+                        </div>
+                    </div>
+
+                    <!-- Student-specific fields -->
+                    <div class="student-only" id="studentProfileFields">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="studentId">
+                                    <i class="fas fa-id-card"></i> Student ID
+                                </label>
+                                <input type="text" id="studentId" class="form-input" value="S001" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="batch">
+                                    <i class="fas fa-calendar-alt"></i> Batch/Year
+                                </label>
+                                <select id="batch" class="form-select">
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2022">2022</option>
+                                    <option value="2021">2021</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="department">
+                                    <i class="fas fa-university"></i> Department
+                                </label>
+                                <select id="department" class="form-select">
+                                    <option value="cs">Computer Science</option>
+                                    <option value="it">Information Technology</option>
+                                    <option value="ece">Electronics</option>
+                                    <option value="mech">Mechanical</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="semester">
+                                    <i class="fas fa-layer-group"></i> Current Semester
+                                </label>
+                                <select id="semester" class="form-select">
+                                    <option value="1">Semester 1</option>
+                                    <option value="2">Semester 2</option>
+                                    <option value="3">Semester 3</option>
+                                    <option value="4">Semester 4</option>
+                                    <option value="5">Semester 5</option>
+                                    <option value="6">Semester 6</option>
+                                    <option value="7">Semester 7</option>
+                                    <option value="8">Semester 8</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lecturer-specific fields -->
+                    <div class="lecturer-only" id="lecturerProfileFields">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="lecturerId">
+                                    <i class="fas fa-id-card"></i> Lecturer ID
+                                </label>
+                                <input type="text" id="lecturerId" class="form-input" value="L001" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="designation">
+                                    <i class="fas fa-briefcase"></i> Designation
+                                </label>
+                                <select id="designation" class="form-select">
+                                    <option value="professor">Professor</option>
+                                    <option value="associate">Associate Professor</option>
+                                    <option value="assistant">Assistant Professor</option>
+                                    <option value="lecturer">Lecturer</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dept">
+                                    <i class="fas fa-university"></i> Department
+                                </label>
+                                <select id="dept" class="form-select">
+                                    <option value="cs">Computer Science</option>
+                                    <option value="it">Information Technology</option>
+                                    <option value="ece">Electronics</option>
+                                    <option value="mech">Mechanical</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="joinDate">
+                                    <i class="fas fa-calendar-plus"></i> Join Date
+                                </label>
+                                <input type="date" id="joinDate" class="form-input" value="2020-01-01">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="save-btn" onclick="saveProfile()">
+                            <i class="fas fa-check"></i> Save Changes
+                        </button>
+                        <button class="cancel-btn" onclick="resetProfile()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Account & Security Section -->
+            <section id="account" class="settings-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-shield-alt"></i> Account & Security</h2>
+                    <span class="section-badge warning">Private</span>
+                </div>
+
+                <div class="security-status">
+                    <div class="status-card">
+                        <div class="status-icon secure">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="status-info">
+                            <h4>Account Status: <span class="secure-text">Secure</span></h4>
+                            <p>Last login: <span id="lastLogin">Today, 10:30 AM</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-form">
+                    <h3><i class="fas fa-key"></i> Change Password</h3>
+                    
+                    <div class="form-group">
+                        <label for="currentPassword">
+                            <i class="fas fa-lock"></i> Current Password
+                        </label>
+                        <div class="password-wrapper">
+                            <input type="password" id="currentPassword" class="form-input">
+                            <button class="toggle-password" onclick="togglePassword('currentPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newPassword">
+                                <i class="fas fa-key"></i> New Password
+                            </label>
+                            <div class="password-wrapper">
+                                <input type="password" id="newPassword" class="form-input">
+                                <button class="toggle-password" onclick="togglePassword('newPassword')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">
+                                <i class="fas fa-check-double"></i> Confirm Password
+                            </label>
+                            <div class="password-wrapper">
+                                <input type="password" id="confirmPassword" class="form-input">
+                                <button class="toggle-password" onclick="togglePassword('confirmPassword')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="password-strength">
+                        <div class="strength-meter">
+                            <div class="strength-bar" id="passwordStrength" style="width: 0%"></div>
+                        </div>
+                        <span class="strength-text" id="strengthText">Enter password</span>
+                    </div>
+
+                    <button class="save-btn" onclick="changePassword()">
+                        <i class="fas fa-sync-alt"></i> Update Password
+                    </button>
+
+                    <h3 style="margin-top: 30px;"><i class="fas fa-shield-virus"></i> Two-Factor Authentication</h3>
+                    
+                    <div class="twofa-setting">
+                        <div class="twofa-info">
+                            <h4>Two-Factor Authentication (2FA)</h4>
+                            <p>Add an extra layer of security to your account</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="enable2FA">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="twofa-details" id="twofaDetails" style="display: none;">
+                        <p>Scan this QR code with your authenticator app:</p>
+                        <div class="qr-placeholder">
+                            <i class="fas fa-qrcode"></i>
+                            <span>QR Code would appear here</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="verificationCode">Verification Code</label>
+                            <input type="text" id="verificationCode" class="form-input" placeholder="Enter 6-digit code">
+                        </div>
+                        <button class="save-btn" onclick="verify2FA()">Verify & Enable</button>
+                    </div>
+
+                    <h3 style="margin-top: 30px;"><i class="fas fa-history"></i> Recent Login Activity</h3>
+                    
+                    <div class="login-history">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Device</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="loginHistory">
+                                <tr>
+                                    <td>Today, 10:30 AM</td>
+                                    <td>Chrome on Windows</td>
+                                    <td>New York, USA</td>
+                                    <td><span class="badge-success">Current</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Yesterday, 8:15 PM</td>
+                                    <td>Mobile App - Android</td>
+                                    <td>New York, USA</td>
+                                    <td><span class="badge-neutral">Previous</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button class="logout-others-btn" onclick="logoutOtherDevices()">
+                        <i class="fas fa-sign-out-alt"></i> Logout from all other devices
+                    </button>
+                </div>
+            </section>
+
+            <!-- Notifications Section -->
+            <section id="notifications" class="settings-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-bell"></i> Notification Preferences</h2>
+                </div>
+
+                <div class="settings-form">
+                    <div class="notification-group">
+                        <h3>Email Notifications</h3>
+                        
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Attendance Updates</h4>
+                                <p>Get notified when attendance is marked</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="emailAttendance" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Low Attendance Alerts</h4>
+                                <p>Warning when attendance falls below threshold</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="emailLowAttendance" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Report Generation</h4>
+                                <p>Get notified when reports are ready</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="emailReports" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <!-- Student-specific -->
+                        <div class="notification-item student-only">
+                            <div class="notification-info">
+                                <h4>Certificate Availability</h4>
+                                <p>Notify when attendance certificates are ready</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="emailCertificate">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <!-- Lecturer-specific -->
+                        <div class="notification-item lecturer-only">
+                            <div class="notification-info">
+                                <h4>Student Excuse Requests</h4>
+                                <p>Get notified when students submit absence notes</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="emailExcuses" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="notification-group">
+                        <h3>In-App Notifications</h3>
+                        
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Show notifications in dashboard</h4>
+                                <p>Display notification bell indicator</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="inAppEnabled" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Sound for new notifications</h4>
+                                <p>Play a sound when new notification arrives</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="notificationSound">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="notification-group">
+                        <h3>Digest Settings</h3>
+                        
+                        <div class="form-group">
+                            <label for="digestFrequency">Weekly Digest Frequency</label>
+                            <select id="digestFrequency" class="form-select">
+                                <option value="daily">Daily</option>
+                                <option value="weekly" selected>Weekly (Monday)</option>
+                                <option value="biweekly">Bi-weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="digestTime">Digest Time</label>
+                            <input type="time" id="digestTime" class="form-input" value="09:00">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="save-btn" onclick="saveNotificationSettings()">
+                            <i class="fas fa-check"></i> Save Preferences
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Academic Settings (Student Only) -->
+            <section id="academic" class="settings-section student-only">
+                <div class="section-header">
+                    <h2><i class="fas fa-graduation-cap"></i> Academic Settings</h2>
+                </div>
+
+                <div class="settings-form">
+                    <div class="form-group">
+                        <label for="enrolledSubjects">Enrolled Subjects</label>
+                        <div class="checkbox-group" id="enrolledSubjects">
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="cs101" checked> CS101 - Programming
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="cs201" checked> CS201 - Data Structures
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="cs301"> CS301 - Algorithms
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="math101" checked> MATH101 - Calculus
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="phy101"> PHY101 - Physics
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="academicYear">Academic Year</label>
+                            <select id="academicYear" class="form-select">
+                                <option value="2024-25">2024-25</option>
+                                <option value="2023-24">2023-24</option>
+                                <option value="2022-23">2022-23</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="attendanceWeight">Attendance Weightage (%)</label>
+                            <input type="number" id="attendanceWeight" class="form-input" value="10" min="0" max="100">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="defaultView">Default Dashboard View</label>
+                        <select id="defaultView" class="form-select">
+                            <option value="overview" selected>Overview</option>
+                            <option value="subjects">Subject-wise</option>
+                            <option value="calendar">Calendar View</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="save-btn" onclick="saveAcademicSettings()">
+                            <i class="fas fa-check"></i> Save Settings
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Attendance Goals (Student Only) -->
+            <section id="goals" class="settings-section student-only">
+                <div class="section-header">
+                    <h2><i class="fas fa-bullseye"></i> Attendance Goals</h2>
+                </div>
+
+                <div class="settings-form">
+                    <div class="goals-customization">
+                        <div class="form-group">
+                            <label for="minAttendance">Minimum Required Attendance (%)</label>
+                            <input type="number" id="minAttendance" class="form-input" value="75" min="0" max="100">
+                            <small class="help-text">Default: 75% (institution requirement)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="targetAttendance">Personal Target (%)</label>
+                            <input type="number" id="targetAttendance" class="form-input" value="85" min="0" max="100">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="excellenceThreshold">Excellence Certificate Threshold (%)</label>
+                            <input type="number" id="excellenceThreshold" class="form-input" value="95" min="0" max="100" readonly>
+                            <small class="help-text">Set by institution</small>
+                        </div>
+
+                        <h3 style="margin-top: 20px;">Goal Notifications</h3>
+                        
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Notify when approaching minimum</h4>
+                                <p>Get alert when 5% above minimum</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="goalAlert" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="notification-item">
+                            <div class="notification-info">
+                                <h4>Weekly progress report</h4>
+                                <p>Receive weekly goal updates</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="weeklyGoalReport" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="save-btn" onclick="saveGoalSettings()">
+                            <i class="fas fa-check"></i> Save Goals
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Teaching Settings (Lecturer Only) -->
+            <section id="teaching" class="settings-section lecturer-only">
+                <div class="section-header">
+                    <h2><i class="fas fa-chalkboard-teacher"></i> Teaching Settings</h2>
+                </div>
+
+                <div class="settings-form">
+                    <div class="form-group">
+                        <label for="teachingHours">Default Teaching Hours per Week</label>
+                        <input type="number" id="teachingHours" class="form-input" value="15" min="1" max="40">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="attendanceMarking">Default Attendance Marking Method</label>
+                        <select id="attendanceMarking" class="form-select">
+                            <option value="manual" selected>Manual (Checkbox)</option>
+                            <option value="rollcall">Roll Call</option>
+                            <option value="qr">QR Code</option>
+                            <option value="biometric">Biometric</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gracePeriod">Grace Period (minutes)</label>
+                        <input type="number" id="gracePeriod" class="form-input" value="5" min="0" max="30">
+                        <small class="help-text">Time after which student is marked late</small>
+                    </div>
+
+                    <h3>Attendance Reminders</h3>
+                    
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <h4>Remind to mark attendance</h4>
+                            <p>Get notification 5 minutes before class</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="remindAttendance" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reminderTime">Reminder Time (before class)</label>
+                        <select id="reminderTime" class="form-select">
+                            <option value="5">5 minutes</option>
+                            <option value="10" selected>10 minutes</option>
+                            <option value="15">15 minutes</option>
+                            <option value="30">30 minutes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="save-btn" onclick="saveTeachingSettings()">
+                            <i class="fas fa-check"></i> Save Settings
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Subject Management (Lecturer Only) -->
+            <section id="subjects" class="settings-section lecturer-only">
+                <div class="section-header">
+                    <h2><i class="fas fa-book-open"></i> Subject Management</h2>
+                    <button class="add-subject-btn" onclick="addNewSubject()">
+                        <i class="fas fa-plus"></i> Add Subject
+                    </button>
+                </div>
+
+                <div class="subjects-list">
+                    <div class="subject-card">
+                        <div class="subject-info">
+                            <h4>CS101 - Programming</h4>
+                            <p><i class="fas fa-users"></i> 45 Students | <i class="fas fa-calendar"></i> Mon, Wed, Fri 10AM</p>
+                        </div>
+                        <div class="subject-actions">
+                            <button class="edit-btn" onclick="editSubject(1)"><i class="fas fa-edit"></i></button>
+                            <button class="delete-btn" onclick="deleteSubject(1)"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="subject-card">
+                        <div class="subject-info">
+                            <h4>CS201 - Data Structures</h4>
+                            <p><i class="fas fa-users"></i> 38 Students | <i class="fas fa-calendar"></i> Tue, Thu 2PM</p>
+                        </div>
+                        <div class="subject-actions">
+                            <button class="edit-btn" onclick="editSubject(2)"><i class="fas fa-edit"></i></button>
+                            <button class="delete-btn" onclick="deleteSubject(2)"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Subject Modal (hidden by default) -->
+                <div class="modal" id="addSubjectModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Add New Subject</h3>
+                            <button class="close-btn" onclick="closeModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Subject Code</label>
+                                <input type="text" class="form-input" placeholder="e.g., CS301">
+                            </div>
+                            <div class="form-group">
+                                <label>Subject Name</label>
+                                <input type="text" class="form-input" placeholder="e.g., Algorithms">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Credits</label>
+                                    <input type="number" class="form-input" value="3" min="1" max="5">
+                                </div>
+                                <div class="form-group">
+                                    <label>Semester</label>
+                                    <select class="form-select">
+                                        <option value="1">Semester 1</option>
+                                        <option value="2">Semester 2</option>
+                                        <option value="3">Semester 3</option>
+                                        <option value="4">Semester 4</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Schedule</label>
+                                <input type="text" class="form-input" placeholder="e.g., Mon, Wed 10-11:30">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+                            <button class="save-btn" onclick="saveSubject()">Save Subject</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Appearance Section -->
+            <section id="appearance" class="settings-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-palette"></i> Appearance</h2>
+                </div>
+
+                <div class="settings-form">
+                    <h3>Theme</h3>
+                    
+                    <div class="theme-options">
+                        <label class="theme-card">
+                            <input type="radio" name="theme" value="light" checked>
+                            <div class="theme-preview light">
+                                <div class="theme-header"></div>
+                                <div class="theme-body"></div>
+                            </div>
+                            <span>Light</span>
+                        </label>
+
+                        <label class="theme-card">
+                            <input type="radio" name="theme" value="dark">
+                            <div class="theme-preview dark">
+                                <div class="theme-header"></div>
+                                <div class="theme-body"></div>
+                            </div>
+                            <span>Dark</span>
+                        </label>
+
+                        <label class="theme-card">
+                            <input type="radio" name="theme" value="system">
+                            <div class="theme-preview system">
+                                <div class="theme-header"></div>
+                                <div class="theme-body half-light half-dark"></div>
+                            </div>
+                            <span>System Default</span>
+                        </label>
+                    </div>
+
+                    <h3>Color Scheme</h3>
+                    
+                    <div class="color-options">
+                        <label class="color-card">
+                            <input type="radio" name="color" value="blue" checked>
+                            <div class="color-preview" style="background: #102094;"></div>
+                            <span>Blue (Default)</span>
+                        </label>
+
+                        <label class="color-card">
+                            <input type="radio" name="color" value="purple">
+                            <div class="color-preview" style="background: #8b5cf6;"></div>
+                            <span>Purple</span>
+                        </label>
+
+                        <label class="color-card">
+                            <input type="radio" name="color" value="green">
+                            <div class="color-preview" style="background: #10b981;"></div>
+                            <span>Green</span>
+                        </label>
+
+                        <label class="color-card">
+                            <input type="radio" name="color" value="orange">
+                            <div class="color-preview" style="background: #f59e0b;"></div>
+                            <span>Orange</span>
+                        </label>
+                    </div>
+
+                    <h3>Layout</h3>
+
+                    <div class="form-group">
+                        <label for="density">Display Density</label>
+                        <select id="density" class="form-select">
+                            <option value="comfortable" selected>Comfortable</option>
+                            <option value="compact">Compact</option>
+                            <option value="cozy">Cozy</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="animations">Animations</label>
+                        <select id="animations" class="form-select">
+                            <option value="all" selected>All animations</option>
+                            <option value="reduced">Reduced motion</option>
+                            <option value="none">No animations</option>
+                        </select>
+                    </div>
+
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <h4>Compact sidebar</h4>
+                            <p>Use condensed sidebar for more space</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="compactSidebar">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="save-btn" onclick="saveAppearance()">
+                            <i class="fas fa-check"></i> Apply Theme
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Privacy & Data Section -->
+            <section id="privacy" class="settings-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-lock"></i> Privacy & Data</h2>
+                </div>
+
+                <div class="settings-form">
+                    <h3>Data Export</h3>
+                    
+                    <div class="data-export-options">
+                        <button class="export-btn" onclick="exportData('attendance')">
+                            <i class="fas fa-file-csv"></i> Export Attendance Data
+                        </button>
+                        <button class="export-btn" onclick="exportData('profile')">
+                            <i class="fas fa-file-pdf"></i> Export Profile
+                        </button>
+                        <button class="export-btn" onclick="exportData('all')">
+                            <i class="fas fa-archive"></i> Export All Data
+                        </button>
+                    </div>
+
+                    <h3>Privacy Settings</h3>
+
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <h4>Profile visibility</h4>
+                            <p>Make profile visible to others in directory</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="profileVisibility" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <h4>Show email to classmates</h4>
+                            <p>Allow other students to see your email</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="emailVisibility">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dataRetention">Data Retention Period</label>
+                        <select id="dataRetention" class="form-select">
+                            <option value="1year">1 year</option>
+                            <option value="2years" selected>2 years</option>
+                            <option value="5years">5 years</option>
+                            <option value="indefinite">Indefinite</option>
+                        </select>
+                    </div>
+
+                    <h3>Cookie Preferences</h3>
+
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <h4>Essential cookies</h4>
+                            <p>Required for site functionality (always on)</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="essentialCookies" checked disabled>
+                            <span class="toggle-slider disabled"></span>
+                        </label>
+                    </div>
+
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <h4>Analytics cookies</h4>
+                            <p>Help us improve your experience</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="analyticsCookies" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <h4>Marketing cookies</h4>
+                            <p>Used for personalized content</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="marketingCookies">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="save-btn" onclick="savePrivacySettings()">
+                            <i class="fas fa-check"></i> Save Privacy Settings
+                        </button>
+                    </div>
+
+                    <h3 style="color: #dc2626;">Danger Zone</h3>
+                    
+                    <div class="danger-zone">
+                        <div class="danger-item">
+                            <div>
+                                <h4>Delete Account</h4>
+                                <p>Permanently delete your account and all data</p>
+                            </div>
+                            <button class="danger-btn" onclick="confirmDeleteAccount()">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </div>
+
+                        <div class="danger-item">
+                            <div>
+                                <h4>Download Personal Data</h4>
+                                <p>Get a copy of all your personal information</p>
+                            </div>
+                            <button class="warning-btn" onclick="downloadPersonalData()">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Integrations Section -->
+            <section id="integrations" class="settings-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-plug"></i> Integrations</h2>
+                </div>
+
+                <div class="settings-form">
+                    <h3>Calendar Integrations</h3>
+
+                    <div class="integration-card">
+                        <div class="integration-info">
+                            <img src="https://img.icons8.com/color/48/000000/google-calendar.png" alt="Google Calendar">
+                            <div>
+                                <h4>Google Calendar</h4>
+                                <p>Sync your class schedule with Google Calendar</p>
+                            </div>
+                        </div>
+                        <button class="connect-btn" onclick="connectCalendar('google')">
+                            <i class="fas fa-plug"></i> Connect
+                        </button>
+                    </div>
+
+                    <div class="integration-card">
+                        <div class="integration-info">
+                            <img src="https://img.icons8.com/color/48/000000/outlook-calendar.png" alt="Outlook">
+                            <div>
+                                <h4>Outlook Calendar</h4>
+                                <p>Sync with Microsoft Outlook</p>
+                            </div>
+                        </div>
+                        <button class="connect-btn" onclick="connectCalendar('outlook')">
+                            <i class="fas fa-plug"></i> Connect
+                        </button>
+                    </div>
+
+                    <h3>LMS Integrations (Student/Lecturer)</h3>
+
+                    <div class="integration-card">
+                        <div class="integration-info">
+                            <img src="https://img.icons8.com/color/48/000000/moodle.png" alt="Moodle">
+                            <div>
+                                <h4>Moodle</h4>
+                                <p>Import courses and sync attendance</p>
+                            </div>
+                        </div>
+                        <button class="connect-btn" onclick="connectLMS('moodle')">
+                            <i class="fas fa-plug"></i> Connect
+                        </button>
+                    </div>
+
+                    <div class="integration-card">
+                        <div class="integration-info">
+                            <img src="https://img.icons8.com/color/48/000000/canvas.png" alt="Canvas">
+                            <div>
+                                <h4>Canvas</h4>
+                                <p>Sync with Canvas LMS</p>
+                            </div>
+                        </div>
+                        <button class="connect-btn" onclick="connectLMS('canvas')">
+                            <i class="fas fa-plug"></i> Connect
+                        </button>
+                    </div>
+
+                    <!-- Lecturer-specific -->
+                    <div class="lecturer-only">
+                        <h3>Export Integrations</h3>
+
+                        <div class="integration-card">
+                            <div class="integration-info">
+                                <img src="https://img.icons8.com/color/48/000000/ms-excel.png" alt="Excel">
+                                <div>
+                                    <h4>Microsoft Excel</h4>
+                                    <p>Auto-export attendance to Excel</p>
+                                </div>
+                            </div>
+                            <button class="connect-btn" onclick="connectExport('excel')">
+                                <i class="fas fa-plug"></i> Enable
+                            </button>
+                        </div>
+
+                        <div class="integration-card">
+                            <div class="integration-info">
+                                <img src="https://img.icons8.com/color/48/000000/google-sheets.png" alt="Google Sheets">
+                                <div>
+                                    <h4>Google Sheets</h4>
+                                    <p>Auto-sync attendance to Sheets</p>
+                                </div>
+                            </div>
+                            <button class="connect-btn" onclick="connectExport('sheets')">
+                                <i class="fas fa-plug"></i> Enable
+                            </button>
+                        </div>
+                    </div>
+
+                    <h3>API Access</h3>
+
+                    <div class="api-section">
+                        <div class="form-group">
+                            <label for="apiKey">Your API Key</label>
+                            <div class="api-key-display">
+                                <input type="text" id="apiKey" class="form-input" value="aa_xxxxxxxxxxxx" readonly>
+                                <button class="copy-btn" onclick="copyApiKey()">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="apiStatus">API Status</label>
+                            <span class="status-badge active">
+                                <i class="fas fa-check-circle"></i> Active
+                            </span>
+                        </div>
+
+                        <button class="regenerate-btn" onclick="regenerateApiKey()">
+                            <i class="fas fa-sync-alt"></i> Regenerate API Key
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Save Success Notification -->
+    <div class="save-notification" id="saveNotification">
+        <i class="fas fa-check-circle"></i>
+        <span>Settings saved successfully!</span>
+    </div>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h3>Attendance Atlas</h3>
+            <p>Smart attendance tracking system for educational institutions.</p>
+        </div>
+
+        <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about">About Us</a></li>
+                <li><a href="/settings">Settings</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Support</h4>
+            <p>Email: support@attendanceatlas.com</p>
+            <p>Phone: +1 (555) 123-4567</p>
+        </div>
+
+        <div class="footer-section">
+            <h4>Legal</h4>
+            <ul>
+                <li><a href="/privacy">Privacy Policy</a></li>
+                <li><a href="/terms">Terms of Service</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        © 2026 Attendance Atlas. All rights reserved.
+    </div>
+</footer>
+
+<!-- ================= SCRIPTS ================= -->
+<script src="js/script.js"></script>
+<script src="js/settings.js"></script>
+</body>
+</html>

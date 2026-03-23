@@ -2,19 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Lecturer Dashboard | Attendance Atlas | Smart Attendance Management</title>
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/lecturer_dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 </head>
-<body>
+<body class="js-loading">
 
 <!-- ================= HEADER ================= -->
-<header class="navbar">
+<header class="navbar" data-aos="fade-down">
     <div class="logo">
         <i class="fas fa-chalkboard-teacher"></i> Lecturer Dashboard
     </div>
@@ -26,13 +32,18 @@
     <div class="header-right" id="auth-area">
         <!-- Will be populated by JavaScript -->
     </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+        <i class="fas fa-bars"></i>
+    </button>
 </header>
 
 <!-- ================= MAIN CONTENT ================= -->
 <main class="dashboard-container">
 
     <!-- Welcome Banner -->
-    <div class="welcome-banner">
+    <div class="welcome-banner" data-aos="fade-up" data-aos-duration="800">
         <div class="banner-content">
             <div class="lecturer-profile">
                 <div class="profile-avatar">
@@ -55,19 +66,23 @@
                     <i class="fas fa-chart-line"></i>
                     <span>Generate Report</span>
                 </button>
+                <button class="quick-action" onclick="exportData()">
+                    <i class="fas fa-file-export"></i>
+                    <span>Export Data</span>
+                </button>
             </div>
         </div>
-        <!--div class="date-time">
+        <div class="date-time">
             <div id="currentDate" class="date-display">Loading...</div>
             <div id="currentTime" class="time-display">--:--:--</div>
-        </div-->
+        </div>
     </div>
 
     <!-- Dashboard Grid -->
     <div class="dashboard-grid">
         
         <!-- Quick Stats -->
-        <div class="stats-section">
+        <div class="stats-section" data-aos="fade-up" data-aos-delay="100">
             <div class="section-header">
                 <h2><i class="fas fa-chart-bar"></i> Dashboard Overview</h2>
                 <select id="statPeriod" class="period-select" onchange="loadStatistics()">
@@ -78,7 +93,7 @@
                 </select>
             </div>
             <div class="stats-grid">
-                <div class="stat-card">
+                <div class="stat-card" data-aos="zoom-in" data-aos-delay="150">
                     <div class="stat-icon total">
                         <i class="fas fa-users"></i>
                     </div>
@@ -88,7 +103,7 @@
                         <div class="stat-change" id="studentChange">+0% this week</div>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" data-aos="zoom-in" data-aos-delay="200">
                     <div class="stat-icon attendance">
                         <i class="fas fa-clipboard-check"></i>
                     </div>
@@ -98,7 +113,7 @@
                         <div class="stat-change" id="attendanceChange">+0% from yesterday</div>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" data-aos="zoom-in" data-aos-delay="250">
                     <div class="stat-icon subjects">
                         <i class="fas fa-book"></i>
                     </div>
@@ -108,7 +123,7 @@
                         <div class="stat-change" id="subjectChange">All active</div>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" data-aos="zoom-in" data-aos-delay="300">
                     <div class="stat-icon performance">
                         <i class="fas fa-trophy"></i>
                     </div>
@@ -122,10 +137,10 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="actions-section">
+        <div class="actions-section" data-aos="fade-up" data-aos-delay="200">
             <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
             <div class="actions-grid">
-                <a href="/mark-attendance" class="action-card primary">
+                <a href="/mark-attendance" class="action-card primary" data-aos="flip-left" data-aos-delay="250">
                     <div class="action-icon">
                         <i class="fas fa-check-circle"></i>
                     </div>
@@ -134,7 +149,7 @@
                     <span class="action-badge new">2 pending</span>
                 </a>
                 
-                <a href="/report" class="action-card">
+                <a href="/report" class="action-card" data-aos="flip-left" data-aos-delay="300">
                     <div class="action-icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
@@ -143,7 +158,7 @@
                     <span class="action-badge">View all</span>
                 </a>
                 
-                <button class="action-card" onclick="exportData()">
+                <button class="action-card" onclick="exportData()" data-aos="flip-left" data-aos-delay="350">
                     <div class="action-icon">
                         <i class="fas fa-file-export"></i>
                     </div>
@@ -152,22 +167,22 @@
                     <span class="action-badge">Quick export</span>
                 </button>
                 
-                <a href="/manage-students" class="action-card">
+                <a href="/settings" class="action-card" data-aos="flip-left" data-aos-delay="400">
                     <div class="action-icon">
-                        <i class="fas fa-user-graduate"></i>
+                        <i class="fas fa-cog"></i>
                     </div>
-                    <h4>Manage Students</h4>
-                    <p>View and manage student information</p>
+                    <h4>Settings</h4>
+                    <p>Configure your preferences</p>
                     <span class="action-badge">Manage</span>
                 </a>
             </div>
         </div>
 
         <!-- Today's Schedule -->
-        <div class="schedule-section">
+        <div class="schedule-section" data-aos="fade-up" data-aos-delay="300">
             <div class="section-header">
                 <h2><i class="fas fa-calendar-day"></i> Today's Schedule</h2>
-                <button class="view-all" onclick="viewFullSchedule()">View All</button>
+                <button class="view-all" onclick="viewFullSchedule()">View All <i class="fas fa-arrow-right"></i></button>
             </div>
             <div class="schedule-list" id="todaySchedule">
                 <!-- Will be populated by JavaScript -->
@@ -179,10 +194,10 @@
         </div>
 
         <!-- Recent Activity -->
-        <div class="activity-section">
+        <div class="activity-section" data-aos="fade-up" data-aos-delay="400">
             <div class="section-header">
                 <h2><i class="fas fa-history"></i> Recent Activity</h2>
-                <button class="refresh-btn" onclick="refreshActivity()">
+                <button class="refresh-btn" onclick="refreshActivity()" title="Refresh Activity">
                     <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
@@ -210,7 +225,7 @@
         </div>
 
         <!-- Performance Chart -->
-        <div class="chart-section">
+        <div class="chart-section" data-aos="fade-up" data-aos-delay="500">
             <div class="section-header">
                 <h2><i class="fas fa-chart-line"></i> Attendance Trends</h2>
                 <div class="chart-controls">
@@ -222,10 +237,24 @@
             <div class="chart-container">
                 <canvas id="attendanceChart"></canvas>
             </div>
+            <div class="chart-stats">
+                <div class="chart-stat">
+                    <span class="stat-label">Average</span>
+                    <span class="stat-value" id="chartAvg">85%</span>
+                </div>
+                <div class="chart-stat">
+                    <span class="stat-label">Highest</span>
+                    <span class="stat-value" id="chartHighest">92%</span>
+                </div>
+                <div class="chart-stat">
+                    <span class="stat-label">Lowest</span>
+                    <span class="stat-value" id="chartLowest">78%</span>
+                </div>
+            </div>
         </div>
 
         <!-- Assigned Subjects -->
-        <div class="subjects-section">
+        <div class="subjects-section" data-aos="fade-up" data-aos-delay="600">
             <div class="section-header">
                 <h2><i class="fas fa-book-open"></i> Your Subjects</h2>
                 <button class="add-btn" onclick="addNewSubject()">
@@ -238,8 +267,10 @@
         </div>
 
         <!-- Upcoming Deadlines -->
-        <div class="deadlines-section">
-            <h2><i class="fas fa-clock"></i> Upcoming Deadlines</h2>
+        <div class="deadlines-section" data-aos="fade-up" data-aos-delay="700">
+            <div class="section-header">
+                <h2><i class="fas fa-clock"></i> Upcoming Deadlines</h2>
+            </div>
             <div class="deadlines-list" id="upcomingDeadlines">
                 <!-- Will be populated by JavaScript -->
                 <div class="deadline-item urgent">
@@ -261,7 +292,7 @@
         </div>
 
         <!-- Notifications Panel -->
-        <div class="notifications-section">
+        <div class="notifications-section" data-aos="fade-up" data-aos-delay="800">
             <div class="section-header">
                 <h2><i class="fas fa-bell"></i> Notifications</h2>
                 <div class="notification-actions">
@@ -277,10 +308,10 @@
     </div>
 
     <!-- Security & Settings Panel -->
-    <div class="security-panel">
+    <div class="security-panel" data-aos="fade-up" data-aos-delay="900">
         <h3><i class="fas fa-shield-alt"></i> Security & Settings</h3>
         <div class="security-grid">
-            <div class="security-card">
+            <div class="security-card" data-aos="fade-right" data-aos-delay="950">
                 <div class="security-icon">
                     <i class="fas fa-user-lock"></i>
                 </div>
@@ -291,7 +322,7 @@
                 </button>
             </div>
             
-            <div class="security-card">
+            <div class="security-card" data-aos="fade-up" data-aos-delay="1000">
                 <div class="security-icon">
                     <i class="fas fa-bell"></i>
                 </div>
@@ -314,7 +345,7 @@
                 </div>
             </div>
             
-            <div class="security-card">
+            <div class="security-card" data-aos="fade-left" data-aos-delay="1050">
                 <div class="security-icon">
                     <i class="fas fa-desktop"></i>
                 </div>
@@ -352,9 +383,8 @@
             <ul>
                 <li><a href="/mark-attendance"><i class="fas fa-check-circle"></i> Mark Attendance</a></li>
                 <li><a href="/report"><i class="fas fa-chart-bar"></i> Generate Reports</a></li>
-                <li><a href="/manage-students"><i class="fas fa-users"></i> Manage Students</a></li>
-                <li><a href="/analytics"><i class="fas fa-chart-line"></i> Analytics Dashboard</a></li>
                 <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+                <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
             </ul>
         </div>
 
@@ -368,11 +398,15 @@
     </div>
 
     <div class="footer-bottom">
-        <p>© 2026 Attendance Atlas - Lecturer Portal | <span id="sessionTimer">Session expires in: 59:59</span></p>
-        <div class="footer-links">
-            <a href="/privacy"><i class="fas fa-lock"></i> Privacy Policy</a>
-            <a href="/terms"><i class="fas fa-file-contract"></i> Terms of Service</a>
-            <a href="/help"><i class="fas fa-question-circle"></i> Help Center</a>
+        <div class="footer-bottom-left">
+            <p>© 2026 Attendance Atlas - Lecturer Portal</p>
+        </div>
+        <div class="footer-bottom-right">
+            <span id="sessionTimer">Session expires in: 59:59</span>
+            <span class="separator">|</span>
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms of Service</a>
+            <a href="/help">Help Center</a>
         </div>
     </div>
 </footer>
@@ -380,5 +414,81 @@
 <!-- ================= SCRIPTS ================= -->
 <script src="js/script.js"></script>
 <script src="js/lecturer_dashboard.js"></script>
+<script>
+    // Initialize AOS animations
+    AOS.init({
+        duration: 600,
+        once: true,
+        offset: 50,
+        easing: 'ease-in-out'
+    });
+    
+    // Remove loading class after page load
+    window.addEventListener('load', () => {
+        document.body.classList.remove('js-loading');
+        document.body.classList.add('js-loaded');
+    });
+    
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('mobileMenuToggle');
+    const navLinks = document.getElementById('nav-links');
+    
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('show');
+            const icon = menuToggle.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            }
+        });
+    }
+    
+    // Save notification preferences
+    const emailNotifications = document.getElementById('emailNotifications');
+    const smsNotifications = document.getElementById('smsNotifications');
+    
+    if (emailNotifications) {
+        emailNotifications.addEventListener('change', function() {
+            localStorage.setItem('emailNotifications', this.checked);
+        });
+        emailNotifications.checked = localStorage.getItem('emailNotifications') !== 'false';
+    }
+    
+    if (smsNotifications) {
+        smsNotifications.addEventListener('change', function() {
+            localStorage.setItem('smsNotifications', this.checked);
+        });
+        smsNotifications.checked = localStorage.getItem('smsNotifications') === 'true';
+    }
+    
+    // View full schedule function
+    window.viewFullSchedule = function() {
+        showInfoMessage('Full schedule view coming soon!');
+    };
+    
+    // Add new subject function
+    window.addNewSubject = function() {
+        showInfoMessage('Add subject feature coming soon!');
+    };
+    
+    // Refresh activity function
+    window.refreshActivity = function() {
+        loadRecentActivity();
+        showSuccessMessage('Activity refreshed!');
+    };
+    
+    // Info message
+    function showInfoMessage(message) {
+        const msgDiv = document.createElement('div');
+        msgDiv.style.cssText = 'position:fixed;top:20px;right:20px;background:#dbeafe;color:#1e40af;padding:15px;border-radius:10px;z-index:9999;max-width:300px;animation:slideIn 0.3s ease-out;';
+        msgDiv.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+        document.body.appendChild(msgDiv);
+        setTimeout(() => msgDiv.remove(), 3000);
+    }
+    
+    // Make functions available globally
+    window.showInfoMessage = showInfoMessage;
+</script>
 </body>
 </html>

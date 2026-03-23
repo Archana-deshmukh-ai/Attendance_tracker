@@ -2,19 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Logged Out | Attendance Atlas | Smart Attendance Management</title>
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/logout.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 </head>
-<body>
+<body class="js-loading">
 
 <!-- ================= HEADER ================= -->
-<header class="navbar">
+<header class="navbar" data-aos="fade-down">
     <div class="logo">
-        📊 Attendance Atlas
+        <i class="fas fa-chart-line"></i> Attendance Atlas
     </div>
 
     <nav class="nav-links" id="nav-links">
@@ -28,12 +34,17 @@
     <div class="header-right" id="auth-area">
         <!-- Will be populated by JavaScript -->
     </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+        <i class="fas fa-bars"></i>
+    </button>
 </header>
 
 <!-- ================= MAIN LOGOUT CONTENT ================= -->
 <main class="logout-main">
     <div class="logout-hero">
-        <div class="logout-card">
+        <div class="logout-card" data-aos="fade-up" data-aos-duration="800">
             <!-- Animated logout icon -->
             <div class="logout-icon-container">
                 <div class="logout-icon">
@@ -47,7 +58,7 @@
             <p class="logout-subtitle">You have been securely logged out of your account</p>
             
             <div class="logout-details">
-                <div class="detail-card">
+                <div class="detail-card" data-aos="fade-up" data-aos-delay="100">
                     <div class="detail-icon success">
                         <i class="fas fa-check-circle"></i>
                     </div>
@@ -57,7 +68,7 @@
                     </div>
                 </div>
                 
-                <div class="detail-card">
+                <div class="detail-card" data-aos="fade-up" data-aos-delay="200">
                     <div class="detail-icon info">
                         <i class="fas fa-shield-alt"></i>
                     </div>
@@ -67,7 +78,7 @@
                     </div>
                 </div>
                 
-                <div class="detail-card">
+                <div class="detail-card" data-aos="fade-up" data-aos-delay="300">
                     <div class="detail-icon timer">
                         <i class="fas fa-clock"></i>
                     </div>
@@ -85,38 +96,41 @@
             
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <a href="/" class="btn btn-primary">
+                <a href="/" class="btn btn-primary" data-aos="zoom-in" data-aos-delay="400">
                     <i class="fas fa-home"></i>
                     <span>Go to Homepage</span>
                 </a>
-                <a href="/login.html" class="btn btn-secondary">
+                <a href="/login.html" class="btn btn-secondary" data-aos="zoom-in" data-aos-delay="450">
                     <i class="fas fa-sign-in-alt"></i>
                     <span>Login Again</span>
                 </a>
-                <a href="/about" class="btn btn-outline">
+                <a href="/about" class="btn btn-outline" data-aos="zoom-in" data-aos-delay="500">
                     <i class="fas fa-info-circle"></i>
                     <span>About Project</span>
                 </a>
             </div>
             
             <!-- Quick Stats -->
-            <div class="logout-stats">
+            <div class="logout-stats" data-aos="fade-up" data-aos-delay="550">
                 <div class="stat-item">
                     <div class="stat-number" id="totalSessions">0</div>
                     <div class="stat-label">Sessions Today</div>
+                    <i class="fas fa-chart-line stat-icon"></i>
                 </div>
                 <div class="stat-item">
                     <div class="stat-number">99.9%</div>
                     <div class="stat-label">System Uptime</div>
+                    <i class="fas fa-check-circle stat-icon"></i>
                 </div>
                 <div class="stat-item">
                     <div class="stat-number">100%</div>
                     <div class="stat-label">Secure Logout</div>
+                    <i class="fas fa-shield-alt stat-icon"></i>
                 </div>
             </div>
             
             <!-- Security Tips -->
-            <div class="security-tips">
+            <div class="security-tips" data-aos="fade-up" data-aos-delay="600">
                 <h3><i class="fas fa-shield-check"></i> Security Best Practices</h3>
                 <div class="tips-grid">
                     <div class="tip">
@@ -151,24 +165,24 @@
             </div>
             
             <!-- Feedback Section -->
-            <div class="feedback-section">
+            <div class="feedback-section" data-aos="fade-up" data-aos-delay="650">
                 <h4>How was your experience?</h4>
                 <p>Help us improve by sharing your feedback</p>
                 <div class="rating">
-                    <button class="star" data-value="1"><i class="far fa-star"></i></button>
-                    <button class="star" data-value="2"><i class="far fa-star"></i></button>
-                    <button class="star" data-value="3"><i class="far fa-star"></i></button>
-                    <button class="star" data-value="4"><i class="far fa-star"></i></button>
-                    <button class="star" data-value="5"><i class="far fa-star"></i></button>
+                    <button class="star" data-value="1" aria-label="1 star"><i class="far fa-star"></i></button>
+                    <button class="star" data-value="2" aria-label="2 stars"><i class="far fa-star"></i></button>
+                    <button class="star" data-value="3" aria-label="3 stars"><i class="far fa-star"></i></button>
+                    <button class="star" data-value="4" aria-label="4 stars"><i class="far fa-star"></i></button>
+                    <button class="star" data-value="5" aria-label="5 stars"><i class="far fa-star"></i></button>
                 </div>
-                <button class="btn-feedback" id="submitFeedback">
+                <button class="btn-feedback" id="submitFeedback" disabled>
                     <i class="fas fa-paper-plane"></i> Submit Feedback
                 </button>
             </div>
         </div>
         
         <!-- Side Panel: Quick Links -->
-        <div class="side-panel">
+        <div class="side-panel" data-aos="fade-left" data-aos-delay="700">
             <div class="panel-card">
                 <h3><i class="fas fa-link"></i> Quick Access</h3>
                 <div class="quick-links">
@@ -243,10 +257,10 @@
             <h3><i class="fas fa-chart-line"></i> Attendance Atlas</h3>
             <p>Smart attendance tracking system for educational institutions. Secure, reliable, and efficient.</p>
             <div class="social-links">
-                <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
-                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
-                <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="social-link" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-link" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="social-link" aria-label="GitHub"><i class="fab fa-github"></i></a>
             </div>
         </div>
 
@@ -271,11 +285,16 @@
     </div>
 
     <div class="footer-bottom">
-        <p>© 2026 Attendance Atlas. All rights reserved.</p>
-        <div class="footer-links">
+        <div class="footer-bottom-left">
+            <p>© 2026 Attendance Atlas. All rights reserved.</p>
+        </div>
+        <div class="footer-bottom-right">
             <a href="/privacy">Privacy Policy</a>
+            <span class="separator">|</span>
             <a href="/terms">Terms of Service</a>
+            <span class="separator">|</span>
             <a href="/security">Security</a>
+            <span class="separator">|</span>
             <a href="/cookies">Cookie Policy</a>
         </div>
     </div>
@@ -284,5 +303,57 @@
 <!-- ================= SCRIPTS ================= -->
 <script src="js/script.js"></script>
 <script src="js/logout.js"></script>
+<script>
+    // Initialize AOS animations
+    AOS.init({
+        duration: 600,
+        once: true,
+        offset: 50,
+        easing: 'ease-in-out'
+    });
+    
+    // Remove loading class after page load
+    window.addEventListener('load', () => {
+        document.body.classList.remove('js-loading');
+        document.body.classList.add('js-loaded');
+    });
+    
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('mobileMenuToggle');
+    const navLinks = document.getElementById('nav-links');
+    
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('show');
+            const icon = menuToggle.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            }
+        });
+    }
+    
+    // Animate total sessions count
+    function animateTotalSessions() {
+        const sessionsEl = document.getElementById('totalSessions');
+        if (sessionsEl) {
+            const target = Math.floor(Math.random() * 50) + 20;
+            let current = 0;
+            const increment = target / 30;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    sessionsEl.textContent = target;
+                    clearInterval(timer);
+                } else {
+                    sessionsEl.textContent = Math.floor(current);
+                }
+            }, 50);
+        }
+    }
+    
+    // Animate after page load
+    setTimeout(animateTotalSessions, 1000);
+</script>
 </body>
 </html>

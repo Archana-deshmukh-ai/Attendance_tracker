@@ -104,7 +104,10 @@ function setupEventListeners() {
     // Email input for auto-fill detection
     if (elements.emailInput) {
         elements.emailInput.addEventListener('input', () => {
-            checkAccountStatus(elements.emailInput.value.trim());
+            const email = elements.emailInput.value.trim();
+            if (email) {
+                checkAccountStatus(email);
+            }
         });
     }
 }
@@ -215,7 +218,6 @@ async function checkAccountStatus(email) {
             showAccountLockedMessage(data.message || 'Account is locked', data.unlock_time);
             disableLoginForm();
         }
-        // else: account not locked – do nothing
     } catch (error) {
         console.error('Error checking account status:', error);
     }
@@ -229,9 +231,14 @@ async function handleLogin() {
         return;
     }
     
-    const role = elements.roleSelect ? elements.roleSelect.value : '';
-    const email = elements.emailInput ? elements.emailInput.value.trim() : '';
-    const password = elements.passwordInput ? elements.passwordInput.value : '';
+    if (!elements.roleSelect || !elements.emailInput || !elements.passwordInput) {
+        showStatusMessage('Form elements not found', 'error');
+        return;
+    }
+    
+    const role = elements.roleSelect.value;
+    const email = elements.emailInput.value.trim();
+    const password = elements.passwordInput.value;
     
     // Validation
     if (!role || !email || !password) {
@@ -400,7 +407,7 @@ function showCooldownMessage(message, waitTime) {
     // Start progress bar animation
     let progress = 0;
     const interval = setInterval(() => {
-        progress += 100 / (waitTime * 10); // Update every 100ms
+        progress += 100 / (waitTime * 10);
         const progressBar = messageDiv.querySelector('#cooldownProgress');
         if (progressBar) {
             progressBar.style.width = `${Math.min(progress, 100)}%`;
@@ -475,13 +482,10 @@ function createSecurityMessage(type, content) {
     // Add to DOM
     if (elements.securityMessages) {
         elements.securityMessages.appendChild(messageDiv);
-    } else {
-        // Fallback to status message area
-        if (elements.statusMessage) {
-            elements.statusMessage.innerHTML = content;
-            elements.statusMessage.className = `status-message ${type}`;
-            elements.statusMessage.style.display = 'block';
-        }
+    } else if (elements.statusMessage) {
+        elements.statusMessage.innerHTML = content;
+        elements.statusMessage.className = `status-message ${type}`;
+        elements.statusMessage.style.display = 'block';
     }
     
     return messageDiv;
@@ -493,7 +497,6 @@ function startUnlockCountdown(unlockTimestamp, container) {
         const remaining = unlockTimestamp - now;
         
         if (remaining <= 0) {
-            // Unlock time reached
             securityState.isAccountLocked = false;
             securityState.unlockTime = null;
             securityState.failedAttempts = 0;
@@ -516,7 +519,6 @@ function startUnlockCountdown(unlockTimestamp, container) {
             timeElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
         }
         
-        // Continue countdown
         requestAnimationFrame(updateCountdown);
     };
     
@@ -527,10 +529,8 @@ function startUnlockCountdown(unlockTimestamp, container) {
 function showCaptchaChallenge() {
     if (!elements.captchaArea) return;
     
-    // Clear existing CAPTCHA
     elements.captchaArea.innerHTML = '';
     
-    // Generate simple math CAPTCHA
     const num1 = Math.floor(Math.random() * 10) + 1;
     const num2 = Math.floor(Math.random() * 10) + 1;
     const operators = ['+', '-', '*'];
@@ -575,14 +575,12 @@ function verifyCaptcha(correctAnswer, captchaId) {
     
     if (userAnswer === correctAnswer) {
         captchaDiv.innerHTML = `
-            <div class="captcha-success" style="background: #d1fae5; padding: 15px; border-radius: 8px; color: #065f46; text-align: center;">
-                <i class="fas fa-check-circle" style="font-size: 24px; margin-bottom: 10px;"></i>
-                <p style="margin: 0; font-weight: 600;">Verification successful!</p>
-                <p style="margin: 5px 0 0; font-size: 14px;">You may proceed with login.</p>
+            <div class="captcha-success">
+                <i class="fas fa-check-circle"></i>
+                <p>Verification successful! You may proceed with login.</p>
             </div>
         `;
         
-        // Remove CAPTCHA after success
         setTimeout(() => {
             if (captchaDiv.parentNode) {
                 captchaDiv.remove();
@@ -590,13 +588,10 @@ function verifyCaptcha(correctAnswer, captchaId) {
         }, 2000);
     } else {
         captchaDiv.innerHTML = `
-            <div class="captcha-error" style="background: #fee2e2; padding: 15px; border-radius: 8px; color: #991b1b; text-align: center;">
-                <i class="fas fa-times-circle" style="font-size: 24px; margin-bottom: 10px;"></i>
-                <p style="margin: 0; font-weight: 600;">Incorrect answer</p>
-                <p style="margin: 10px 0; font-size: 14px;">Please try again.</p>
-                <button onclick="showCaptchaChallenge()" style="padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                    Try Again
-                </button>
+            <div class="captcha-error">
+                <i class="fas fa-times-circle"></i>
+                <p>Incorrect answer. Please try again.</p>
+                <button onclick="showCaptchaChallenge()">Try Again</button>
             </div>
         `;
     }
@@ -628,8 +623,6 @@ function showForgotPasswordForm() {
     if (elements.forgotPasswordForm) {
         elements.forgotPasswordForm.style.display = 'block';
     }
-    
-    // Disable login form
     disableLoginForm();
 }
 
@@ -637,11 +630,8 @@ function hideForgotPasswordForm() {
     if (elements.forgotPasswordForm) {
         elements.forgotPasswordForm.style.display = 'none';
     }
-    
-    // Enable login form
     enableLoginForm();
     
-    // Clear reset message
     if (elements.resetMessage) {
         elements.resetMessage.style.display = 'none';
         elements.resetMessage.textContent = '';
@@ -649,14 +639,15 @@ function hideForgotPasswordForm() {
 }
 
 async function sendResetLink() {
-    const email = elements.resetEmail ? elements.resetEmail.value.trim() : '';
+    if (!elements.resetEmail) return;
+    
+    const email = elements.resetEmail.value.trim();
     
     if (!validateEmail(email)) {
         showResetMessage('Please enter a valid email address', 'error');
         return;
     }
     
-    // Show loading state
     const originalText = elements.sendResetBtn.innerHTML;
     elements.sendResetBtn.disabled = true;
     elements.sendResetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
@@ -671,14 +662,11 @@ async function sendResetLink() {
         const data = await response.json();
         
         if (data.success) {
-            showResetMessage('Reset link sent to your email! Check your inbox.', 'success');
+            showResetMessage('Reset instructions sent to your email! Check your inbox.', 'success');
             
-            // Auto-hide form after success
             setTimeout(() => {
                 hideForgotPasswordForm();
-                if (elements.resetEmail) {
-                    elements.resetEmail.value = '';
-                }
+                if (elements.resetEmail) elements.resetEmail.value = '';
             }, 3000);
         } else {
             showResetMessage(data.message || 'Failed to send reset link', 'error');
@@ -691,31 +679,32 @@ async function sendResetLink() {
     }
 }
 
-async function requestAccountUnlock() {
-    const email = elements.emailInput ? elements.emailInput.value.trim() : '';
+function requestAccountUnlock() {
+    if (!elements.emailInput) return;
+    
+    const email = elements.emailInput.value.trim();
     
     if (!email) {
         showStatusMessage('Please enter your email first', 'error');
         return;
     }
     
-    try {
-        const response = await fetch('/api/security/unlock-request', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
-        });
-        
-        const data = await response.json();
-        
+    fetch('/api/security/unlock-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+    })
+    .then(response => response.json())
+    .then(data => {
         if (data.success) {
             showStatusMessage('Unlock instructions sent to your email!', 'success');
         } else {
             showStatusMessage(data.message || 'Failed to send unlock request', 'error');
         }
-    } catch (error) {
+    })
+    .catch(error => {
         showStatusMessage('Network error. Please try again.', 'error');
-    }
+    });
 }
 
 // ================= HELPER FUNCTIONS =================
@@ -737,7 +726,6 @@ function togglePasswordVisibility() {
     const type = elements.passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
     elements.passwordInput.setAttribute('type', type);
     
-    // Update icon
     const icon = elements.togglePassword.querySelector('i');
     if (icon) {
         icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
@@ -770,10 +758,9 @@ function showStatusMessage(message, type) {
     elements.statusMessage.className = `status-message ${type}`;
     elements.statusMessage.style.display = 'block';
     
-    // Auto-hide after 5 seconds (except for success messages during redirect)
     if (type !== 'success') {
         setTimeout(() => {
-            elements.statusMessage.style.display = 'none';
+            if (elements.statusMessage) elements.statusMessage.style.display = 'none';
         }, 5000);
     }
 }
@@ -785,10 +772,9 @@ function showResetMessage(message, type) {
     elements.resetMessage.className = `reset-message ${type}`;
     elements.resetMessage.style.display = 'block';
     
-    // Auto-hide success messages
     if (type === 'success') {
         setTimeout(() => {
-            elements.resetMessage.style.display = 'none';
+            if (elements.resetMessage) elements.resetMessage.style.display = 'none';
         }, 5000);
     }
 }
@@ -800,3 +786,165 @@ document.addEventListener('DOMContentLoaded', initLoginPage);
 window.verifyCaptcha = verifyCaptcha;
 window.refreshCaptcha = refreshCaptcha;
 window.requestAccountUnlock = requestAccountUnlock;
+// Add these improvements to login.js
+
+// Enhanced toggle password with better accessibility
+function togglePasswordVisibility() {
+    if (!elements.passwordInput || !elements.togglePassword) return;
+    
+    const type = elements.passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    elements.passwordInput.setAttribute('type', type);
+    
+    const icon = elements.togglePassword.querySelector('i');
+    if (icon) {
+        icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+    }
+    
+    // Announce for screen readers
+    const announcement = type === 'text' ? 'Password visible' : 'Password hidden';
+    const ariaLive = document.createElement('div');
+    ariaLive.setAttribute('aria-live', 'polite');
+    ariaLive.classList.add('sr-only');
+    ariaLive.textContent = announcement;
+    document.body.appendChild(ariaLive);
+    setTimeout(() => ariaLive.remove(), 1000);
+}
+
+// Enhanced showStatusMessage with better UX
+function showStatusMessage(message, type) {
+    if (!elements.statusMessage) return;
+    
+    elements.statusMessage.textContent = message;
+    elements.statusMessage.className = `status-message ${type}`;
+    elements.statusMessage.style.display = 'block';
+    
+    // Add icon based on type
+    const icon = document.createElement('i');
+    if (type === 'success') icon.className = 'fas fa-check-circle';
+    else if (type === 'error') icon.className = 'fas fa-exclamation-circle';
+    else if (type === 'warning') icon.className = 'fas fa-exclamation-triangle';
+    else icon.className = 'fas fa-info-circle';
+    
+    elements.statusMessage.insertBefore(icon, elements.statusMessage.firstChild);
+    
+    // Auto-hide after delay
+    let delay = 5000;
+    if (type === 'success') delay = 3000;
+    
+    setTimeout(() => {
+        if (elements.statusMessage) elements.statusMessage.style.display = 'none';
+    }, delay);
+}
+
+// Enhanced showResetMessage with icon
+function showResetMessage(message, type) {
+    if (!elements.resetMessage) return;
+    
+    elements.resetMessage.textContent = message;
+    elements.resetMessage.className = `reset-message ${type}`;
+    elements.resetMessage.style.display = 'block';
+    
+    const icon = document.createElement('i');
+    icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+    elements.resetMessage.insertBefore(icon, elements.resetMessage.firstChild);
+    
+    if (type === 'success') {
+        setTimeout(() => {
+            if (elements.resetMessage) elements.resetMessage.style.display = 'none';
+        }, 5000);
+    }
+}
+
+// Add input validation with real-time feedback
+function setupInputValidation() {
+    if (elements.emailInput) {
+        elements.emailInput.addEventListener('input', function() {
+            const isValid = validateEmail(this.value);
+            if (isValid) {
+                this.style.borderColor = '#10b981';
+            } else if (this.value) {
+                this.style.borderColor = '#ef4444';
+            } else {
+                this.style.borderColor = '#e2e8f0';
+            }
+        });
+    }
+    
+    if (elements.passwordInput) {
+        elements.passwordInput.addEventListener('input', function() {
+            if (this.value.length > 0) {
+                this.style.borderColor = '#102094';
+            } else {
+                this.style.borderColor = '#e2e8f0';
+            }
+        });
+    }
+    
+    if (elements.roleSelect) {
+        elements.roleSelect.addEventListener('change', function() {
+            if (this.value) {
+                this.style.borderColor = '#10b981';
+            } else {
+                this.style.borderColor = '#e2e8f0';
+            }
+        });
+    }
+}
+
+// Add keyboard navigation support
+function setupKeyboardNavigation() {
+    const focusableElements = [
+        elements.roleSelect,
+        elements.emailInput,
+        elements.passwordInput,
+        elements.loginBtn,
+        elements.forgotPasswordLink
+    ].filter(el => el);
+    
+    focusableElements.forEach((el, index) => {
+        if (el) {
+            el.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab' && e.shiftKey && index === 0) {
+                    // Focus last element
+                    const lastEl = focusableElements[focusableElements.length - 1];
+                    if (lastEl) lastEl.focus();
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+}
+
+// Call setup functions in initLoginPage
+function initLoginPage() {
+    console.log("Login page initialized");
+    
+    cacheElements();
+    checkLoginStatus();
+    setupEventListeners();
+    loadSecurityState();
+    updateAttemptCounter();
+    setupForgotPassword();
+    setupInputValidation();
+    setupKeyboardNavigation();
+    
+    // Set focus to role select on load
+    if (elements.roleSelect) setTimeout(() => elements.roleSelect.focus(), 100);
+}
+
+// Add screen reader support class
+const style = document.createElement('style');
+style.textContent = `
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
+`;
+document.head.appendChild(style);

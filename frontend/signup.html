@@ -2,15 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sign Up - Attendance Atlas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Sign Up | Attendance Atlas | Create Your Account</title>
     <link rel="stylesheet" href="css/signup.css">
     <link rel="stylesheet" href="css/index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 </head>
-<body>
+<body class="js-loading">
 
-<header class="navbar">
+<header class="navbar" data-aos="fade-down">
     <div class="logo">
-         Attendance Atlas
+        <i class="fas fa-chart-line"></i> Attendance Atlas
     </div>
     
     <nav class="nav-links" id="nav-links">
@@ -23,12 +32,22 @@
     <div class="header-right" id="auth-area">
         <!-- Will be populated by JavaScript -->
     </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+        <i class="fas fa-bars"></i>
+    </button>
 </header>
 
 <div class="signup-container">
-    <div class="signup-box">
-        <h2>Create Your Account</h2>
-        <p class="subtitle">Join Attendance Atlas to manage your attendance efficiently</p>
+    <div class="signup-box" data-aos="fade-up" data-aos-duration="800">
+        <div class="signup-header">
+            <div class="signup-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h2>Create Your Account</h2>
+            <p class="subtitle">Join Attendance Atlas to manage your attendance efficiently</p>
+        </div>
         
         <!-- Progress Steps -->
         <div class="signup-progress">
@@ -50,20 +69,30 @@
         <div id="roleStep" class="signup-step active">
             <h3>I am a...</h3>
             <div class="role-options">
-                <div class="role-option" data-role="student">
+                <div class="role-option" data-role="student" data-aos="zoom-in" data-aos-delay="100">
                     <div class="role-icon">🎓</div>
                     <h4>Student</h4>
                     <p>Track attendance, view reports, monitor progress</p>
+                    <div class="role-features">
+                        <span><i class="fas fa-chart-line"></i> Analytics</span>
+                        <span><i class="fas fa-bell"></i> Alerts</span>
+                    </div>
                 </div>
-                <div class="role-option" data-role="lecturer">
+                <div class="role-option" data-role="lecturer" data-aos="zoom-in" data-aos-delay="200">
                     <div class="role-icon">👨‍🏫</div>
                     <h4>Lecturer</h4>
                     <p>Mark attendance, generate reports, manage classes</p>
+                    <div class="role-features">
+                        <span><i class="fas fa-check-double"></i> Bulk Marking</span>
+                        <span><i class="fas fa-file-export"></i> Export Data</span>
+                    </div>
                 </div>
             </div>
             
             <div class="step-actions">
-                <button class="btn next-btn" onclick="nextStep()" disabled>Next</button>
+                <button class="btn next-btn" onclick="nextStep()" disabled>
+                    <i class="fas fa-arrow-right"></i> Next
+                </button>
             </div>
         </div>
         
@@ -73,51 +102,61 @@
             
             <form id="signupForm">
                 <div class="form-group">
-                    <label for="name">Full Name *</label>
-                    <input type="text" id="name" placeholder="Enter your full name" required>
+                    <label for="name"><i class="fas fa-user"></i> Full Name *</label>
+                    <input type="text" id="name" placeholder="Enter your full name" autocomplete="name" required>
                     <div class="error-message" id="nameError"></div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="email">Email Address *</label>
-                    <input type="email" id="email" placeholder="student@uni.edu or lecturer@uni.edu" required>
+                    <label for="email"><i class="fas fa-envelope"></i> Email Address *</label>
+                    <input type="email" id="email" placeholder="student@uni.edu or lecturer@uni.edu" autocomplete="email" required>
                     <div class="error-message" id="emailError"></div>
-                    <small class="help-text">Use your institutional email address</small>
+                    <small class="help-text"><i class="fas fa-info-circle"></i> Use your institutional email address</small>
                 </div>
                 
                 <div class="form-group">
-                    <label for="password">Password *</label>
-                    <input type="password" id="password" placeholder="Create a strong password" required>
+                    <label for="password"><i class="fas fa-lock"></i> Password *</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" placeholder="Create a strong password" autocomplete="new-password" required>
+                        <button type="button" class="toggle-password" id="togglePassword" aria-label="Show password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                     <div class="password-strength">
                         <div class="strength-bar" id="strengthBar"></div>
                     </div>
                     <div class="password-requirements">
                         <ul>
-                            <li id="reqLength" class="invalid">At least 8 characters</li>
-                            <li id="reqUpper" class="invalid">One uppercase letter</li>
-                            <li id="reqLower" class="invalid">One lowercase letter</li>
-                            <li id="reqNumber" class="invalid">One number</li>
-                            <li id="reqSpecial" class="invalid">One special character</li>
+                            <li id="reqLength" class="invalid"><i class="fas fa-times"></i> At least 8 characters</li>
+                            <li id="reqUpper" class="invalid"><i class="fas fa-times"></i> One uppercase letter</li>
+                            <li id="reqLower" class="invalid"><i class="fas fa-times"></i> One lowercase letter</li>
+                            <li id="reqNumber" class="invalid"><i class="fas fa-times"></i> One number</li>
+                            <li id="reqSpecial" class="invalid"><i class="fas fa-times"></i> One special character</li>
                         </ul>
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="confirmPassword">Confirm Password *</label>
-                    <input type="password" id="confirmPassword" placeholder="Re-enter your password" required>
+                    <label for="confirmPassword"><i class="fas fa-check-double"></i> Confirm Password *</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="confirmPassword" placeholder="Re-enter your password" autocomplete="new-password" required>
+                        <button type="button" class="toggle-password" id="toggleConfirmPassword" aria-label="Show password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                     <div class="error-message" id="confirmError"></div>
                 </div>
                 
                 <!-- Student Fields -->
                 <div id="studentFields" class="role-fields" style="display: none;">
                     <div class="form-group">
-                        <label for="rollno">Roll Number *</label>
+                        <label for="rollno"><i class="fas fa-id-card"></i> Roll Number *</label>
                         <input type="text" id="rollno" placeholder="Enter your roll number">
                         <div class="error-message" id="rollnoError"></div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="batch">Batch Year *</label>
+                        <label for="batch"><i class="fas fa-calendar-alt"></i> Batch Year *</label>
                         <select id="batch">
                             <option value="">Select Batch</option>
                             <option value="2024">2024</option>
@@ -129,14 +168,14 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="department">Department *</label>
+                        <label for="department"><i class="fas fa-university"></i> Department *</label>
                         <select id="department">
                             <option value="">Select Department</option>
-                            <option value="CSE">Computer Science & Engineering</option>
-                            <option value="ECE">Electronics & Communication</option>
-                            <option value="ME">Mechanical Engineering</option>
-                            <option value="CE">Civil Engineering</option>
-                            <option value="EEE">Electrical & Electronics</option>
+                            <option value="Computer Science">Computer Science & Engineering</option>
+                            <option value="Electronics">Electronics & Communication</option>
+                            <option value="Mechanical">Mechanical Engineering</option>
+                            <option value="Civil">Civil Engineering</option>
+                            <option value="Electrical">Electrical & Electronics</option>
                         </select>
                         <div class="error-message" id="departmentError"></div>
                     </div>
@@ -145,29 +184,30 @@
                 <!-- Lecturer Fields -->
                 <div id="lecturerFields" class="role-fields" style="display: none;">
                     <div class="form-group">
-                        <label for="empid">Employee ID *</label>
+                        <label for="empid"><i class="fas fa-id-badge"></i> Employee ID *</label>
                         <input type="text" id="empid" placeholder="Enter your employee ID">
                         <div class="error-message" id="empidError"></div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="lecturerDepartment">Department *</label>
+                        <label for="lecturerDepartment"><i class="fas fa-university"></i> Department *</label>
                         <select id="lecturerDepartment">
                             <option value="">Select Department</option>
-                            <option value="CSE">Computer Science & Engineering</option>
-                            <option value="ECE">Electronics & Communication</option>
-                            <option value="ME">Mechanical Engineering</option>
-                            <option value="CE">Civil Engineering</option>
-                            <option value="EEE">Electrical & Electronics</option>
+                            <option value="Computer Science">Computer Science & Engineering</option>
+                            <option value="Electronics">Electronics & Communication</option>
+                            <option value="Mechanical">Mechanical Engineering</option>
+                            <option value="Civil">Civil Engineering</option>
+                            <option value="Electrical">Electrical & Electronics</option>
                         </select>
                         <div class="error-message" id="lecturerDeptError"></div>
                     </div>
                 </div>
                 
                 <div class="terms-agreement">
-                    <input type="checkbox" id="terms" required>
-                    <label for="terms">
-                        I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="terms" required>
+                        <span class="checkmark"></span>
+                        I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>
                     </label>
                     <div class="error-message" id="termsError"></div>
                 </div>
@@ -175,12 +215,10 @@
             
             <div class="step-actions">
                 <button class="btn back-btn" onclick="prevStep()">
-                    <span class="btn-icon">←</span>
-                    <span>Back</span>
+                    <i class="fas fa-arrow-left"></i> Back
                 </button>
                 <button class="btn submit-btn" onclick="signup()" disabled>
-                    <span class="btn-icon">✅</span>
-                    <span>Create Account</span>
+                    <i class="fas fa-check-circle"></i> Create Account
                 </button>
             </div>
         </div>
@@ -199,12 +237,10 @@
             
             <div class="step-actions">
                 <button class="btn login-btn" onclick="goToLogin()">
-                    <span class="btn-icon">🔑</span>
-                    <span>Go to Login</span>
+                    <i class="fas fa-sign-in-alt"></i> Go to Login
                 </button>
                 <button class="btn home-btn" onclick="goToHome()">
-                    <span class="btn-icon">🏠</span>
-                    <span>Back to Home</span>
+                    <i class="fas fa-home"></i> Back to Home
                 </button>
             </div>
         </div>
@@ -223,68 +259,116 @@
 <footer class="footer">
     <div class="footer-container">
         <div class="footer-section">
-            <h3>Attendance Atlas</h3>
+            <h3><i class="fas fa-chart-line"></i> Attendance Atlas</h3>
             <p>Smart attendance tracking system for students and teachers.</p>
         </div>
         <div class="footer-section">
-            <h4>Quick Links</h4>
+            <h4><i class="fas fa-link"></i> Quick Links</h4>
             <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/about">About</a></li>
-                <li><a href="/login.html">Login</a></li>
+                <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
+                <li><a href="/login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
             </ul>
         </div>
         <div class="footer-section">
-            <h4>Support</h4>
-            <p>Email: support@attendanceatlas.com</p>
+            <h4><i class="fas fa-headset"></i> Support</h4>
+            <p><i class="fas fa-envelope"></i> support@attendanceatlas.com</p>
+            <p><i class="fas fa-clock"></i> 24/7 Support Available</p>
             <p>Attendance Atlas - 2026</p>
         </div>
     </div>
     <div class="footer-bottom">
-        © 2026 Attendance Atlas. All rights reserved.
+        <div class="footer-bottom-left">
+            <p>© 2026 Attendance Atlas. All rights reserved.</p>
+        </div>
+        <div class="footer-bottom-right">
+            <a href="/privacy">Privacy Policy</a>
+            <span class="separator">|</span>
+            <a href="/terms">Terms of Service</a>
+        </div>
     </div>
 </footer>
 
 <!-- JavaScript Files -->
-<script src="js/signup.js"></script>
 <script src="js/script.js"></script>
+<script src="js/signup.js"></script>
 <script>
-// Update navigation for signup page
-document.addEventListener('DOMContentLoaded', function() {
-    // Update auth area and navigation
-    if (typeof updateAuthArea === 'function') {
-        updateAuthArea();
-    }
-    if (typeof updateNavigation === 'function') {
-        updateNavigation();
-    }
-    
-    // Highlight current page
-    const currentPath = window.location.pathname;
-    document.querySelectorAll('#nav-links a').forEach(link => {
-        if (link.getAttribute('href') === currentPath) {
-            link.classList.add('active');
-        }
+    // Initialize AOS animations
+    AOS.init({
+        duration: 600,
+        once: true,
+        offset: 50,
+        easing: 'ease-in-out'
     });
     
-    // Check if user is already logged in
-    fetch('/api/login-status')
-        .then(res => res.json())
-        .then(data => {
-            if (data.logged_in) {
-                // Redirect to appropriate dashboard
-                if (data.role === 'student') {
-                    window.location.href = '/student-dashboard';
-                } else if (data.role === 'lecturer') {
-                    window.location.href = '/lecturer-dashboard';
-                }
+    // Remove loading class after page load
+    window.addEventListener('load', () => {
+        document.body.classList.remove('js-loading');
+        document.body.classList.add('js-loaded');
+    });
+    
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('mobileMenuToggle');
+    const navLinks = document.getElementById('nav-links');
+    
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('show');
+            const icon = menuToggle.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
             }
         });
-});
+    }
+    
+    // Update navigation for signup page
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof updateAuthArea === 'function') updateAuthArea();
+        if (typeof updateNavigation === 'function') updateNavigation();
+        
+        // Highlight current page
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('#nav-links a').forEach(link => {
+            if (link.getAttribute('href') === currentPath) link.classList.add('active');
+        });
+        
+        // Check if user is already logged in
+        fetch('/api/login-status')
+            .then(res => res.json())
+            .then(data => {
+                if (data.logged_in) {
+                    if (data.role === 'student') window.location.href = '/student-dashboard';
+                    else if (data.role === 'lecturer') window.location.href = '/lecturer-dashboard';
+                }
+            });
+    });
+    
+    // Password toggle functionality
+    function setupPasswordToggle() {
+        const togglePassword = document.getElementById('togglePassword');
+        const toggleConfirm = document.getElementById('toggleConfirmPassword');
+        const passwordInput = document.getElementById('password');
+        const confirmInput = document.getElementById('confirmPassword');
+        
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                togglePassword.querySelector('i').className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+            });
+        }
+        
+        if (toggleConfirm && confirmInput) {
+            toggleConfirm.addEventListener('click', () => {
+                const type = confirmInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                confirmInput.setAttribute('type', type);
+                toggleConfirm.querySelector('i').className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+            });
+        }
+    }
+    
+    setupPasswordToggle();
 </script>
-
-
-
-
 </body>
 </html>

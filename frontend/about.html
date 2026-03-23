@@ -2,21 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>About Us | Attendance Atlas | Smart Attendance Management System</title>
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/about.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- AOS Library for animations -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
 </head>
-<body>
+<body class="js-loading">
 
 <!-- ================= HEADER ================= -->
-<header class="navbar">
+<header class="navbar" data-aos="fade-down">
     <div class="logo">
-         Attendance Atlas
+        <i class="fas fa-chart-line"></i> Attendance Atlas
     </div>
 
     <nav class="nav-links" id="nav-links">
@@ -26,34 +29,46 @@
     <div class="header-right" id="auth-area">
         <!-- Will be populated by JavaScript -->
     </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+        <i class="fas fa-bars"></i>
+    </button>
 </header>
 
 <!-- ================= HERO SECTION ================= -->
 <section class="about-hero">
     <div class="hero-overlay">
         <div class="hero-content" data-aos="fade-up" data-aos-duration="1000">
+            <div class="hero-badge">
+                <span class="badge"><i class="fas fa-star"></i> Trusted by 50+ Institutions</span>
+            </div>
             <h1 class="hero-title">About Attendance Atlas</h1>
             <p class="hero-subtitle">Revolutionizing Attendance Management in Education</p>
             <p class="hero-description">
                 A comprehensive solution designed to simplify attendance tracking, enhance academic 
-                management, and provide insightful analytics for educational institutions.
+                management, and provide insightful analytics for educational institutions worldwide.
             </p>
             <div class="hero-stats">
-                <div class="stat-item">
+                <div class="stat-item" data-aos="zoom-in" data-aos-delay="200">
                     <div class="stat-number" id="studentsCount">5000+</div>
                     <div class="stat-label">Students Served</div>
+                    <div class="stat-trend"><i class="fas fa-chart-line"></i> +200% growth</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item" data-aos="zoom-in" data-aos-delay="300">
                     <div class="stat-number" id="institutionsCount">50+</div>
                     <div class="stat-label">Institutions</div>
+                    <div class="stat-trend"><i class="fas fa-building"></i> Global reach</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item" data-aos="zoom-in" data-aos-delay="400">
                     <div class="stat-number" id="accuracyCount">99.9%</div>
                     <div class="stat-label">Accuracy Rate</div>
+                    <div class="stat-trend"><i class="fas fa-check-circle"></i> Industry leading</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item" data-aos="zoom-in" data-aos-delay="500">
                     <div class="stat-number" id="sessionsCount">100K+</div>
                     <div class="stat-label">Sessions Tracked</div>
+                    <div class="stat-trend"><i class="fas fa-calendar-alt"></i> 10K+/month</div>
                 </div>
             </div>
         </div>
@@ -65,7 +80,7 @@
     
     <!-- Our Mission & Vision -->
     <section class="mission-section" data-aos="fade-up" data-aos-delay="100">
-        <div class="mission-card">
+        <div class="mission-card" data-aos="flip-left" data-aos-delay="150">
             <div class="mission-icon">
                 <i class="fas fa-bullseye"></i>
             </div>
@@ -75,9 +90,19 @@
                 and intelligent system that empowers educational institutions with real-time 
                 insights and reduces administrative workload by 70%.
             </p>
+            <div class="mission-metrics">
+                <div class="metric">
+                    <span class="metric-value">70%</span>
+                    <span class="metric-label">Less Admin Work</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">99.9%</span>
+                    <span class="metric-label">Accuracy</span>
+                </div>
+            </div>
         </div>
         
-        <div class="mission-card">
+        <div class="mission-card" data-aos="flip-right" data-aos-delay="200">
             <div class="mission-icon">
                 <i class="fas fa-eye"></i>
             </div>
@@ -85,8 +110,18 @@
             <p>
                 To become the leading attendance management platform globally, recognized for 
                 innovation, reliability, and its contribution to improving educational outcomes 
-                through data-driven insights.
+                through data-driven insights and predictive analytics.
             </p>
+            <div class="mission-metrics">
+                <div class="metric">
+                    <span class="metric-value">2026</span>
+                    <span class="metric-label">Launch Year</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">Global</span>
+                    <span class="metric-label">Reach</span>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -104,6 +139,7 @@
                 </div>
                 <h3>Real-time Tracking</h3>
                 <p>Instant attendance updates with live notifications and alerts for both students and lecturers.</p>
+                <div class="feature-tag">⚡ Instant</div>
             </div>
             
             <div class="feature-card" data-aos="zoom-in" data-aos-delay="200">
@@ -112,6 +148,7 @@
                 </div>
                 <h3>Advanced Analytics</h3>
                 <p>Comprehensive reports and visualizations to identify trends and improve academic performance.</p>
+                <div class="feature-tag">📊 Insights</div>
             </div>
             
             <div class="feature-card" data-aos="zoom-in" data-aos-delay="300">
@@ -120,6 +157,7 @@
                 </div>
                 <h3>Mobile Friendly</h3>
                 <p>Fully responsive design that works seamlessly across all devices and screen sizes.</p>
+                <div class="feature-tag">📱 Responsive</div>
             </div>
             
             <div class="feature-card" data-aos="zoom-in" data-aos-delay="400">
@@ -128,6 +166,7 @@
                 </div>
                 <h3>Secure Platform</h3>
                 <p>Enterprise-grade security with encryption, role-based access, and data protection.</p>
+                <div class="feature-tag">🔒 Secure</div>
             </div>
         </div>
     </section>
@@ -136,39 +175,51 @@
     <section class="process-section" data-aos="fade-up" data-aos-delay="300">
         <div class="section-header">
             <h2>How It Works</h2>
-            <p>Simple, efficient, and effective attendance management</p>
+            <p>Simple, efficient, and effective attendance management in 4 steps</p>
         </div>
         
         <div class="process-timeline">
             <div class="process-step" data-aos="fade-right" data-aos-delay="100">
                 <div class="step-number">01</div>
                 <div class="step-content">
+                    <div class="step-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
                     <h3>User Registration</h3>
-                    <p>Students and lecturers create accounts with role-based access permissions.</p>
+                    <p>Students and lecturers create accounts with role-based access permissions. Simple, fast, and secure signup process.</p>
                 </div>
             </div>
             
             <div class="process-step" data-aos="fade-left" data-aos-delay="200">
                 <div class="step-number">02</div>
                 <div class="step-content">
+                    <div class="step-icon">
+                        <i class="fas fa-check-double"></i>
+                    </div>
                     <h3>Attendance Marking</h3>
-                    <p>Lecturers quickly mark attendance with our intuitive interface.</p>
+                    <p>Lecturers quickly mark attendance with our intuitive interface. Support for bulk actions and notes.</p>
                 </div>
             </div>
             
             <div class="process-step" data-aos="fade-right" data-aos-delay="300">
                 <div class="step-number">03</div>
                 <div class="step-content">
+                    <div class="step-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
                     <h3>Real-time Updates</h3>
-                    <p>Students receive instant updates on their attendance status.</p>
+                    <p>Students receive instant updates on their attendance status with push notifications and email alerts.</p>
                 </div>
             </div>
             
             <div class="process-step" data-aos="fade-left" data-aos-delay="400">
                 <div class="step-number">04</div>
                 <div class="step-content">
+                    <div class="step-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
                     <h3>Reports & Analytics</h3>
-                    <p>Generate comprehensive reports and gain valuable insights.</p>
+                    <p>Generate comprehensive reports, export data, and gain valuable insights with interactive dashboards.</p>
                 </div>
             </div>
         </div>
@@ -241,9 +292,15 @@
         
         <div class="users-tabs">
             <div class="tab-buttons">
-                <button class="tab-btn active" data-target="students">For Students</button>
-                <button class="tab-btn" data-target="lecturers">For Lecturers</button>
-                <button class="tab-btn" data-target="admin">For Administrators</button>
+                <button class="tab-btn active" data-target="students">
+                    <i class="fas fa-user-graduate"></i> For Students
+                </button>
+                <button class="tab-btn" data-target="lecturers">
+                    <i class="fas fa-chalkboard-teacher"></i> For Lecturers
+                </button>
+                <button class="tab-btn" data-target="admin">
+                    <i class="fas fa-user-tie"></i> For Administrators
+                </button>
             </div>
             
             <div class="tab-content">
@@ -260,6 +317,7 @@
                                 <li><i class="fas fa-check-circle"></i> Download attendance records</li>
                                 <li><i class="fas fa-check-circle"></i> Notifications for low attendance</li>
                                 <li><i class="fas fa-check-circle"></i> Academic performance insights</li>
+                                <li><i class="fas fa-check-circle"></i> Attendance certificates</li>
                             </ul>
                         </div>
                     </div>
@@ -278,6 +336,7 @@
                                 <li><i class="fas fa-check-circle"></i> Student performance tracking</li>
                                 <li><i class="fas fa-check-circle"></i> Export data to multiple formats</li>
                                 <li><i class="fas fa-check-circle"></i> Custom report generation</li>
+                                <li><i class="fas fa-check-circle"></i> Real-time student insights</li>
                             </ul>
                         </div>
                     </div>
@@ -296,6 +355,7 @@
                                 <li><i class="fas fa-check-circle"></i> Institutional analytics</li>
                                 <li><i class="fas fa-check-circle"></i> Customizable settings</li>
                                 <li><i class="fas fa-check-circle"></i> Data backup and restore</li>
+                                <li><i class="fas fa-check-circle"></i> System health monitoring</li>
                             </ul>
                         </div>
                     </div>
@@ -311,7 +371,7 @@
                 <i class="fas fa-university"></i>
             </div>
             <div class="project-content">
-                <h2>Academic Project</h2>
+                <h2>Academic Capstone Project</h2>
                 <p>
                     Attendance Atlas was developed as a comprehensive college capstone project 
                     to demonstrate practical application of web development technologies and 
@@ -339,6 +399,23 @@
                             <p>Full Stack Web Application</p>
                         </div>
                     </div>
+                    <div class="detail-item">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <h4>Team Size</h4>
+                            <p>Academic Project</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-achievements">
+                    <div class="achievement">
+                        <i class="fas fa-trophy"></i>
+                        <span>Excellence in Innovation</span>
+                    </div>
+                    <div class="achievement">
+                        <i class="fas fa-award"></i>
+                        <span>Best Project Nominee</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -353,50 +430,70 @@
         
         <div class="contact-grid">
             <div class="contact-info">
-                <div class="contact-item">
+                <div class="contact-item" data-aos="fade-right" data-aos-delay="750">
                     <div class="contact-icon">
                         <i class="fas fa-envelope"></i>
                     </div>
                     <div>
                         <h4>Email Support</h4>
                         <p>support@attendanceatlas.com</p>
-                        <small>Response within 24 hours</small>
+                        <small><i class="fas fa-clock"></i> Response within 24 hours</small>
                     </div>
                 </div>
                 
-                <div class="contact-item">
+                <div class="contact-item" data-aos="fade-right" data-aos-delay="800">
                     <div class="contact-icon">
                         <i class="fas fa-comments"></i>
                     </div>
                     <div>
                         <h4>Live Chat</h4>
                         <p>Available during business hours</p>
-                        <small>Click the chat icon in bottom right</small>
+                        <small><i class="fas fa-smile"></i> 9 AM - 6 PM, Mon-Fri</small>
                     </div>
                 </div>
                 
-                <div class="contact-item">
+                <div class="contact-item" data-aos="fade-right" data-aos-delay="850">
                     <div class="contact-icon">
                         <i class="fas fa-file-alt"></i>
                     </div>
                     <div>
                         <h4>Documentation</h4>
                         <p>Comprehensive user guides</p>
-                        <small>Available in Help Center</small>
+                        <small><i class="fas fa-book"></i> Available in Help Center</small>
+                    </div>
+                </div>
+                
+                <div class="contact-item" data-aos="fade-right" data-aos-delay="900">
+                    <div class="contact-icon">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <div>
+                        <h4>GitHub</h4>
+                        <p>Open Source Contribution</p>
+                        <small><i class="fas fa-code-branch"></i> View our repositories</small>
                     </div>
                 </div>
             </div>
             
-            <div class="contact-form">
-                <h3>Send us a Message</h3>
+            <div class="contact-form" data-aos="fade-left" data-aos-delay="900">
+                <h3><i class="fas fa-paper-plane"></i> Send us a Message</h3>
                 <form id="contactForm">
                     <div class="form-group">
+                        <div class="input-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
                         <input type="text" placeholder="Your Name" required>
                     </div>
                     <div class="form-group">
+                        <div class="input-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
                         <input type="email" placeholder="Email Address" required>
                     </div>
                     <div class="form-group">
+                        <div class="input-icon">
+                            <i class="fas fa-tag"></i>
+                        </div>
                         <select required>
                             <option value="">Select Subject</option>
                             <option value="support">Technical Support</option>
@@ -406,12 +503,31 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <textarea placeholder="Your Message" rows="4" required></textarea>
+                        <div class="input-icon">
+                            <i class="fas fa-comment"></i>
+                        </div>
+                        <textarea placeholder="Your Message" rows="5" required></textarea>
                     </div>
                     <button type="submit" class="submit-btn">
                         <i class="fas fa-paper-plane"></i> Send Message
                     </button>
                 </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section" data-aos="fade-up" data-aos-delay="1000">
+        <div class="cta-content">
+            <h2>Ready to Transform Attendance Management?</h2>
+            <p>Join thousands of institutions already using Attendance Atlas</p>
+            <div class="cta-buttons">
+                <a href="/signup.html" class="cta-btn primary">
+                    <i class="fas fa-rocket"></i> Get Started Free
+                </a>
+                <a href="/demo" class="cta-btn secondary">
+                    <i class="fas fa-play"></i> Watch Demo
+                </a>
             </div>
         </div>
     </section>
@@ -425,10 +541,10 @@
             <h3><i class="fas fa-chart-line"></i> Attendance Atlas</h3>
             <p>Smart attendance tracking system for educational institutions. Secure, reliable, and efficient.</p>
             <div class="social-links">
-                <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
-                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
-                <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="social-link" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-link" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="social-link" aria-label="GitHub"><i class="fab fa-github"></i></a>
             </div>
         </div>
 
@@ -447,17 +563,22 @@
             <h4><i class="fas fa-envelope"></i> Contact</h4>
             <p><i class="fas fa-envelope"></i> support@attendanceatlas.com</p>
             <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
-            <p><i class="fas fa-university"></i> Attendance atlas – 2026</p>
+            <p><i class="fas fa-university"></i> Attendance Atlas – 2026</p>
             <p><i class="fas fa-clock"></i> 24/7 Support Available</p>
         </div>
     </div>
 
     <div class="footer-bottom">
-        <p>© 2026 Attendance Atlas. All rights reserved.</p>
-        <div class="footer-links">
+        <div class="footer-bottom-left">
+            <p>© 2026 Attendance Atlas. All rights reserved.</p>
+        </div>
+        <div class="footer-bottom-right">
             <a href="#">Privacy Policy</a>
+            <span class="separator">|</span>
             <a href="#">Terms of Service</a>
+            <span class="separator">|</span>
             <a href="#">Security</a>
+            <span class="separator">|</span>
             <a href="#">Cookie Policy</a>
         </div>
     </div>
@@ -467,5 +588,44 @@
 <script src="js/script.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 <script src="js/about.js"></script>
+<script>
+    // Initialize AOS animations
+    AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100,
+        easing: 'ease-in-out'
+    });
+    
+    // Remove loading class after page load
+    window.addEventListener('load', () => {
+        document.body.classList.remove('js-loading');
+        document.body.classList.add('js-loaded');
+    });
+    
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('mobileMenuToggle');
+    const navLinks = document.getElementById('nav-links');
+    
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('show');
+            const icon = menuToggle.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            }
+        });
+    }
+    
+    // Parallax effect for hero
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const hero = document.querySelector('.about-hero');
+        if (hero) {
+            hero.style.transform = `translateY(${scrolled * 0.3}px)`;
+        }
+    });
+</script>
 </body>
 </html>

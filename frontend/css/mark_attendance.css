@@ -1275,3 +1275,243 @@ body {
         justify-content: center;
     }
 }
+/* ================= ADDITIONAL STYLES ================= */
+
+/* Loading State */
+.js-loading {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.js-loaded {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease;
+}
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--gray-color);
+}
+
+.empty-state i {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    margin-bottom: 10px;
+    color: var(--dark-color);
+}
+
+/* Stat Icons */
+.stat-icon {
+    font-size: 32px;
+}
+
+.stat-icon.present-icon i {
+    color: var(--success-color);
+}
+
+.stat-icon.absent-icon i {
+    color: var(--danger-color);
+}
+
+.stat-icon.percentage-icon i {
+    color: var(--primary-color);
+}
+
+/* Student Note */
+.student-note {
+    font-size: 12px;
+    color: var(--warning-color);
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Note Textarea */
+.note-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.note-hint {
+    display: block;
+    margin-top: 8px;
+    color: var(--gray-color);
+    font-size: 12px;
+}
+
+/* Loading Spinner Small */
+.loading-spinner-small {
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto 0;
+}
+
+/* Status Actions */
+.status-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.status-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-btn.confirm {
+    background: var(--primary-color);
+    color: white;
+}
+
+.status-btn.cancel {
+    background: var(--light-color);
+    color: var(--gray-color);
+}
+
+/* Animation for success messages */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive Mobile Menu */
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background: var(--dark-color);
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        z-index: 999;
+    }
+    
+    .nav-links.show {
+        display: flex;
+    }
+    
+    .nav-links a {
+        padding: 12px 20px;
+    }
+    
+    .attendance-container {
+        padding: 0 10px;
+    }
+    
+    .action-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-group, .department-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .view-controls {
+        justify-content: center;
+    }
+    
+    .grid-view {
+        grid-template-columns: 1fr;
+    }
+    
+    .student-item {
+        padding: 15px;
+    }
+    
+    .list-footer {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .pagination {
+        justify-content: center;
+    }
+    
+    .footer-container {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .quick-stats-bar {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .detailed-summary {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+}

@@ -65,11 +65,16 @@ async function updateLiveStats() {
             fetch(`${API_BASE_URL}/subjects`)
         ]);
         
+        const studentsData = await studentsRes.json();
+        const lecturersData = await lecturersRes.json();
+        const attendanceData = await attendanceRes.json();
+        const subjectsData = await subjectsRes.json();
+        
         const stats = {
-            students: (await studentsRes.json()).students?.length || 1245,
-            lecturers: (await lecturersRes.json()).lecturers?.length || 68,
-            attendance: (await attendanceRes.json()).attendance?.length || 15420,
-            subjects: (await subjectsRes.json()).subjects?.length || 42
+            students: studentsData.students?.length || 0,
+            lecturers: lecturersData.lecturers?.length || 0,
+            attendance: attendanceData.attendance?.length || 0,
+            subjects: subjectsData.subjects?.length || 0
         };
         
         // Animate counting up
@@ -81,10 +86,10 @@ async function updateLiveStats() {
         console.error('Error fetching stats:', error);
         // Set default values if API fails
         const defaultStats = {
-            studentCount: 1245,
-            lecturerCount: 68,
-            attendanceCount: 15420,
-            subjectsCount: 42
+            studentCount: 0,
+            lecturerCount: 0,
+            attendanceCount: 0,
+            subjectsCount: 0
         };
         Object.keys(defaultStats).forEach(key => {
             const element = document.getElementById(key);
@@ -113,6 +118,8 @@ function animateCount(element, target) {
 function initDemoTabs() {
     const tabs = document.querySelectorAll('.demo-tab');
     const panels = document.querySelectorAll('.demo-panel');
+    
+    if (tabs.length === 0) return;
     
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -184,6 +191,8 @@ function initMiniChart() {
 function initFAQAccordion() {
     const faqQuestions = document.querySelectorAll('.faq-question');
     
+    if (faqQuestions.length === 0) return;
+    
     // Initially collapse all answers
     faqQuestions.forEach(question => {
         const answer = question.nextElementSibling;
@@ -233,7 +242,7 @@ async function updateAuthArea() {
         const data = await response.json();
 
         if (data.logged_in) {
-            // User is logged in – link to dashboard instead of /profile
+            // User is logged in – link to dashboard
             const dashboardUrl = data.role === 'student' ? '/student-dashboard' : '/lecturer-dashboard';
             authArea.innerHTML = `
                 <span class="user-name">👤 ${data.name} (${data.role})</span>
@@ -241,7 +250,8 @@ async function updateAuthArea() {
                 <button class="logout-btn" id="logoutBtn">Logout</button>
             `;
 
-            document.getElementById("logoutBtn").addEventListener("click", logoutUser);
+            const logoutBtn = document.getElementById("logoutBtn");
+            if (logoutBtn) logoutBtn.addEventListener("click", logoutUser);
 
         } else {
             // User is not logged in
@@ -381,12 +391,31 @@ function initializeLoginPage() {
     if (!loginBtn) return;
 
     loginBtn.addEventListener("click", loginUser);
+    
+    // Also handle Enter key press
+    const passwordField = document.getElementById("password");
+    if (passwordField) {
+        passwordField.addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                loginUser();
+            }
+        });
+    }
 }
 
 async function loginUser() {
-    const role = document.getElementById("role").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const roleSelect = document.getElementById("role");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    
+    if (!roleSelect || !emailInput || !passwordInput) {
+        alert("Form elements not found");
+        return;
+    }
+    
+    const role = roleSelect.value;
+    const email = emailInput.value;
+    const password = passwordInput.value;
 
     if (!role || !email || !password) {
         alert("Please fill all fields");
@@ -415,7 +444,7 @@ async function loginUser() {
         }
     } catch (error) {
         console.error("Login error:", error);
-        alert("Login failed");
+        alert("Login failed. Please check if the server is running.");
     }
 }
 
@@ -429,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateNavigation();
     
     // Update home page content if on home page
-    if (window.location.pathname === '/') {
+    if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
         updateHomeContent();
         initHomePageFeatures();
     }
@@ -442,6 +471,56 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update auth area every minute (keeps session info fresh)
     setInterval(updateAuthArea, 60000);
 });
+
+// Update the updateNavigation function to include Settings link
+async function updateNavigation() {
+    const navLinks = document.getElementById("nav-links");
+    if (!navLinks) return;
+
+    try {
+        const response = await fetch("/api/login-status");
+        const data = await response.json();
+
+        let navHTML = '';
+        
+        if (data.logged_in) {
+            // User-specific navigation
+            navHTML += `<a href="/">Home</a>`;
+            
+            if (data.role === 'lecturer') {
+                navHTML += `<a href="/mark-attendance">Mark Attendance</a>`;
+                navHTML += `<a href="/lecturer-dashboard">Lecturer Dashboard</a>`;
+            } else if (data.role === 'student') {
+                navHTML += `<a href="/student-dashboard">Student Dashboard</a>`;
+            }
+            
+            navHTML += `<a href="/report">Reports</a>`;
+            navHTML += `<a href="/settings">Settings</a>`;  // ADDED: Settings link
+            navHTML += `<a href="/about">About Us</a>`;
+        } else {
+            // Default navigation for non-logged in users
+            navHTML = `
+                <a href="/">Home</a>
+                <a href="/about">About Us</a>
+                <a href="/login.html">Login</a>
+                <a href="/signup.html">Sign Up</a>
+            `;
+        }
+        
+        navLinks.innerHTML = navHTML;
+        
+        // Highlight active page
+        const currentPath = window.location.pathname;
+        navLinks.querySelectorAll('a').forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            }
+        });
+        
+    } catch (error) {
+        console.error("Navigation update failed:", error);
+    }
+}
 
 // Make functions available globally
 window.updateAuthArea = updateAuthArea;

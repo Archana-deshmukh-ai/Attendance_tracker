@@ -8,27 +8,31 @@ const ABOUT_CONFIG = {
 };
 
 // ================= DOM ELEMENTS =================
-const elements = {
-    studentsCount: document.getElementById('studentsCount'),
-    institutionsCount: document.getElementById('institutionsCount'),
-    accuracyCount: document.getElementById('accuracyCount'),
-    sessionsCount: document.getElementById('sessionsCount'),
-    tabButtons: document.querySelectorAll('.tab-btn'),
-    tabPanels: document.querySelectorAll('.tab-panel'),
-    contactForm: document.getElementById('contactForm')
+let elements = {
+    studentsCount: null,
+    institutionsCount: null,
+    accuracyCount: null,
+    sessionsCount: null,
+    tabButtons: [],
+    tabPanels: [],
+    contactForm: null
 };
 
 // ================= INITIALIZATION =================
 function initAboutPage() {
     console.log('About page initialized');
     
-    // Initialize AOS (Animate On Scroll)
-    AOS.init({
-        duration: 1000,
-        once: true,
-        offset: 100,
-        easing: 'ease-in-out'
-    });
+    cacheElements();
+    
+    // Check if AOS is available
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100,
+            easing: 'ease-in-out'
+        });
+    }
     
     // Animate statistics counters
     animateStatistics();
@@ -43,6 +47,16 @@ function initAboutPage() {
     initScrollAnimations();
 }
 
+function cacheElements() {
+    elements.studentsCount = document.getElementById('studentsCount');
+    elements.institutionsCount = document.getElementById('institutionsCount');
+    elements.accuracyCount = document.getElementById('accuracyCount');
+    elements.sessionsCount = document.getElementById('sessionsCount');
+    elements.tabButtons = document.querySelectorAll('.tab-btn');
+    elements.tabPanels = document.querySelectorAll('.tab-panel');
+    elements.contactForm = document.getElementById('contactForm');
+}
+
 // ================= STATISTICS ANIMATION =================
 function animateStatistics() {
     const statistics = {
@@ -52,22 +66,10 @@ function animateStatistics() {
         sessions: 100000
     };
     
-    // Animate each counter
-    if (elements.studentsCount) {
-        animateCounter(elements.studentsCount, statistics.students, '+');
-    }
-    
-    if (elements.institutionsCount) {
-        animateCounter(elements.institutionsCount, statistics.institutions, '+');
-    }
-    
-    if (elements.accuracyCount) {
-        animateCounter(elements.accuracyCount, statistics.accuracy, '%');
-    }
-    
-    if (elements.sessionsCount) {
-        animateCounter(elements.sessionsCount, statistics.sessions, '+');
-    }
+    if (elements.studentsCount) animateCounter(elements.studentsCount, statistics.students, '+');
+    if (elements.institutionsCount) animateCounter(elements.institutionsCount, statistics.institutions, '+');
+    if (elements.accuracyCount) animateCounter(elements.accuracyCount, statistics.accuracy, '%');
+    if (elements.sessionsCount) animateCounter(elements.sessionsCount, statistics.sessions, '+');
 }
 
 function animateCounter(element, target, suffix = '') {
@@ -95,21 +97,15 @@ function initTabSystem() {
         button.addEventListener('click', () => {
             const targetId = button.dataset.target;
             
-            // Remove active class from all buttons
             elements.tabButtons.forEach(btn => btn.classList.remove('active'));
-            
-            // Add active class to clicked button
             button.classList.add('active');
             
-            // Hide all panels
             elements.tabPanels.forEach(panel => panel.classList.remove('active'));
             
-            // Show target panel
             const targetPanel = document.getElementById(targetId);
             if (targetPanel) {
                 targetPanel.classList.add('active');
                 
-                // Add animation effect
                 targetPanel.style.opacity = '0';
                 targetPanel.style.transform = 'translateY(20px)';
                 
@@ -130,26 +126,20 @@ function initContactForm() {
     elements.contactForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // Get form data
         const formData = new FormData(this);
         const data = Object.fromEntries(formData);
         
-        // Show loading state
         const submitBtn = this.querySelector('.submit-btn');
+        if (!submitBtn) return;
+        
         const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
         
         try {
-            // Simulate API call (replace with actual API endpoint)
             await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            // Show success message
             showFormSuccess();
-            
-            // Reset form
             this.reset();
-            
         } catch (error) {
             console.error('Error submitting form:', error);
             showFormError();
@@ -161,6 +151,8 @@ function initContactForm() {
 }
 
 function showFormSuccess() {
+    if (!elements.contactForm) return;
+    
     const successMessage = document.createElement('div');
     successMessage.className = 'form-success';
     successMessage.innerHTML = `
@@ -172,15 +164,14 @@ function showFormSuccess() {
     
     elements.contactForm.appendChild(successMessage);
     
-    // Remove message after 5 seconds
     setTimeout(() => {
-        if (successMessage.parentNode) {
-            successMessage.remove();
-        }
+        if (successMessage.parentNode) successMessage.remove();
     }, 5000);
 }
 
 function showFormError() {
+    if (!elements.contactForm) return;
+    
     const errorMessage = document.createElement('div');
     errorMessage.className = 'form-error';
     errorMessage.innerHTML = `
@@ -192,27 +183,23 @@ function showFormError() {
     
     elements.contactForm.appendChild(errorMessage);
     
-    // Remove message after 5 seconds
     setTimeout(() => {
-        if (errorMessage.parentNode) {
-            errorMessage.remove();
-        }
+        if (errorMessage.parentNode) errorMessage.remove();
     }, 5000);
 }
 
 // ================= SCROLL ANIMATIONS =================
 function initScrollAnimations() {
-    // Add parallax effect to hero
+    // Parallax effect
     window.addEventListener('scroll', () => {
         const scrolled = window.pageYOffset;
         const hero = document.querySelector('.about-hero');
-        
         if (hero) {
             hero.style.transform = `translateY(${scrolled * 0.5}px)`;
         }
     });
     
-    // Add intersection observer for fade-in animations
+    // Intersection Observer
     const observerOptions = {
         root: null,
         rootMargin: '0px',
@@ -227,7 +214,6 @@ function initScrollAnimations() {
         });
     }, observerOptions);
     
-    // Observe all feature cards and process steps
     document.querySelectorAll('.feature-card, .process-step, .tech-card').forEach(el => {
         observer.observe(el);
     });

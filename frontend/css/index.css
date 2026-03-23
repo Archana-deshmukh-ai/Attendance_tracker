@@ -1112,3 +1112,353 @@
 .js-loaded #status-info {
     display: block;
 }
+/* ================= ADD TO END OF INDEX.CSS ================= */
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Section Subtitle */
+.section-subtitle {
+    text-align: center;
+    color: #64748b;
+    font-size: 18px;
+    margin-bottom: 50px;
+}
+
+/* Hero Badge */
+.hero-badge {
+    margin-bottom: 20px;
+}
+
+.badge-new {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #102094, #38bdf8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* Hero Stats */
+.hero-stats {
+    display: flex;
+    gap: 30px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+.hero-stat {
+    text-align: center;
+}
+
+.hero-stat .stat-number {
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+}
+
+.hero-stat .stat-label {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* Live Indicator */
+.preview-footer {
+    padding: 10px;
+    text-align: center;
+    background: #f1f5f9;
+    border-top: 1px solid #e2e8f0;
+    font-size: 12px;
+}
+
+.live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #10b981;
+}
+
+.pulse {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Stat Card Icons */
+.stat-icon {
+    font-size: 32px;
+    color: #102094;
+    margin-bottom: 15px;
+}
+
+/* Feature Icons */
+.feature-icon i {
+    font-size: 48px;
+    background: linear-gradient(135deg, #102094, #38bdf8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* Process Step Icons */
+.step-icon {
+    font-size: 28px;
+    color: #102094;
+    margin: 15px 0;
+}
+
+/* Demo Tab Icons */
+.demo-tab i {
+    margin-right: 8px;
+}
+
+/* Testimonial Avatar */
+.author-avatar img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.rating {
+    margin-top: 5px;
+}
+
+.rating i {
+    color: #f59e0b;
+    font-size: 12px;
+}
+
+/* Update Card Icon */
+.update-icon {
+    font-size: 32px;
+    color: #102094;
+    margin-bottom: 15px;
+}
+
+.update-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    background: #e2e8f0;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.update-badge.new {
+    background: #10b981;
+    color: white;
+}
+
+/* CTA Section */
+.cta-section {
+    padding: 80px 20px;
+    background: linear-gradient(135deg, #102094 0%, #1e40af 100%);
+    border-radius: 20px;
+    margin: 40px 0;
+    color: white;
+    text-align: center;
+}
+
+.cta-content h2 {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+.cta-content p {
+    font-size: 18px;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+.cta-buttons-group {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn.large {
+    padding: 16px 32px;
+    font-size: 18px;
+}
+
+.cta-note {
+    margin-top: 20px;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.cta-note i {
+    margin-right: 5px;
+}
+
+/* Footer Badges */
+.footer-badges {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.footer-badges .badge {
+    background: rgba(255,255,255,0.1);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+}
+
+/* Newsletter */
+.newsletter {
+    margin-top: 20px;
+}
+
+.newsletter h5 {
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.newsletter form {
+    display: flex;
+    gap: 8px;
+}
+
+.newsletter input {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+.newsletter input::placeholder {
+    color: rgba(255,255,255,0.6);
+}
+
+.newsletter button {
+    padding: 8px 12px;
+    background: #38bdf8;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.newsletter button:hover {
+    background: #0ea5e9;
+    transform: scale(1.05);
+}
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #102094;
+    cursor: pointer;
+}
+
+/* Responsive Updates */
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background: white;
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        z-index: 999;
+    }
+    
+    .nav-links.show {
+        display: flex;
+    }
+    
+    .hero-title {
+        font-size: 32px;
+    }
+    
+    .hero-stats {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .cta-content h2 {
+        font-size: 28px;
+    }
+    
+    .btn.large {
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+    
+    .footer-bottom-right {
+        margin-top: 10px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-stats {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .cta-buttons-group {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .cta-buttons-group .btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}
+
+/* Feature List Icons */
+.feature-list li i {
+    color: #10b981;
+    margin-right: 10px;
+    width: 20px;
+}
