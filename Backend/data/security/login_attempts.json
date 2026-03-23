@@ -1,0 +1,42 @@
+{
+  "sai.reddy@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-03-09T19:30:54.373717",
+        "ip": "127.0.0.1",
+        "success": false
+      },
+      {
+        "timestamp": "2026-03-09T19:31:52.438069",
+        "ip": "127.0.0.1",
+        "success": false
+      },
+      {
+        "timestamp": "2026-03-10T21:08:36.118242",
+        "ip": "127.0.0.1",
+        "success": false
+      },
+      {
+        "timestamp": "2026-03-10T21:08:36.122283",
+        "ip": "127.0.0.1",
+        "success": false
+      }
+    ],
+    "failed_count": 4,
+    "last_attempt": "2026-03-10T21:08:36.122283"
+  },
+  "127.0.0.1": {
+    "failed_attempts": 5
+  },
+  "aditya.kumar@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-03-09T19:34:46.385984",
+        "ip": "127.0.0.1",
+        "success": false
+      }
+    ],
+    "failed_count": 1,
+    "last_attempt": "2026-03-09T19:34:46.385984"
+  }
+}

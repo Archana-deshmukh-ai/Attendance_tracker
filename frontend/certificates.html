@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Student Certificates</title>
+<link rel="stylesheet" href="css/certificates.css">
+<style>
+body{
+font-family: Arial;
+background:#f4f6f9;
+text-align:center;
+}
+
+h2{
+margin-top:40px;
+}
+
+table{
+margin:40px auto;
+border-collapse:collapse;
+width:60%;
+background:white;
+box-shadow:0px 2px 10px rgba(0,0,0,0.1);
+}
+
+th,td{
+padding:12px;
+border:1px solid #ddd;
+}
+
+th{
+background:#4CAF50;
+color:white;
+}
+
+button{
+padding:8px 14px;
+background:#2196F3;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+button:hover{
+background:#0b7dda;
+}
+
+
+</style>
+</head>
+<body>
+
+<header>
+<h2>🎓 Student Certificate Dashboard</h2>
+</header>
+
+<div class="dashboard">
+    <div class="card">Total Certificates: <span id="totalCert">0</span></div>
+    <div class="card">Attendance %: <span id="attendance">0%</span></div>
+    <div class="card">Next Goal: 95% Excellence</div>
+</div>
+
+<input type="text" id="searchBox" placeholder="Search Certificate ID...">
+
+<div id="certificatesContainer"></div>
+<button onclick="generateCertificate()">Generate Certificate</button>
+
+<h2>Eligible Students for Certificates</h2>
+
+<table border="1">
+
+<tr>
+<th>Name</th>
+<th>Attendance %</th>
+</tr>
+
+{% for student in students %}
+
+<tr>
+<td>{{ student.name }}</td>
+<td>{{ student.attendance_percentage }}</td>
+
+<td>
+<button onclick="downloadCertificate('{{ student.name }}')">
+Download
+</button>
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+<script>
+function downloadCertificate(name){
+window.location.href="/download_certificate/"+name;
+}
+</script>
+
+<script src="js/certificates.js"></script>
+</body>
+</html>

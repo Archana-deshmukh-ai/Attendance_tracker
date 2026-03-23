@@ -1,0 +1,105 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  margin: 0;
+}
+
+/* Dark background overlay */
+.overlay {
+  width: 100%;
+  height: 100vh;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.5s ease;
+}
+
+/* Policy Card */
+.policy-card {
+  width: 500px;
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  border-top: 6px solid navy;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  animation: slideUp 0.6s ease;
+}
+
+.policy-card h2 {
+  color: navy;
+  margin-bottom: 10px;
+}
+
+.policy-content {
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 14px;
+  color: #334155;
+}
+
+.policy-content ul {
+  padding-left: 20px;
+}
+
+/* Agree section */
+.policy-agree {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.policy-agree input {
+  accent-color: navy;
+}
+
+/* Buttons */
+.policy-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+button {
+  width: 48%;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* Agree button */
+#agreeBtn {
+  background: navy;
+  color: white;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#agreeBtn:hover {
+  background: #0ea5e9;
+}
+
+/* Back button */
+#backBtn {
+  background: white;
+  border: 2px solid navy;
+  color: navy;
+}
+
+#backBtn:hover {
+  background: navy;
+  color: white;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+@keyframes slideUp {
+  from {transform: translateY(40px); opacity: 0;}
+  to {transform: translateY(0); opacity: 1;}
+}

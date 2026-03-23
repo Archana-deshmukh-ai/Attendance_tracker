@@ -29,9 +29,70 @@
         "timestamp": "2026-02-16T16:03:19.128078",
         "ip": "127.0.0.1",
         "success": true
+      },
+      {
+        "timestamp": "2026-02-16T21:04:17.415858",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-02-17T19:49:33.331856",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-02-17T19:49:33.358237",
+        "ip": "127.0.0.1",
+        "success": true
       }
     ],
     "failed_count": 0,
+<<<<<<< HEAD
+    "last_attempt": "2026-02-17T19:49:33.358237"
+  },
+  "anil.verma@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-02-11T19:28:20.877087",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-02-14T18:49:47.889526",
+        "ip": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "failed_count": 0,
+    "last_attempt": "2026-02-14T18:49:47.889526"
+  },
+  "kiranmaivanapalli07@gmail.com": {
+    "attempts": [
+      {
+        "timestamp": "2026-02-14T19:06:21.257539",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-02-14T19:09:39.175545",
+        "ip": "127.0.0.1",
+        "success": false
+      },
+      {
+        "timestamp": "2026-02-14T19:09:52.930280",
+        "ip": "127.0.0.1",
+        "success": false
+      },
+      {
+        "timestamp": "2026-02-14T19:09:52.933538",
+        "ip": "127.0.0.1",
+        "success": false
+      }
+    ],
+    "failed_count": 3,
+    "last_attempt": "2026-02-14T19:09:52.933538"
+=======
     "last_attempt": "2026-02-16T16:03:19.128078"
+>>>>>>> d47e46afbc813a379f29a75f50cb4b8af4928ae1
   }
 }

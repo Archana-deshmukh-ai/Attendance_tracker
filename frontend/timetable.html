@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Atlas | Timetable</title>
+    <link rel="stylesheet" href="timetable.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="css/timetable.css">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-calendar-check"></i>
+                <span class="logo-text">Attendance Atlas</span>
+            </div>
+            
+            <div class="nav-menu" id="navMenu">
+                <ul class="nav-links">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link active">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/aboutus.html" class="nav-link">
+                            <i class="fas fa-info-circle"></i>
+                            <span>About Us</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/profile.html" class="nav-link">
+                            <i class="fas fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/student_dashboard.html" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Student Dashboard</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="nav-logout">
+                    <a href="/logout.html" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mobile menu toggle -->
+            <div class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <!-- Header with day display and department selector -->
+            <header class="header">
+                <div class="header-top">
+                    <h1 class="page-title">
+                        <i class="fas fa-calendar-alt"></i> 
+                        Timetable
+                    </h1>
+                    <div class="day-badge" id="currentDay">Monday</div>
+                </div>
+                
+                <div class="selector-wrapper">
+                    <label for="deptSelect" class="select-label">
+                        <i class="fas fa-building"></i> Select Department:
+                    </label>
+                    <select id="deptSelect" class="dept-select">
+                        <option value="CSE">Computer Science (CSE)</option>
+                        <option value="ECE">Electronics & Comm. (ECE)</option>
+                        <option value="ME">Mechanical Engg (ME)</option>
+                        <option value="CE">Civil Engg (CE)</option>
+                        <option value="EEE">Electrical & Electronics (EEE)</option>
+                    </select>
+                </div>
+            </header>
+
+            <!-- Timetable Display Area -->
+            <div id="timetableContainer" class="timetable-container">
+                <!-- Dynamically populated by JS -->
+            </div>
+
+            <!-- Footer note with animation -->
+            <footer class="footer-note">
+                <span class="dot"></span> Daily auto-update · navy & white with transitions
+            </footer>
+        </div>
+    </div>
+
+    <script src="js/timetable.js"></script>
+</body>
+</html>
