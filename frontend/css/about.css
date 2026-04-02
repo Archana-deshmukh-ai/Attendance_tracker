@@ -248,13 +248,15 @@
 
 .process-step {
     display: flex;
-    align-items: center;
+    align-items:flex-end;
     margin-bottom: 50px;
-    position: relative;
+    position:  relative;
+    
 }
 
 .process-step:nth-child(odd) {
     flex-direction: row-reverse;
+     
 }
 
 .step-number {

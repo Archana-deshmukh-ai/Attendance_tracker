@@ -265,6 +265,6 @@ Chart Types
 
 If you found this project helpful, please give it a ⭐ on GitHub!
 
-Made  by Kiranmayee and  Archana Deshmukh |  Project 2026
+Made  by Kiranmai Vanapalli and  Archana Deshmukh |  Project 2026
 
 "Revolutionizing attendance management, one click at a time."

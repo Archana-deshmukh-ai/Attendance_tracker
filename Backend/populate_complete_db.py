@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import bcrypt
 
 # Database path
-DB_PATH = os.path.join("data", "institute.db")
+DB_PATH = "Backend/data/institute.db"
 
 def hash_password(password):
     """Hash a password using bcrypt"""
@@ -216,49 +216,59 @@ def create_students():
         "Priyanka Mehta", "Rahul Sharma", "Sneha Reddy", "Tushar Gupta", "Usha Devi"
     ]
     
-    # Generate students for each department
+    # Generate students for each department with varied attendance patterns
+    # We'll store attendance pattern info to use later
+    
     # CSE Students
     for i, name in enumerate(cse_names, 1):
+        pattern = determine_attendance_pattern(i, 'CSE')
         students.append({
             'student_id': f'CSE{i:03d}',
             'name': name,
             'email': f'{name.lower().replace(" ", ".")}@uni.edu',
             'password': 'student@1001',
             'batch': '2024',
-            'department': 'Computer Science'
+            'department': 'Computer Science',
+            'attendance_pattern': pattern
         })
     
     # ECE Students
     for i, name in enumerate(ece_names, 1):
+        pattern = determine_attendance_pattern(i, 'ECE')
         students.append({
             'student_id': f'ECE{i:03d}',
             'name': name,
             'email': f'{name.lower().replace(" ", ".")}@uni.edu',
             'password': 'student@1001',
             'batch': '2024',
-            'department': 'Electronics'
+            'department': 'Electronics',
+            'attendance_pattern': pattern
         })
     
     # ME Students
     for i, name in enumerate(me_names, 1):
+        pattern = determine_attendance_pattern(i, 'ME')
         students.append({
             'student_id': f'ME{i:03d}',
             'name': name,
             'email': f'{name.lower().replace(" ", ".")}@uni.edu',
             'password': 'student@1001',
             'batch': '2024',
-            'department': 'Mechanical'
+            'department': 'Mechanical',
+            'attendance_pattern': pattern
         })
     
     # Civil Students
     for i, name in enumerate(civil_names, 1):
+        pattern = determine_attendance_pattern(i, 'CE')
         students.append({
             'student_id': f'CE{i:03d}',
             'name': name,
             'email': f'{name.lower().replace(" ", ".")}@uni.edu',
             'password': 'student@1001',
             'batch': '2024',
-            'department': 'Civil'
+            'department': 'Civil',
+            'attendance_pattern': pattern
         })
     
     conn = sqlite3.connect(DB_PATH)
@@ -274,46 +284,106 @@ def create_students():
     
     conn.commit()
     conn.close()
-    print(f"✓ Created {len(students)} students")
+    
+    # Return students with patterns for attendance generation
+    return students
 
-def create_attendance():
-    """Create realistic attendance records for last 2 months"""
+def determine_attendance_pattern(student_num, dept):
+    """
+    Determine attendance pattern for a student
+    Returns: dict with attendance rate range and pattern type
+    """
+    # Create varied attendance patterns across all students
+    # This ensures we have students across all attendance ranges to test notification system
+    
+    # Use deterministic but varied pattern based on student number and department
+    # This ensures consistent results when re-running the script
+    import hashlib
+    seed_string = f"{dept}_{student_num}"
+    hash_value = int(hashlib.md5(seed_string.encode()).hexdigest()[:8], 16)
+    seed = hash_value % 100
+    
+    # Distribution to test notification system thoroughly:
+    # - 20% students: Very Low Attendance (below 60%) - CRITICAL notifications
+    # - 25% students: Low Attendance (60-74%) - WARNING notifications  
+    # - 20% students: Borderline (75-79%) - Close to threshold
+    # - 20% students: Average (80-84%) - Safe zone
+    # - 15% students: Good Attendance (85%+) - Excellent
+    
+    if seed < 20:  # 20% students - Very Low Attendance (below 60%) - CRITICAL
+        rate_min, rate_max = 40, 59
+        pattern_type = "critical"
+    elif seed < 45:  # 25% students - Low Attendance (60-74%) - WARNING
+        rate_min, rate_max = 60, 74
+        pattern_type = "warning"
+    elif seed < 65:  # 20% students - Borderline (75-79%)
+        rate_min, rate_max = 75, 79
+        pattern_type = "borderline"
+    elif seed < 85:  # 20% students - Average (80-84%)
+        rate_min, rate_max = 80, 84
+        pattern_type = "average"
+    else:  # 15% students - Good Attendance (85%+)
+        rate_min, rate_max = 85, 98
+        pattern_type = "good"
+    
+    return {
+        'rate_min': rate_min,
+        'rate_max': rate_max,
+        'pattern_type': pattern_type,
+        'expected_attendance': (rate_min + rate_max) / 2
+    }
+
+def create_attendance(students_with_patterns):
+    """Create realistic attendance records with varied patterns"""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    # Get all subjects and students
+    # Get all subjects and create mapping
     cursor.execute("SELECT subject_id, code, department FROM subjects")
     subjects = cursor.fetchall()
     
-    cursor.execute("SELECT student_id, department FROM students")
-    students = cursor.fetchall()
+    # Create a mapping of subjects by department
+    subjects_by_dept = {}
+    for subject in subjects:
+        subject_id, subject_code, subject_dept = subject
+        if subject_dept not in subjects_by_dept:
+            subjects_by_dept[subject_dept] = []
+        subjects_by_dept[subject_dept].append({
+            'id': subject_id,
+            'code': subject_code,
+            'dept': subject_dept
+        })
     
-    # Create a mapping of students by department
+    # Create student mapping by department
     students_by_dept = {}
-    for student in students:
-        dept = student[1]
+    student_patterns = {}
+    for student in students_with_patterns:
+        dept = student['department']
         if dept not in students_by_dept:
             students_by_dept[dept] = []
-        students_by_dept[dept].append(student[0])
+        students_by_dept[dept].append(student['student_id'])
+        student_patterns[student['student_id']] = student['attendance_pattern']
     
     # Generate attendance for the last 60 days
     end_date = datetime.now()
     start_date = end_date - timedelta(days=60)
     
     attendance_count = 0
-    total_days = 0
+    total_possible_records = 0
     
-    print("   Generating attendance records...")
+    print("   Generating attendance records with varied patterns...")
+    print("   (This may take a moment...)")
     
     # For each subject, generate attendance records
     for subject in subjects:
         subject_id, subject_code, subject_dept = subject
         
-        # Students from the same department take this subject
-        # Also, common subjects (Mathematics) are taken by all departments
+        # Determine which students take this subject
         if subject_dept == 'Mathematics':
             # All students take mathematics
-            eligible_students = [s[0] for s in students]
+            eligible_students = []
+            for dept_students in students_by_dept.values():
+                eligible_students.extend(dept_students)
         elif subject_dept in students_by_dept:
             eligible_students = students_by_dept[subject_dept]
         else:
@@ -321,39 +391,61 @@ def create_attendance():
         
         # Generate attendance for each day
         current_date = start_date
+        days_with_class = 0
+        
         while current_date <= end_date:
             # Skip weekends (Saturday and Sunday)
             if current_date.weekday() < 5:  # Monday to Friday
                 date_str = current_date.strftime('%Y-%m-%d')
-                total_days += 1
                 
-                # Determine if class was conducted (80% chance)
-                # Some subjects have more classes than others
-                class_probability = 0.85 if subject_code.startswith('CS') else 0.80
+                # Determine if class was conducted (80-90% probability)
+                class_probability = random.uniform(0.80, 0.90)
                 
                 if random.random() < class_probability:
+                    days_with_class += 1
+                    
                     for student_id in eligible_students:
-                        # Generate realistic attendance pattern based on student performance
-                        # Create a seed based on student_id to make patterns consistent
-                        seed = int(student_id[3:]) if student_id[3:].isdigit() else 0
-                        random.seed(seed + current_date.toordinal())
+                        total_possible_records += 1
                         
-                        # Different attendance patterns for different students
-                        # Some students have high attendance (90-100%), some medium (70-90%), some low (50-70%)
-                        student_num = int(student_id[3:]) if student_id[3:].isdigit() else 0
+                        # Get attendance pattern for this student
+                        pattern = student_patterns.get(student_id, {
+                            'rate_min': 85, 'rate_max': 95, 'pattern_type': 'good'
+                        })
                         
-                        if student_num % 10 < 2:  # 20% students - low attendance
-                            attendance_rate = random.uniform(0.50, 0.70)
-                        elif student_num % 10 < 6:  # 40% students - medium attendance
-                            attendance_rate = random.uniform(0.70, 0.85)
-                        else:  # 40% students - high attendance
-                            attendance_rate = random.uniform(0.85, 0.98)
+                        # Create deterministic but realistic attendance pattern
+                        # Use student_id and date to create consistent pattern
+                        seed_value = hash(f"{student_id}_{date_str}_{subject_id}") % 1000
+                        random.seed(seed_value)
                         
-                        is_present = random.random() < attendance_rate
+                        # Base attendance probability from pattern
+                        base_rate = random.uniform(pattern['rate_min'], pattern['rate_max']) / 100
+                        
+                        # Add some variation based on day of week
+                        weekday = current_date.weekday()
+                        if weekday == 0:  # Monday - lower attendance
+                            variation = -0.05
+                        elif weekday == 4:  # Friday - slightly lower
+                            variation = -0.03
+                        elif weekday == 2:  # Wednesday - higher attendance
+                            variation = 0.03
+                        else:
+                            variation = 0
+                        
+                        attendance_probability = max(0.30, min(0.98, base_rate + variation))
+                        
+                        # For students with very low attendance, sometimes they skip multiple days
+                        if pattern['pattern_type'] == 'critical' and random.random() < 0.35:
+                            attendance_probability *= 0.5
+                        elif pattern['pattern_type'] == 'warning' and random.random() < 0.25:
+                            attendance_probability *= 0.7
+                        elif pattern['pattern_type'] == 'borderline' and random.random() < 0.15:
+                            attendance_probability *= 0.85
+                        
+                        is_present = random.random() < attendance_probability
                         
                         if is_present:
-                            # Sometimes mark as late (10% of present students)
-                            if random.random() < 0.10:
+                            # Sometimes mark as late (15% of present students)
+                            if random.random() < 0.15:
                                 status = 'late'
                             else:
                                 status = 'present'
@@ -363,18 +455,40 @@ def create_attendance():
                         # Get lecturer who marked attendance
                         lecturer_id = get_lecturer_for_subject(cursor, subject_id)
                         
-                        # Add remarks for some absent students
+                        # Add remarks for some absent students (for notification testing)
                         remarks = None
-                        if status == 'absent' and random.random() < 0.15:
-                            remarks_list = [
-                                'Medical leave',
-                                'Family emergency',
-                                'Sports event',
-                                'Technical event',
-                                'Personal reason',
-                                'Travel'
-                            ]
-                            remarks = random.choice(remarks_list)
+                        if status == 'absent':
+                            if pattern['pattern_type'] == 'critical' and random.random() < 0.30:
+                                remarks_list = [
+                                    '⚠️ CRITICAL: Attendance below 60% - Urgent action required',
+                                    '⚠️ Multiple consecutive absences - Parent notification sent',
+                                    '⚠️ Attendance critically low - Intervention needed',
+                                    '⚠️ Below minimum attendance requirement - Warning issued'
+                                ]
+                                remarks = random.choice(remarks_list)
+                            elif pattern['pattern_type'] == 'warning' and random.random() < 0.20:
+                                remarks_list = [
+                                    '⚠️ Warning: Attendance below 75%',
+                                    '⚠️ Low attendance - Improvement needed',
+                                    '⚠️ Regular absentee - Monitoring required'
+                                ]
+                                remarks = random.choice(remarks_list)
+                            elif pattern['pattern_type'] == 'borderline' and random.random() < 0.10:
+                                remarks_list = [
+                                    'Borderline attendance - Need to improve',
+                                    'Close to warning threshold'
+                                ]
+                                remarks = random.choice(remarks_list)
+                            elif random.random() < 0.08:
+                                remarks_list = [
+                                    'Medical leave',
+                                    'Family emergency',
+                                    'Sports event participation',
+                                    'Technical symposium',
+                                    'Personal reason',
+                                    'Travel'
+                                ]
+                                remarks = random.choice(remarks_list)
                         
                         cursor.execute("""
                             INSERT INTO attendance 
@@ -389,10 +503,17 @@ def create_attendance():
         
         # Reset random seed
         random.seed()
+        
+        if days_with_class > 0:
+            print(f"      {subject_code}: {days_with_class} classes")
     
     conn.commit()
     conn.close()
-    print(f"   ✓ Created {attendance_count} attendance records across {total_days} days")
+    
+    print(f"\n   ✓ Created {attendance_count:,} attendance records")
+    print(f"   ✓ Total possible records: {total_possible_records:,}")
+    
+    return total_possible_records
 
 def get_lecturer_for_subject(cursor, subject_id):
     """Get the lecturer assigned to a subject"""
@@ -400,62 +521,134 @@ def get_lecturer_for_subject(cursor, subject_id):
     result = cursor.fetchone()
     return result[0] if result else None
 
-def add_special_data_patterns():
-    """Add interesting data patterns for demonstration"""
+def calculate_attendance_statistics():
+    """Calculate and display attendance statistics for notification testing"""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    print("   Adding special data patterns...")
+    print("\n   📊 Calculating attendance statistics...")
     
-    # 1. Mark some students with perfect attendance
+    # Calculate attendance percentage for each student
     cursor.execute("""
-        UPDATE attendance 
-        SET remarks = 'Perfect attendance' 
-        WHERE student_id IN ('CSE001', 'CSE005', 'ECE003', 'ME010', 'CE002') 
-        AND status = 'present'
-        AND date > date('now', '-30 days')
+        SELECT s.student_id, s.name, s.department,
+               COUNT(CASE WHEN a.status='present' THEN 1 END) as present,
+               COUNT(CASE WHEN a.status='late' THEN 1 END) as late,
+               COUNT(CASE WHEN a.status='absent' THEN 1 END) as absent,
+               COUNT(*) as total
+        FROM students s
+        LEFT JOIN attendance a ON s.student_id = a.student_id
+        GROUP BY s.student_id
+        HAVING total > 0
+        ORDER BY (present * 1.0 / total) ASC
     """)
     
-    # 2. Mark some students with very low attendance
+    student_attendance = cursor.fetchall()
+    
+    # Categorize students for notification system
+    critical_students = []  # Below 60%
+    warning_students = []   # 60-74%
+    borderline_students = [] # 75-79%
+    safe_students = []      # 80%+
+    
+    for student in student_attendance:
+        student_id, name, dept, present, late, absent, total = student
+        percentage = (present / total * 100) if total > 0 else 0
+        
+        if percentage < 60:
+            critical_students.append((name, student_id, dept, percentage, present, late, absent, total))
+        elif percentage < 75:
+            warning_students.append((name, student_id, dept, percentage, present, late, absent, total))
+        elif percentage < 80:
+            borderline_students.append((name, student_id, dept, percentage, present, late, absent, total))
+        else:
+            safe_students.append((name, student_id, dept, percentage, present, late, absent, total))
+    
+    print(f"\n   🔴 CRITICAL (Below 60%): {len(critical_students)} students")
+    for name, sid, dept, pct, present, late, absent, total in critical_students[:10]:
+        print(f"      • {name} ({sid}) - {dept}: {pct:.1f}% (P:{present}, L:{late}, A:{absent})")
+    
+    print(f"\n   🟠 WARNING (60-74%): {len(warning_students)} students")
+    for name, sid, dept, pct, present, late, absent, total in warning_students[:10]:
+        print(f"      • {name} ({sid}) - {dept}: {pct:.1f}% (P:{present}, L:{late}, A:{absent})")
+    
+    print(f"\n   🟡 BORDERLINE (75-79%): {len(borderline_students)} students")
+    for name, sid, dept, pct, present, late, absent, total in borderline_students[:10]:
+        print(f"      • {name} ({sid}) - {dept}: {pct:.1f}% (P:{present}, L:{late}, A:{absent})")
+    
+    print(f"\n   🟢 SAFE (80%+): {len(safe_students)} students")
+    for name, sid, dept, pct, present, late, absent, total in safe_students[:5]:
+        print(f"      • {name} ({sid}) - {dept}: {pct:.1f}% (P:{present}, L:{late}, A:{absent})")
+    
+    conn.close()
+    
+    return {
+        'critical': len(critical_students),
+        'warning': len(warning_students),
+        'borderline': len(borderline_students),
+        'safe': len(safe_students)
+    }
+
+def add_special_notification_patterns():
+    """Add special patterns specifically for testing notification system"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    print("\n   🔔 Adding special notification patterns...")
+    
+    # Add specific remarks for students with very low attendance to trigger notifications
     cursor.execute("""
         UPDATE attendance 
-        SET remarks = 'Low attendance warning' 
-        WHERE student_id IN ('CSE020', 'ECE015', 'ME018', 'CE012') 
+        SET remarks = '⚠️ URGENT: Attendance critically low - Below 60% - Parent notification sent'
+        WHERE student_id IN (
+            SELECT student_id FROM attendance 
+            GROUP BY student_id 
+            HAVING (COUNT(CASE WHEN status='present' THEN 1 END) * 1.0 / COUNT(*)) < 0.6
+        ) 
         AND status = 'absent'
         AND date > date('now', '-15 days')
+        AND remarks IS NULL
     """)
     
-    # 3. Add late marks for certain students
+    # Add warning remarks for students with 60-74% attendance
     cursor.execute("""
         UPDATE attendance 
-        SET status = 'late' 
-        WHERE student_id IN ('CSE010', 'ECE008', 'ME005', 'CE008') 
-        AND date > date('now', '-7 days')
-        AND random() % 100 < 40
-    """)
-    
-    # 4. Add some attendance with remarks for special events
-    cursor.execute("""
-        UPDATE attendance 
-        SET remarks = 'Cultural fest participation' 
-        WHERE student_id IN ('CSE015', 'ECE020', 'ME022', 'CE015') 
+        SET remarks = '⚠️ Warning: Attendance below 75% - Improvement needed'
+        WHERE student_id IN (
+            SELECT student_id FROM attendance 
+            GROUP BY student_id 
+            HAVING (COUNT(CASE WHEN status='present' THEN 1 END) * 1.0 / COUNT(*)) BETWEEN 0.6 AND 0.74
+        ) 
         AND status = 'absent'
-        AND date = date('now', '-12 days')
+        AND date > date('now', '-10 days')
+        AND remarks IS NULL
     """)
     
+    # Add consecutive absence patterns for critical students
     cursor.execute("""
         UPDATE attendance 
-        SET remarks = 'Technical symposium' 
-        WHERE student_id IN ('CSE025', 'ECE012', 'ME008') 
+        SET remarks = '⚠️ Multiple consecutive absences detected - Automatic notification triggered'
+        WHERE student_id IN (
+            SELECT DISTINCT a1.student_id 
+            FROM attendance a1
+            WHERE a1.status = 'absent'
+            AND EXISTS (
+                SELECT 1 FROM attendance a2 
+                WHERE a2.student_id = a1.student_id 
+                AND a2.date = date(a1.date, '+1 day')
+                AND a2.status = 'absent'
+            )
+            AND a1.date > date('now', '-30 days')
+        )
         AND status = 'absent'
-        AND date = date('now', '-5 days')
+        AND date > date('now', '-15 days')
+        AND remarks IS NULL
     """)
     
     conn.commit()
     conn.close()
-    print("   ✓ Special data patterns added")
+    print("   ✓ Special notification patterns added")
 
-def print_complete_statistics():
+def print_complete_statistics(attendance_stats):
     """Print detailed database statistics"""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -531,7 +724,7 @@ def print_complete_statistics():
     stats = cursor.fetchone()
     total = stats[0] + stats[1] + stats[2]
     
-    print(f"\n✅ ATTENDANCE SUMMARY:")
+    print(f"\n✅ OVERALL ATTENDANCE SUMMARY:")
     if total > 0:
         present_pct = (stats[0] / total * 100)
         absent_pct = (stats[1] / total * 100)
@@ -540,6 +733,34 @@ def print_complete_statistics():
         print(f"   • Absent: {stats[1]:,} ({absent_pct:.1f}%)")
         print(f"   • Late: {stats[2]:,} ({late_pct:.1f}%)")
         print(f"   • Total Records: {total:,}")
+    
+    # Notification System Summary
+    print(f"\n🔔 NOTIFICATION SYSTEM TESTING SUMMARY:")
+    print(f"   • Students needing CRITICAL notifications (<60%): {attendance_stats['critical']}")
+    print(f"   • Students needing WARNING notifications (60-74%): {attendance_stats['warning']}")
+    print(f"   • Students on BORDERLINE (75-79%): {attendance_stats['borderline']}")
+    print(f"   • Students with SAFE attendance (80%+): {attendance_stats['safe']}")
+    
+    # Sample low attendance students for testing
+    print(f"\n📋 SAMPLE STUDENTS FOR NOTIFICATION TESTING:")
+    cursor.execute("""
+        SELECT s.student_id, s.name, s.email, s.department,
+               COUNT(CASE WHEN a.status='present' THEN 1 END) as present,
+               COUNT(*) as total,
+               ROUND(100.0 * COUNT(CASE WHEN a.status='present' THEN 1 END) / COUNT(*), 1) as percentage
+        FROM attendance a
+        JOIN students s ON a.student_id = s.student_id
+        GROUP BY a.student_id
+        HAVING percentage < 75
+        ORDER BY percentage ASC
+        LIMIT 10
+    """)
+    low_attendance = cursor.fetchall()
+    
+    for sid, name, email, dept, present, total, pct in low_attendance:
+        status = "CRITICAL" if pct < 60 else "WARNING"
+        print(f"   • {status}: {name} ({sid}) - {dept} - {pct}% attendance")
+        print(f"     Email: {email}")
     
     # Lecturers with most classes
     print(f"\n👨‍🏫 TOP LECTURERS (by classes conducted):")
@@ -556,40 +777,6 @@ def print_complete_statistics():
     for name, classes in top_lecturers:
         print(f"   • {name}: {classes} classes")
     
-    # Students with highest attendance
-    print(f"\n🏆 TOP 5 STUDENTS (highest attendance %):")
-    cursor.execute("""
-        SELECT s.name, 
-               COUNT(CASE WHEN a.status='present' THEN 1 END) as present,
-               COUNT(*) as total,
-               ROUND(100.0 * COUNT(CASE WHEN a.status='present' THEN 1 END) / COUNT(*), 1) as percentage
-        FROM attendance a
-        JOIN students s ON a.student_id = s.student_id
-        GROUP BY a.student_id
-        ORDER BY percentage DESC
-        LIMIT 5
-    """)
-    top_students = cursor.fetchall()
-    for name, present, total, pct in top_students:
-        print(f"   • {name}: {pct}% ({present}/{total})")
-    
-    # Students with lowest attendance
-    print(f"\n⚠️  BOTTOM 5 STUDENTS (lowest attendance %):")
-    cursor.execute("""
-        SELECT s.name, 
-               COUNT(CASE WHEN a.status='present' THEN 1 END) as present,
-               COUNT(*) as total,
-               ROUND(100.0 * COUNT(CASE WHEN a.status='present' THEN 1 END) / COUNT(*), 1) as percentage
-        FROM attendance a
-        JOIN students s ON a.student_id = s.student_id
-        GROUP BY a.student_id
-        ORDER BY percentage ASC
-        LIMIT 5
-    """)
-    bottom_students = cursor.fetchall()
-    for name, present, total, pct in bottom_students:
-        print(f"   • {name}: {pct}% ({present}/{total})")
-    
     conn.close()
     print("="*70)
 
@@ -603,13 +790,14 @@ def main():
     print("   • 110 Students (CSE:40, ECE:25, ME:25, Civil:20)")
     print("   • 25 Subjects across 5 departments")
     print("   • Attendance records for last 60 days")
-    print("   • Realistic attendance patterns (50-98%)")
-    print("   • Special remarks and late marks")
+    print("   • RANDOM attendance patterns (40% to 98%)")
+    print("   • 45% students below 75% attendance for notification testing")
+    print("   • Special remarks and notification triggers")
     
     # Check if database exists
     if not os.path.exists(DB_PATH):
         print("\n❌ Database not found! Please run the app first to create the database.")
-        print("   Run: python app.py")
+        print("   Run: python app.py first to create the database structure")
         return
     
     # Ask for confirmation
@@ -629,36 +817,42 @@ def main():
     print("\n📚 Creating subjects...")
     create_subjects()
     
-    print("\n👥 Creating students...")
-    create_students()
+    print("\n👥 Creating students with varied attendance patterns...")
+    students_with_patterns = create_students()
     
-    print("\n📊 Generating attendance records for last 60 days...")
-    create_attendance()
+    print("\n📊 Generating random attendance records for last 60 days...")
+    create_attendance(students_with_patterns)
     
-    print("\n✨ Adding special data patterns...")
-    add_special_data_patterns()
+    print("\n✨ Adding special notification patterns...")
+    add_special_notification_patterns()
     
-    print("\n📈 Generating complete statistics...")
-    print_complete_statistics()
+    print("\n📈 Calculating attendance statistics...")
+    attendance_stats = calculate_attendance_statistics()
+    
+    print("\n📊 Generating complete statistics...")
+    print_complete_statistics(attendance_stats)
     
     print("\n" + "="*70)
     print("✅ DATABASE POPULATION COMPLETE!")
     print("="*70)
     print("\n🎯 TEST CREDENTIALS:")
-    print("\n   STUDENTS:")
-    print("   • Aarav Sharma: aarav.sharma@uni.edu / student@1001")
-    print("   • Diya Reddy: diya.reddy@uni.edu / student@1001")
-    print("   • Any student email: [firstname.lastname]@uni.edu")
-    print("\n   LECTURERS:")
+    print("\n   STUDENTS (Use any of these emails with password: student@1001):")
+    print("   • CSE Student: aarav.sharma@uni.edu")
+    print("   • ECE Student: akash.verma@uni.edu")
+    print("   • ME Student: amit.trivedi@uni.edu")
+    print("   • CE Student: ankit.sharma@uni.edu")
+    print("\n   LECTURERS (Use these to see department-wide data):")
     print("   • Dr. Rajesh Iyer: rajesh.iyer@uni.edu / prof@201")
     print("   • Prof. Sarah Johnson: sarah.johnson@uni.edu / prof@202")
-    print("   • Dr. Amit Sharma: amit.sharma@uni.edu / prof@203")
-    print("\n🔍 Visit: http://localhost:5000/report")
-    print("\n💡 TIPS:")
-    print("   • Login as lecturer to see all department data")
-    print("   • Login as student to see personal attendance")
-    print("   • Use filters to analyze specific subjects/students")
-    print("   • Export data in CSV format for further analysis")
+    print("\n🔔 NOTIFICATION SYSTEM TESTING:")
+    print("   • 45% of students have attendance below 75%")
+    print("   • 20% of students have CRITICAL attendance (<60%)")
+    print("   • 25% of students have WARNING attendance (60-74%)")
+    print("\n💡 TIPS FOR TESTING NOTIFICATIONS:")
+    print("   • Login as a lecturer to see all low attendance students")
+    print("   • Check the notification system for students with remarks")
+    print("   • Students with CRITICAL status need immediate attention")
+    print("   • Use the report section to filter by attendance percentage")
     print("="*70)
 
 if __name__ == "__main__":
