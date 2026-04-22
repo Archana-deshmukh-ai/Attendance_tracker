@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Student Dashboard | Attendance Atlas | Track Your Attendance</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/student_dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Notification.css -->
+    <link rel="stylesheet" href="css/notification.css">
+   
+
+</head>
+<body class="js-loading">
+
+<!-- ================= HEADER ================= -->
+<header class="navbar" data-aos="fade-down">
+    <div class="logo">
+        <i class="fas fa-user-graduate"></i> Student Dashboard
+    </div>
+
+    <nav class="nav-links" id="nav-links">
+        <!-- Will be populated by JavaScript -->
+    </nav>
+
+    <div class="header-right" id="auth-area">
+        <!-- Will be populated by JavaScript -->
+    </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div id="notification-container"></div>
+        <script src="js/notification.js"></script>
+        <link rel="stylesheet" href="css/notification.css">
+    
+    
+</header>
+
+<!-- ================= MAIN CONTENT ================= -->
+<main class="dashboard-container">
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner" data-aos="fade-up" data-aos-duration="800">
+        <div class="banner-content">
+            <div class="student-profile">
+                <div class="profile-avatar">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="profile-info">
+                    <h1>Welcome back, <span id="studentName">Student</span>! 🎓</h1>
+                    <p class="student-details">
+                        <i class="fas fa-id-card"></i> Student ID: <span id="studentId">S001</span> |
+                        <i class="fas fa-university"></i> Department: <span id="studentDept">Computer Science</span> |
+                        <i class="fas fa-calendar-alt"></i> Semester: <span id="studentSemester">6</span>
+                    </p>
+                </div>
+            </div>
+            <div class="welcome-actions">
+                <button class="quick-action" onclick="viewDetailedReport()">
+                    <i class="fas fa-chart-line"></i>
+                    <span>View Detailed Report</span>
+                </button>
+                <button class="quick-action" onclick="downloadAttendanceCertificate()">
+                    <i class="fas fa-file-certificate"></i>
+                    <span>Get Certificate</span>
+                </button>
+                <button class="quick-action" onclick="downloadReport()">
+                    <i class="fas fa-download"></i>
+                    <span>Download Report</span>
+                </button>
+            </div>
+        </div>
+        <div class="academic-status">
+            <div class="status-indicator" id="attendanceStatus">
+                <i class="fas fa-check-circle"></i>
+                <span>Attendance Status: <strong>Good</strong></span>
+            </div>
+            <div class="semester-progress">
+                <div class="progress-info">
+                    <span>Semester Progress</span>
+                    <span id="semesterProgress">65%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 65%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        
+        <!-- Attendance Overview -->
+        <div class="overview-section" data-aos="fade-up" data-aos-delay="100">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-pie"></i> Attendance Overview</h2>
+                <select id="overviewPeriod" class="period-select" onchange="updateOverview()">
+                    <option value="week">This Week</option>
+                    <option value="month" selected>This Month</option>
+                    <option value="semester">This Semester</option>
+                    <option value="all">All Time</option>
+                </select>
+            </div>
+            <div class="overview-grid">
+                <div class="overview-card primary" data-aos="zoom-in" data-aos-delay="150">
+                    <div class="overview-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="overview-content">
+                        <div class="overview-number" id="totalClasses">0</div>
+                        <div class="overview-label">Total Classes</div>
+                        <div class="overview-change" id="classChange">+0 this week</div>
+                    </div>
+                </div>
+                
+                <div class="overview-card success" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="overview-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="overview-content">
+                        <div class="overview-number" id="presentCount">0</div>
+                        <div class="overview-label">Classes Present</div>
+                        <div class="overview-change" id="presentChange">+0 this week</div>
+                    </div>
+                </div>
+                
+                <div class="overview-card warning" data-aos="zoom-in" data-aos-delay="250">
+                    <div class="overview-icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="overview-content">
+                        <div class="overview-number" id="absentCount">0</div>
+                        <div class="overview-label">Classes Absent</div>
+                        <div class="overview-change" id="absentChange">+0 this week</div>
+                    </div>
+                </div>
+                
+                <div class="overview-card highlight" data-aos="zoom-in" data-aos-delay="300">
+                    <div class="overview-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="overview-content">
+                        <div class="overview-number" id="attendancePercent">0%</div>
+                        <div class="overview-label">Attendance Rate</div>
+                        <div class="overview-change" id="percentChange">+0% from last week</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="actions-section" data-aos="fade-up" data-aos-delay="200">
+            <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+            <div class="actions-grid">
+                <a href="/report" class="action-card primary" data-aos="flip-left" data-aos-delay="250">
+                    <div class="action-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h4>View Reports</h4>
+                    <p>Detailed attendance analysis and insights</p>
+                    <span class="action-badge">Analytics</span>
+                </a>
+                
+                <button class="action-card" onclick="downloadReport()" data-aos="flip-left" data-aos-delay="300">
+                    <div class="action-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <h4>Download PDF</h4>
+                    <p>Generate and download attendance report</p>
+                    <span class="action-badge new">New</span>
+                </button>
+                
+                <button class="action-card" onclick="requestAttendanceCertificate()" data-aos="flip-left" data-aos-delay="350">
+                    <div class="action-icon">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <h4>Get Certificate</h4>
+                    <p>Request attendance excellence certificate</p>
+                    <span class="action-badge" id="certEligibility">Check</span>
+                </button>
+                
+                <a href="/settings" class="action-card" data-aos="flip-left" data-aos-delay="400">
+                    <div class="action-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <h4>Settings</h4>
+                    <p>Manage your profile preferences</p>
+                    <span class="action-badge">Profile</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Attendance Chart -->
+        <div class="chart-section" data-aos="fade-up" data-aos-delay="300">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-line"></i> Attendance Trend</h2>
+                <div class="chart-controls">
+                    <button class="chart-btn active" data-type="weekly">Weekly</button>
+                    <button class="chart-btn" data-type="monthly">Monthly</button>
+                    <button class="chart-btn" data-type="subject">By Subject</button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+            <div class="chart-stats">
+                <div class="chart-stat">
+                    <span class="stat-label">Your Average</span>
+                    <span class="stat-value" id="yourAvg">85%</span>
+                </div>
+                <div class="chart-stat">
+                    <span class="stat-label">Class Average</span>
+                    <span class="stat-value" id="classAvg">78%</span>
+                </div>
+                <div class="chart-stat">
+                    <span class="stat-label">Difference</span>
+                    <span class="stat-value" id="avgDiff">+7%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Classes -->
+        <div class="schedule-section" data-aos="fade-up" data-aos-delay="400">
+            <div class="section-header">
+                <h2><i class="fas fa-calendar-day"></i> Today's Classes</h2>
+                <button class="view-all" onclick="viewFullSchedule()">
+                    <i class="fas fa-calendar"></i> View All
+                </button>
+            </div>
+            <div class="classes-list" id="todaysClasses">
+                <!-- Will be populated by JavaScript -->
+                <div class="class-empty">
+                    <i class="fas fa-calendar-times"></i>
+                    <p>No classes scheduled for today</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subject Performance -->
+        <div class="performance-section">
+            <div class="section-title">
+                <i class="fas fa-chart-line"></i>
+                <span>Student-wise Performance</span>
+            </div>
+            <div id="performanceContainer">
+            <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+            </div>
+        </div>
+
+        <!-- Recent Attendance -->
+        <div class="recent-section" data-aos="fade-up" data-aos-delay="600">
+            <div class="section-header">
+                <h2><i class="fas fa-history"></i> Recent Attendance</h2>
+                <div class="filter-options">
+                    <select id="attendanceFilter" onchange="filterAttendance()">
+                        <option value="all">All Records</option>
+                        <option value="present">Present Only</option>
+                        <option value="absent">Absent Only</option>
+                        <option value="week">This Week</option>
+                    </select>
+                </div>
+            </div>
+            <div class="attendance-table-container">
+                <table class="attendance-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-calendar"></i> Date</th>
+                            <th><i class="fas fa-book"></i> Subject</th>
+                            <th><i class="fas fa-clock"></i> Time</th>
+                            <th><i class="fas fa-check-circle"></i> Status</th>
+                            <th><i class="fas fa-comment"></i> Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody">
+                        <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-footer">
+                <span class="record-count">Showing <span id="recordCount">0</span> records</span>
+                <button class="load-more" onclick="loadMoreAttendance()">
+                    <i class="fas fa-plus"></i> Load More
+                </button>
+            </div>
+        </div>
+
+        <!-- Attendance Goals -->
+        <div class="goals-section" data-aos="fade-up" data-aos-delay="700">
+            <h2><i class="fas fa-bullseye"></i> Attendance Goals</h2>
+            <div class="goals-container">
+                <div class="goal-card" data-aos="fade-right" data-aos-delay="750">
+                    <div class="goal-header">
+                        <h4>Minimum Requirement</h4>
+                        <div class="goal-progress">
+                            <span id="minRequirementProgress">75%</span>
+                            <span class="goal-target">Target: 75%</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="minRequirementFill" style="width: 75%"></div>
+                    </div>
+                    <p class="goal-desc">Minimum attendance required for eligibility</p>
+                </div>
+                
+                <div class="goal-card" data-aos="fade-up" data-aos-delay="800">
+                    <div class="goal-header">
+                        <h4>Good Standing</h4>
+                        <div class="goal-progress">
+                            <span id="goodStandingProgress">85%</span>
+                            <span class="goal-target">Target: 85%</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="goodStandingFill" style="width: 85%"></div>
+                    </div>
+                    <p class="goal-desc">Recommended for academic success</p>
+                </div>
+                
+                <div class="goal-card" data-aos="fade-left" data-aos-delay="850">
+                    <div class="goal-header">
+                        <h4>Excellence</h4>
+                        <div class="goal-progress">
+                            <span id="excellenceProgress">95%</span>
+                            <span class="goal-target">Target: 95%</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="excellenceFill" style="width: 95%"></div>
+                    </div>
+                    <p class="goal-desc">For certificate eligibility</p>
+                </div>
+            </div>
+        </div>
+
+         
+        <!-- Notifications & Alerts -->
+        <div class="notifications-section" data-aos="fade-up" data-aos-delay="900">
+            <div class="section-header">
+                <h2><i class="fas fa-bell"></i> Notifications & Alerts</h2>
+                <div class="notification-actions">
+                    <button class="mark-all-btn" onclick="markAllAsRead()">Mark all as read</button>
+                    <span class="badge" id="notificationCount">0</span>
+                </div>
+            </div>
+            <div class="notifications-list" id="notificationsList">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Upcoming Deadlines -->
+        <div class="deadlines-section" data-aos="fade-up" data-aos-delay="1000">
+            <h2><i class="fas fa-exclamation-circle"></i> Important Alerts</h2>
+            <div class="alerts-list" id="importantAlerts">
+                <!-- Will be populated by JavaScript -->
+                <div class="alert-item info">
+                    <div class="alert-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <h4>Attendance Review Week</h4>
+                        <p>Check your attendance and report discrepancies</p>
+                        <small><i class="fas fa-clock"></i> Ends in 3 days</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Academic Performance Summary -->
+    <div class="performance-summary" data-aos="fade-up" data-aos-delay="1100">
+        <h3><i class="fas fa-trophy"></i> Academic Performance Summary</h3>
+        <div class="summary-grid">
+            <div class="summary-card" data-aos="fade-right" data-aos-delay="1150">
+                <div class="summary-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="summary-content">
+                    <h4>Attendance Ranking</h4>
+                    <div class="summary-value" id="attendanceRanking">--</div>
+                    <p class="summary-change">in your department</p>
+                </div>
+            </div>
+            
+            <div class="summary-card" data-aos="fade-up" data-aos-delay="1200">
+                <div class="summary-icon">
+                    <i class="fas fa-medal"></i>
+                </div>
+                <div class="summary-content">
+                    <h4>Consistency Score</h4>
+                    <div class="summary-value" id="consistencyScore">--%</div>
+                    <p class="summary-change">of regular attendance</p>
+                </div>
+            </div>
+            
+            <div class="summary-card" data-aos="fade-left" data-aos-delay="1250">
+                <div class="summary-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="summary-content">
+                    <h4>Days Since Last Absent</h4>
+                    <div class="summary-value" id="daysSinceAbsent">0</div>
+                    <p class="summary-change">days streak</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h3><i class="fas fa-user-graduate"></i> Student Portal</h3>
+            <p>Track your attendance, monitor performance, and excel in academics with real-time insights.</p>
+            <div class="footer-stats">
+                <div class="footer-stat">
+                    <div class="footer-stat-number" id="footerTotalClasses">0</div>
+                    <div class="footer-stat-label">Total Classes</div>
+                </div>
+                <div class="footer-stat">
+                    <div class="footer-stat-number" id="footerAttendanceRate">0%</div>
+                    <div class="footer-stat-label">Attendance Rate</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-section">
+            <h4><i class="fas fa-tools"></i> Student Tools</h4>
+            <ul>
+                <li><a href="/report"><i class="fas fa-chart-bar"></i> Attendance Reports</a></li>
+                <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+                <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
+                <li><a href="/help"><i class="fas fa-question-circle"></i> Help Center</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4><i class="fas fa-headset"></i> Student Support</h4>
+            <p><i class="fas fa-envelope"></i> student.support@attendanceatlas.com</p>
+            <p><i class="fas fa-phone"></i> +1 (555) 987-6543</p>
+            <p><i class="fas fa-clock"></i> Mon-Fri, 9 AM - 5 PM</p>
+            <p><i class="fas fa-info-circle"></i> Emergency: 24/7 Help Desk</p>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <div class="footer-bottom-left">
+            <p>© 2026 Attendance Atlas - Student Dashboard</p>
+        </div>
+        <div class="footer-bottom-right">
+            <span id="sessionInfo">Active • Last updated: Just now</span>
+            <span class="separator">|</span>
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms of Service</a>
+        </div>
+    </div>
+</footer>
+
+<!-- ================= SCRIPTS ================= -->
+<script src="js/script.js"></script>
+<script src="js/student_dashboard.js"></script>
+<script src="js/notification.js"></script>
+
+<script>
+    // Initialize AOS animations!~ 
+    AOS.init({
+        duration: 600,
+        once: true,
+        offset: 50,
+        easing: 'ease-in-out'
+    });
+    
+    // Remove loading class after page load
+    window.addEventListener('load', () => {
+        document.body.classList.remove('js-loading');
+        document.body.classList.add('js-loaded');
+    });
+    
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('mobileMenuToggle');
+    const navLinks = document.getElementById('nav-links');
+    
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('show');
+            const icon = menuToggle.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            }
+        });
+    }
+    
+    // View full schedule function
+    window.viewFullSchedule = function() {
+        showInfoMessage('Full schedule view coming soon!');
+    };
+    
+    // Download attendance certificate function
+    window.downloadAttendanceCertificate = function() {
+        const att = studentState?.currentAttendance || 85;
+        if (att >= 95) {
+            showSuccessMessage('Certificate downloaded successfully!');
+        } else {
+            showInfoMessage(`You need 95% attendance to download certificate. Current: ${att}%`);
+        }
+    };
+    
+    // Info message
+    function showInfoMessage(message) {
+        const msgDiv = document.createElement('div');
+        msgDiv.style.cssText = 'position:fixed;top:20px;right:20px;background:#dbeafe;color:#1e40af;padding:15px;border-radius:10px;z-index:9999;max-width:300px;animation:slideIn 0.3s ease-out;';
+        msgDiv.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+        document.body.appendChild(msgDiv);
+        setTimeout(() => msgDiv.remove(), 3000);
+    }
+    
+    // Make functions available globally
+    window.showInfoMessage = showInfoMessage;
+    window.downloadAttendanceCertificate = downloadAttendanceCertificate;
+    window.viewFullSchedule = viewFullSchedule;
+</script>
+</body>
+</html>

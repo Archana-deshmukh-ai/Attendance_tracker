@@ -1,216 +1,144 @@
-// notification.js - Complete Notification System for Student Dashboard
+// ================= NOTIFICATION.JS - WORKS FOR ALL STUDENTS =================
 
-class NotificationSystem {
-    constructor() {
-        this.notifications = [];
-        this.container = null;
-        this.init();
-    }
-
-    init() {
-        // Create notification container
-        this.createNotificationContainer();
-        // Load notifications from localStorage
-        this.loadNotifications();
-        // Fetch attendance data and generate notifications
-        this.checkAttendanceAndNotify();
-    }
-
-    createNotificationContainer() {
-        // Check if container already exists
-        if (document.getElementById('notificationContainer')) return;
+// Get the actual logged-in student ID from session
+async function getCurrentStudentId() {
+    try {
+        const response = await fetch('/api/current-student');
+        const data = await response.json();
         
-        // Create main container
-        this.container = document.createElement('div');
-        this.container.id = 'notificationContainer';
-        this.container.className = 'notification-container';
-        
-        // Insert after navbar (or at top of content)
-        const navbar = document.querySelector('.navbar');
-        if (navbar && navbar.nextSibling) {
-            navbar.parentNode.insertBefore(this.container, navbar.nextSibling);
+        if (data.success) {
+            return data.student.student_id;
         } else {
-            document.body.insertBefore(this.container, document.body.firstChild);
+            console.error('Not logged in');
+            return null;
         }
-    }
-
-    loadNotifications() {
-        const saved = localStorage.getItem('attendance_notifications');
-        if (saved) {
-            this.notifications = JSON.parse(saved);
-            // Remove old notifications (older than 24 hours)
-            const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
-            this.notifications = this.notifications.filter(n => n.timestamp > oneDayAgo);
-            this.saveNotifications();
-        }
-    }
-
-    saveNotifications() {
-        localStorage.setItem('attendance_notifications', JSON.stringify(this.notifications));
-    }
-
-    async checkAttendanceAndNotify() {
-        try {
-            const response = await fetch('/api/student/performance');
-            if (!response.ok) return;
-            
-            const subjects = await response.json();
-            const lowAttendanceSubjects = subjects.filter(s => s.attendance.percentage < 75);
-            
-            if (lowAttendanceSubjects.length > 0) {
-                this.showLowAttendanceAlert(lowAttendanceSubjects);
-            }
-            
-            // Also show existing notifications
-            this.renderNotifications();
-            
-        } catch (error) {
-            console.error('Error checking attendance:', error);
-        }
-    }
-
-    showLowAttendanceAlert(subjects) {
-        const newNotifications = [];
-        
-        subjects.forEach(subject => {
-            const percentage = subject.attendance.percentage;
-            const status = percentage < 60 ? 'critical' : (percentage < 75 ? 'warning' : 'good');
-            
-            // Check if notification already exists for this subject today
-            const today = new Date().toDateString();
-            const alreadyNotified = this.notifications.some(n => 
-                n.subjectCode === subject.subject_code && 
-                new Date(n.timestamp).toDateString() === today
-            );
-            
-            if (!alreadyNotified) {
-                newNotifications.push({
-                    id: Date.now() + Math.random(),
-                    subjectCode: subject.subject_code,
-                    subjectName: subject.subject_name,
-                    attendance: percentage,
-                    status: status,
-                    message: this.getNotificationMessage(subject.subject_name, percentage, status),
-                    timestamp: Date.now(),
-                    read: false
-                });
-            }
-        });
-        
-        if (newNotifications.length > 0) {
-            this.notifications = [...newNotifications, ...this.notifications];
-            this.saveNotifications();
-            this.renderNotifications();
-            this.playNotificationSound();
-        }
-    }
-
-    getNotificationMessage(subjectName, percentage, status) {
-        if (status === 'critical') {
-            return `⚠️ CRITICAL: Your attendance in ${subjectName} is only ${percentage}%! Please contact your instructor immediately.`;
-        } else if (status === 'warning') {
-            return `⚠️ WARNING: Your attendance in ${subjectName} is ${percentage}% which is below 75%. Please improve your attendance.`;
-        }
-        return `ℹ️ Your attendance in ${subjectName} is ${percentage}%. Keep it above 75% to avoid issues.`;
-    }
-
-    playNotificationSound() {
-        // Optional: Play a soft sound (you can enable if needed)
-        // const audio = new Audio('/notification-sound.mp3');
-        // audio.play().catch(e => console.log('Audio play failed'));
-    }
-
-    renderNotifications() {
-        if (!this.container) return;
-        
-        const unreadCount = this.notifications.filter(n => !n.read).length;
-        
-        if (this.notifications.length === 0) {
-            this.container.innerHTML = `
-                <div class="notification-empty">
-                    <i class="fas fa-bell-slash"></i>
-                    <span>No new notifications</span>
-                </div>
-            `;
-            return;
-        }
-        
-        this.container.innerHTML = `
-            <div class="notification-header">
-                <div class="notification-title">
-                    <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
-                    ${unreadCount > 0 ? `<span class="notification-badge">${unreadCount}</span>` : ''}
-                </div>
-                <button class="notification-clear-all" onclick="notificationSystem.clearAllNotifications()">
-                    <i class="fas fa-trash-alt"></i> Clear All
-                </button>
-            </div>
-            <div class="notification-list">
-                ${this.notifications.map(notification => `
-                    <div class="notification-item ${notification.read ? 'read' : 'unread'} ${notification.status}" data-id="${notification.id}">
-                        <div class="notification-icon">
-                            <i class="fas ${notification.status === 'critical' ? 'fa-exclamation-triangle' : (notification.status === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle')}"></i>
-                        </div>
-                        <div class="notification-content">
-                            <div class="notification-message">${notification.message}</div>
-                            <div class="notification-time">${this.formatTime(notification.timestamp)}</div>
-                        </div>
-                        <button class="notification-close" onclick="notificationSystem.dismissNotification(${notification.id})">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-        
-        // Add animation to new notifications
-        const newItems = this.container.querySelectorAll('.notification-item.unread');
-        newItems.forEach(item => {
-            item.style.animation = 'slideInRight 0.5s ease-out';
-        });
-    }
-
-    dismissNotification(id) {
-        const index = this.notifications.findIndex(n => n.id === id);
-        if (index !== -1) {
-            this.notifications.splice(index, 1);
-            this.saveNotifications();
-            this.renderNotifications();
-        }
-    }
-
-    clearAllNotifications() {
-        if (confirm('Clear all notifications?')) {
-            this.notifications = [];
-            this.saveNotifications();
-            this.renderNotifications();
-        }
-    }
-
-    formatTime(timestamp) {
-        const diff = Date.now() - timestamp;
-        const minutes = Math.floor(diff / 60000);
-        const hours = Math.floor(diff / 3600000);
-        const days = Math.floor(diff / 86400000);
-        
-        if (minutes < 1) return 'Just now';
-        if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-        if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-        return `${days} day${days > 1 ? 's' : ''} ago`;
+    } catch (error) {
+        console.error('Error fetching student:', error);
+        return null;
     }
 }
 
-// Initialize notification system when page loads
-let notificationSystem;
+// Load notifications for the logged-in student
+async function loadNotifications() {
+    const studentId = await getCurrentStudentId();
+    
+    if (!studentId) {
+        const container = document.getElementById("notification-container");
+        if (container) {
+            container.innerHTML = '<p>⚠️ Please login to see notifications</p>';
+        }
+        return;
+    }
+    
+    console.log(`Loading notifications for student: ${studentId}`);
+    
+    try {
+        const response = await fetch(`/api/subject-notifications/${studentId}`);
+        const data = await response.json();
+        
+        const container = document.getElementById("notification-container");
+        
+        if (!container) return;
+        
+        if (data.length === 0) {
+            container.innerHTML = '<div class="no-notifications">🎉 No new alerts! Great attendance!</div>';
+            return;
+        }
+        
+        // Clear existing notifications
+        container.innerHTML = '';
+        
+        // Add each notification
+        data.forEach((notification, index) => {
+            const div = document.createElement("div");
+            div.className = "notification";
+            div.setAttribute('data-id', index);
+            
+            // Determine priority color based on percentage
+            let priorityColor = '';
+            let priorityText = '';
+            if (notification.percentage < 60) {
+                priorityColor = '#dc2626';
+                priorityText = 'Critical';
+            } else if (notification.percentage < 75) {
+                priorityColor = '#f59e0b';
+                priorityText = 'Warning';
+            } else {
+                priorityColor = '#10b981';
+                priorityText = 'Good';
+            }
+            
+            div.innerHTML = `
+                <span class="close-btn" onclick="removeNotification(this)">✖</span>
+                <div class="notification-subject" style="border-left-color: ${priorityColor}">
+                    <strong>📚 ${notification.subject}</strong>
+                    <span class="priority-badge" style="background: ${priorityColor}">${priorityText}</span>
+                </div>
+                <p>⚠️ ${notification.message}</p>
+                <div class="notification-footer">
+                    <small>🕐 ${notification.time}</small>
+                    <small>📊 Attendance: ${notification.percentage}%</small>
+                </div>
+            `;
+            
+            container.appendChild(div);
+        });
+        
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+        const container = document.getElementById("notification-container");
+        if (container) {
+            container.innerHTML = '<p>❌ Error loading notifications</p>';
+        }
+    }
+}
 
+// Remove notification (mark as read)
+function removeNotification(element) {
+    const card = element.parentElement;
+    card.style.opacity = "0";
+    card.style.transform = "translateX(100%)";
+    
+    setTimeout(() => {
+        card.remove();
+        
+        // Check if no notifications left
+        const container = document.getElementById("notification-container");
+        if (container && container.children.length === 0) {
+            container.innerHTML = '<div class="no-notifications">🎉 No more alerts! Great job!</div>';
+        }
+    }, 300);
+}
+
+// Auto-refresh notifications every 30 seconds
+let refreshInterval = null;
+
+function startAutoRefresh() {
+    if (refreshInterval) clearInterval(refreshInterval);
+    refreshInterval = setInterval(() => {
+        loadNotifications();
+    }, 30000); // Refresh every 30 seconds
+}
+
+function stopAutoRefresh() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+    }
+}
+
+// Load notifications when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    notificationSystem = new NotificationSystem();
+    loadNotifications();
+    startAutoRefresh();
 });
 
-// Also check for new notifications every 5 minutes
-setInterval(() => {
-    if (notificationSystem) {
-        notificationSystem.checkAttendanceAndNotify();
+// Stop auto-refresh when page is hidden (optional)
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        stopAutoRefresh();
+    } else {
+        startAutoRefresh();
+        loadNotifications(); // Refresh immediately when page becomes visible
     }
-}, 5 * 60 * 1000);
+});

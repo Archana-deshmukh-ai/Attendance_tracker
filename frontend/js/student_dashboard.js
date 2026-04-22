@@ -20,6 +20,7 @@ function initStudentDashboard() {
     highlightCurrentPage();
 }
 
+
 async function loadAllData() { await Promise.all([loadOverviewStatistics(), loadTodaysClasses(), loadSubjectPerformance(), loadRecentAttendance(), loadNotifications(), loadImportantAlerts()]); initAttendanceChart(); updateGoalsProgress(); updatePerformanceSummary(); }
 
 async function loadStudentData() {
@@ -99,7 +100,316 @@ async function loadSubjectPerformance() {
         renderSubjectsPerformance();
     } catch (error) { console.error('Error loading subjects:', error); }
 }
-function renderSubjectsPerformance() { if (!elements.subjectsPerformance) return; if (!studentState.subjects.length) { elements.subjectsPerformance.innerHTML = `<div class="empty-state"><i class="fas fa-book"></i><p>No subject data</p></div>`; return; } elements.subjectsPerformance.innerHTML = studentState.subjects.map(s => `<div class="subject-item"><div class="subject-info"><div class="subject-code">${s.code}</div><div class="subject-name">${s.name}</div></div><div class="subject-performance"><div class="attendance-rate">${s.attendance_rate}%</div><div class="performance-bar"><div class="performance-fill" style="width: ${s.attendance_rate}%"></div></div></div></div>`).join(''); }
+
+
+function renderSubjectsPerformance() { if (!elements.subjectsPerformance) return; if (!studentState.subjects.length) { elements.subjectsPerformance.innerHTML = `<div class="empty-state"><i class="fas fa-book"></i><p>No subject data</p></div>`; return; } elements.subjectsPerformance.innerHTML = studentState.subjects.map(s => `<div class="subject-item"><div class="subject-info"><div class="subject-code">${s.code}</div><div class="subject-name">${s.name}</div></div><div class="subject-performance"><div class="attendance-rate">${s.attendance_rate}%</div><div class="performance-bar"><div class="performance-fill" style="width: ${s.attendance_rate}%"></div></div></div></div>`).join(''); } 
+
+// Add this to your student_dashboard.html
+
+// Load student info and performance
+// student_dashboard.html - Corrected JavaScript
+// student_dashboard.html - Corrected JavaScript
+
+async function loadStudentInfo() {
+    try {
+        const response = await fetch('/api/student/info');
+        if (response.status === 401) {
+            window.location.href = '/login';
+            return;
+        }
+        const data = await response.json();
+        
+        document.getElementById('studentName').innerHTML = `<i class="fas fa-user-graduate"></i> ${data.name}`;
+        document.getElementById('studentDept').innerHTML = `<i class="fas fa-building"></i> Department: ${data.department}`;
+        document.getElementById('studentId').innerHTML = `<i class="fas fa-id-card"></i> ID: ${data.id}`;
+        
+        console.log("Student department:", data.department);
+        
+    } catch (error) {
+        console.error('Error loading student info:', error);
+    }
+}
+
+async function loadPerformance() {
+    try {
+        const response = await fetch('/api/student/performance');
+        if (response.status === 401) {
+            window.location.href = '/login';
+            return;
+        }
+        
+        const subjects = await response.json();
+        const container = document.getElementById('performanceContainer');
+        
+        console.log("Subjects received:", subjects);
+        
+        if (!container) return;
+        
+        if (subjects.length === 0) {
+            container.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-info-circle"></i>
+                    <p>No subjects found for your department. Please contact your coordinator.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const studentDept = sessionStorage.getItem('studentDept') || 'your';
+        
+        container.innerHTML = `
+            <div class="dept-banner">
+                <i class="fas fa-graduation-cap"></i>
+                <span>${studentDept} Department - ${subjects.length} Subjects</span>
+            </div>
+            <div class="subjects-grid">
+                ${subjects.map(subject => `
+                    <div class="subject-card ${subject.attendance.percentage < 75 ? 'warning' : 'good'}">
+                        <div class="subject-header">
+                            <span class="subject-code">${subject.subject_code}</span>
+                            <span class="subject-credits">${subject.credits} Credits</span>
+                        </div>
+                        <div class="subject-name">${subject.subject_name}</div>
+                        
+                        <div class="performance-metrics">
+                            <div class="metric">
+                                <div class="metric-label">
+                                    <span>Attendance</span>
+                                    <span>${subject.attendance.percentage}%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill ${subject.attendance.percentage < 75 ? 'warning-fill' : 'good-fill'}" 
+                                         style="width: ${Math.min(subject.attendance.percentage, 100)}%"></div>
+                                </div>
+                                <div class="attendance-details">
+                                    <small>✅ Present: ${subject.attendance.present}</small>
+                                    <small>⏰ Late: ${subject.attendance.late || 0}</small>
+                                    <small>❌ Absent: ${(subject.attendance.total - subject.attendance.present)}</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="status-badge ${subject.attendance.percentage < 75 ? 'status-warning' : 'status-good'}">
+                            <i class="fas ${subject.attendance.percentage < 75 ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i>
+                            ${subject.status}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        
+    } catch (error) {
+        console.error('Error loading performance:', error);
+        const container = document.getElementById('performanceContainer');
+        if (container) {
+            container.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Failed to load performance data. Please refresh the page.</p>
+                </div>
+            `;
+        }
+    }
+}
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', () => {
+    loadStudentInfo();
+    loadPerformance();
+    
+    setTimeout(() => {
+        const deptElement = document.getElementById('studentDept');
+        if (deptElement) {
+            const deptText = deptElement.innerText.replace('Department: ', '');
+            sessionStorage.setItem('studentDept', deptText);
+        }
+    }, 1000);
+});
+
+async function loadPerformance() {
+    try {
+        const response = await fetch('/api/student/performance');
+        if (response.status === 401) {
+            window.location.href = '/login';
+            return;
+        }
+        
+        const subjects = await response.json();
+        const container = document.getElementById('performanceContainer');
+        
+        console.log("Subjects received:", subjects); // Debug - check what subjects are returned
+        
+        if (!container) return;
+        
+        if (subjects.length === 0) {
+            container.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-info-circle"></i>
+                    <p>No subjects found for your department. Please contact your coordinator.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Show department name and subject count
+        const studentDept = sessionStorage.getItem('studentDept') || 'your';
+        
+        container.innerHTML = `
+            <div class="dept-banner">
+                <i class="fas fa-graduation-cap"></i>
+                <span>${studentDept} Department - ${subjects.length} Subjects</span>
+            </div>
+            <div class="subjects-grid">
+                ${subjects.map(subject => `
+                    <div class="subject-card ${subject.attendance.percentage < 75 ? 'warning' : 'good'}">
+                        <div class="subject-header">
+                            <span class="subject-code">${subject.subject_code}</span>
+                            <span class="subject-credits">${subject.credits} Credits</span>
+                        </div>
+                        <div class="subject-name">${subject.subject_name}</div>
+                        
+                        <div class="performance-metrics">
+                            <div class="metric">
+                                <div class="metric-label">
+                                    <span>Attendance</span>
+                                    <span>${subject.attendance.percentage}%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill ${subject.attendance.percentage < 75 ? 'warning-fill' : 'good-fill'}" 
+                                         style="width: ${Math.min(subject.attendance.percentage, 100)}%"></div>
+                                </div>
+                                <div class="attendance-details">
+                                    <small>✅ Present: ${subject.attendance.present}</small>
+                                    <small>⏰ Late: ${subject.attendance.late || 0}</small>
+                                    <small>❌ Absent: ${(subject.attendance.total - subject.attendance.present)}</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="status-badge ${subject.attendance.percentage < 75 ? 'status-warning' : 'status-good'}">
+                            <i class="fas ${subject.attendance.percentage < 75 ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i>
+                            ${subject.status}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        
+    } catch (error) {
+        console.error('Error loading performance:', error);
+        const container = document.getElementById('performanceContainer');
+        if (container) {
+            container.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Failed to load performance data. Please refresh the page.</p>
+                </div>
+            `;
+        }
+    }
+}
+
+// Also add sessionStorage for department
+document.addEventListener('DOMContentLoaded', () => {
+    loadStudentInfo();
+    loadPerformance();
+    
+    // Store department in sessionStorage after loading
+    setTimeout(() => {
+        const deptElement = document.getElementById('studentDept');
+        if (deptElement) {
+            const deptText = deptElement.innerText.replace('Department: ', '');
+            sessionStorage.setItem('studentDept', deptText);
+        }
+    }, 1000);
+});
+
+// async function loadPerformance() {
+//     try {
+//         const response = await fetch('/api/student/performance');
+//         if (response.status === 401) {
+//             window.location.href = '/login';
+//             return;
+//         }
+        
+//         const subjects = await response.json();
+//         const container = document.getElementById('performanceContainer');
+        
+//         if (!container) return;
+        
+//         if (subjects.length === 0) {
+//             container.innerHTML = `
+//                 <div class="loading">
+//                     <i class="fas fa-info-circle"></i>
+//                     <p>No subjects found for your department. Please contact your coordinator.</p>
+//                 </div>
+//             `;
+//             return;
+//         }
+        
+//         // Show department name
+//         const studentDept = sessionStorage.getItem('studentDept') || 'your';
+        
+//         container.innerHTML = `
+//             <div class="dept-banner">
+//                 <i class="fas fa-graduation-cap"></i>
+//                 <span>${studentDept} Department - Semester Subjects</span>
+//             </div>
+//             <div class="subjects-grid">
+//                 ${subjects.map(subject => `
+//                     <div class="subject-card ${subject.status_class}">
+//                         <div class="subject-header">
+//                             <span class="subject-code">${subject.subject_code}</span>
+//                             <span class="subject-credits">${subject.credits} Credits</span>
+//                         </div>
+//                         <div class="subject-name">${subject.subject_name}</div>
+                        
+//                         <div class="performance-metrics">
+//                             <div class="metric">
+//                                 <div class="metric-label">
+//                                     <span>Attendance</span>
+//                                     <span>${subject.attendance.percentage}%</span>
+//                                 </div>
+//                                 <div class="progress-bar">
+//                                     <div class="progress-fill ${subject.attendance.percentage < 75 ? 'warning-fill' : 'good-fill'}" 
+//                                          style="width: ${Math.min(subject.attendance.percentage, 100)}%"></div>
+//                                 </div>
+//                                 <div class="attendance-details">
+//                                     <small>✅ Present: ${subject.attendance.present}</small>
+//                                     <small>⏰ Late: ${subject.attendance.late}</small>
+//                                     <small>❌ Absent: ${subject.attendance.absent}</small>
+//                                 </div>
+//                             </div>
+//                         </div>
+                        
+//                         <div class="status-badge ${subject.status_class}">
+//                             <i class="fas ${subject.status_class === 'good' ? 'fa-check-circle' : (subject.status_class === 'warning' ? 'fa-exclamation-triangle' : 'fa-times-circle')}"></i>
+//                             ${subject.status}
+//                         </div>
+//                     </div>
+//                 `).join('')}
+//             </div>
+//         `;
+        
+//     } catch (error) {
+//         console.error('Error loading performance:', error);
+//         const container = document.getElementById('performanceContainer');
+//         if (container) {
+//             container.innerHTML = `
+//                 <div class="error-message">
+//                     <i class="fas fa-exclamation-circle"></i>
+//                     <p>Failed to load performance data. Please refresh the page.</p>
+//                 </div>
+//             `;
+//         }
+//     }
+// }
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', () => {
+    loadStudentInfo();
+    loadPerformance();
+});
 
 async function loadRecentAttendance(filter = 'all') {
     if (studentState.attendanceData.length === 0) await loadAttendanceData();
@@ -325,6 +635,8 @@ function updatePerformanceSummary() {
     updateDaysSinceLastAbsent();
 }
 
+
+
 // Update the loadAllData function to include days since absent
 async function loadAllData() {
     await Promise.all([
@@ -431,4 +743,23 @@ function updateAllData() {
     updateGoalsProgress();
     updatePerformanceSummary();
     updateCertificateEligibility();
+}
+
+
+// Add this function to student_dashboard.js
+function goToSettings() {
+    window.location.href = '/settings';
+}
+
+// Also add a settings button in your dashboard UI
+// For example, in the header section:
+function addSettingsButton() {
+    const headerActions = document.querySelector('.header-actions');
+    if (headerActions) {
+        const settingsBtn = document.createElement('button');
+        settingsBtn.className = 'settings-btn';
+        settingsBtn.innerHTML = '<i class="fas fa-cog"></i> Settings';
+        settingsBtn.onclick = goToSettings;
+        headerActions.appendChild(settingsBtn);
+    }
 }

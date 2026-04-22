@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, session, redirect, url_for, send_file
+from flask import Flask, jsonify, request, render_template, session, redirect, url_for, send_file,send_from_directory
 from flask_cors import CORS
 import pandas as pd
 import csv, os, random, string, hashlib, time, json
@@ -189,11 +189,16 @@ def import_csv_to_db():
 
 def migrate_existing_passwords():
     """Migrate existing plain text passwords to hashed ones"""
+    print("⏭️ Skipping password migration...")
+    return  # ← ADD THIS LINE - SKIPS THE ENTIRE FUNCTION
+    
     print("\n" + "="*60)
     print("CHECKING FOR PASSWORDS TO MIGRATE...")
     print("="*60)
     
     with get_db() as conn:
+        # ... rest of the code
+
         # Migrate students
         students = conn.execute("SELECT email, password FROM students WHERE password IS NOT NULL").fetchall()
         migrated_count = 0
@@ -234,6 +239,8 @@ def home_page():
     """Serve the home page HTML"""
     return render_template('index.html')
 
+
+
 @app.route('/mark-attendance')
 def mark_attendance_page():
     """Serve the mark attendance page HTML"""
@@ -265,10 +272,26 @@ def forgot_password_page():
     """Serve the forgot password page"""
     return render_template('forgot_password.html')
 
+# Route for settings page
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')
+
 @app.route("/logout")
 def logout():
     session.clear()
     return render_template("logout.html")       #goes to logout.html
+
+# Route to serve CSS files
+@app.route('/css/<path:filename>')
+def serve_css(filename):
+    return send_from_directory('../frontend/css', filename)
+
+# Route to serve JS files
+@app.route('/js/<path:filename>')
+def serve_js(filename):
+    return send_from_directory('../frontend/js', filename)
+
 
 # ========== SECURITY DECORATORS ==========
 
@@ -1392,15 +1415,56 @@ def get_time_ago(timestamp_str):
 def health():
     return jsonify({"status": "running", "version": "1.0"})
 
+# @app.route('/api/students')
+# def get_students():
+#     try:
+#         with get_db() as conn:
+#             rows = conn.execute("SELECT * FROM students").fetchall()
+#             students = [dict(row) for row in rows]
+#             return jsonify({"success": True, "count": len(students), "students": students})
+#     except Exception as e:
+#         return jsonify({"success": False, "error": str(e)}), 500
+
+#===========new code of get student from deepseek============
+# Get a single student by ID
+@app.route('/api/student/<student_id>')
+def get_student(student_id):
+    # Replace this with your actual database query
+    # Example for SQLite:
+    conn = get_db()
+    cursor = conn.execute('SELECT * FROM students WHERE student_id = ?', (student_id,))
+    student = cursor.fetchone()
+    conn. close()
+    
+    if student:
+        return jsonify({
+            'success': True,
+            'student': {
+                'student_id': student['student_id'],
+                'name': student['name'],
+                'email': student['email'],
+                'department': student['department'],
+                'semester': student['semester'],
+                'batch': student['batch'],
+                'phone': student.get('phone', '')
+            }
+        })
+    else:
+        return jsonify({'success': False, 'message': 'Student not found'}), 404
+
+# Get all students (for admin panel)
 @app.route('/api/students')
-def get_students():
-    try:
-        with get_db() as conn:
-            rows = conn.execute("SELECT * FROM students").fetchall()
-            students = [dict(row) for row in rows]
-            return jsonify({"success": True, "count": len(students), "students": students})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+def get_all_students():
+    conn = get_db()
+    cursor = conn.execute('SELECT * FROM students')
+    students = cursor.fetchone()
+    conn. close()
+    return jsonify({
+        'success': True,
+        'students': [dict(s) for s in students]
+    })
+
+#===========end of new code deepseek============
 
 @app.route('/api/lecturers')
 def get_lecturers():
@@ -1459,7 +1523,7 @@ def login_status():
 
 @app.route('/api/student/performance', methods=['GET'])
 def get_student_performance():
-    """Get subject-wise performance for the logged-in student"""
+    """Get subject-wise performance for the logged-in student (only their branch subjects)"""
     if 'student_id' not in session:
         return jsonify({'error': 'Not logged in'}), 401
     
@@ -1467,9 +1531,9 @@ def get_student_performance():
     
     try:
         with get_db() as conn:
-            # Get student's department
+            # Step 1: Get student's department/branch
             student = conn.execute(
-                "SELECT department FROM students WHERE student_id = ?", 
+                "SELECT student_id, name, department FROM students WHERE student_id = ?", 
                 (student_id,)
             ).fetchone()
             
@@ -1477,17 +1541,44 @@ def get_student_performance():
                 return jsonify({'error': 'Student not found'}), 404
             
             student_dept = student['department']
+            print(f"🎓 Student {student_id} belongs to: {student_dept}")  # Debug
             
-            # Get subjects ONLY for student's department
-            subjects = conn.execute(
-                "SELECT * FROM subjects WHERE department = ?", 
-                (student_dept,)
-            ).fetchall()
+            # Step 2: Get subjects ONLY for student's department
+            # Method 1: If subjects have department column
+            subjects = conn.execute("""
+                SELECT subject_id, code, name, credits, department 
+                FROM subjects 
+                WHERE department = ? OR department = 'Common' OR department = 'Mathematics'
+                ORDER BY subject_id
+            """, (student_dept,)).fetchall()
+            
+            # If no subjects found with department filter, try alternative approach
+            if len(subjects) == 0:
+                print(f"⚠️ No subjects found for {student_dept}, trying alternative filter...")
+                # Alternative: Filter by subject code prefix
+                dept_prefix = {
+                    'Computer Science': 'CS',
+                    'Electronics': 'EC',
+                    'Mechanical': 'ME',
+                    'Civil': 'CE',
+                    'Electrical': 'EE',
+                    'Information Technology': 'IT'
+                }
+                prefix = dept_prefix.get(student_dept, '')
+                if prefix:
+                    subjects = conn.execute("""
+                        SELECT subject_id, code, name, credits, department 
+                        FROM subjects 
+                        WHERE code LIKE ? OR department = 'Common' OR department = 'Mathematics'
+                    """, (f'{prefix}%',)).fetchall()
+            
+            print(f"📚 Found {len(subjects)} subjects for {student_dept}")  # Debug
             
             performance = []
             
+            # Step 3: Get attendance for each subject
             for subject in subjects:
-                # Get attendance for this subject
+                # Get attendance statistics
                 attendance = conn.execute('''
                     SELECT 
                         COUNT(CASE WHEN status='present' THEN 1 END) as present,
@@ -1501,28 +1592,43 @@ def get_student_performance():
                 if attendance['total'] > 0:
                     attendance_percentage = (attendance['present'] / attendance['total']) * 100
                 
+                # Determine status
+                if attendance_percentage < 60:
+                    status_text = 'Critical - Action Required'
+                    status_class = 'critical'
+                elif attendance_percentage < 75:
+                    status_text = 'Needs Improvement'
+                    status_class = 'warning'
+                else:
+                    status_text = 'Good'
+                    status_class = 'good'
+                
                 performance.append({
+                    'subject_id': subject['subject_id'],
                     'subject_code': subject['code'],
                     'subject_name': subject['name'],
                     'credits': subject['credits'],
+                    'department': subject['department'],
                     'attendance': {
                         'percentage': round(attendance_percentage, 2),
                         'present': attendance['present'],
                         'late': attendance['late'],
+                        'absent': attendance['total'] - attendance['present'],
                         'total': attendance['total']
                     },
-                    'status': 'Good' if attendance_percentage >= 75 else 'Needs Improvement'
+                    'status': status_text,
+                    'status_class': status_class
                 })
             
             return jsonify(performance)
             
     except Exception as e:
-        print(f"Error in get_student_performance: {str(e)}")
+        print(f"❌ Error in get_student_performance: {str(e)}")
         return jsonify({'error': str(e)}), 500
     
 @app.route('/api/student/info', methods=['GET'])
 def get_student_info():
-    """Get current student's information"""
+    """Get current student's information including branch"""
     if 'student_id' not in session:
         return jsonify({'error': 'Not logged in'}), 401
     
@@ -1531,7 +1637,7 @@ def get_student_info():
     try:
         with get_db() as conn:
             student = conn.execute(
-                "SELECT student_id, name, email, department FROM students WHERE student_id = ?", 
+                "SELECT student_id, name, email, department, batch FROM students WHERE student_id = ?", 
                 (student_id,)
             ).fetchone()
             
@@ -1540,11 +1646,13 @@ def get_student_info():
                     'id': student['student_id'],
                     'name': student['name'],
                     'email': student['email'],
-                    'department': student['department']
+                    'department': student['department'],
+                    'batch': student['batch']
                 })
             else:
                 return jsonify({'error': 'Student not found'}), 404
     except Exception as e:
+        print(f"Error in student info: {str(e)}")
         return jsonify({'error': str(e)}), 500
 # ========== ATTENDANCE ENDPOINTS ==========
 
@@ -1946,57 +2054,179 @@ def lecturer_export():
             )
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
-# ================== Notification Routes =================
-
-@app.route('/api/subject-notifications/<int:student_id>')
+ 
+# ==================notifaction-system routes==================
+@app.route('/api/subject-notifications/<student_id>')
 def subject_notifications(student_id):
-
-    import pandas as pd
-    import datetime
-
-    attendance = pd.read_csv("Backend/Backend/data/attendance.csv")
-    subjects = pd.read_csv("Backend/Backend/data/subjects.csv")
-
-    notifications = []
-
-    # filter student data
-    student_data = attendance[attendance["student_id"] == student_id]
-
-    if student_data.empty:
-        return []
-
-    # calculate percentage per subject
-    grouped = student_data.groupby("subject_id")
-
-    for subject_id, group in grouped:
-
-        total = len(group)
-        present = len(group[group["status"] == "Present"])
-
-        percentage = (present / total) * 100
-
-        if percentage < 75:
-
-            subject_name = subjects[subjects["subject_id"] == subject_id]["name"].values[0]
-
-            notifications.append({
-                "subject": subject_name,
-                "percentage": round(percentage, 2),
-                "message": f"Attendance in {subject_name} is {round(percentage,2)}% (<75%)",
-                "time": datetime.datetime.now().strftime("%H:%M")
-            })
-            #=====temporary code to get attendance percentage===========
-            print("---- Attendance Check ----")
-
-            for subject_id, group in grouped:
-                total = len(group)
-                present = len(group[group["status"] == "Present"])
+    """Get attendance alerts for a student (works for all branches)"""
+    
+    try:
+        with get_db() as conn:
+            # First, get the student's department
+            student = conn.execute(
+                "SELECT student_id, name, department FROM students WHERE student_id = ?", 
+                (student_id,)
+            ).fetchone()
+            
+            if not student:
+                return jsonify([])
+            
+            student_dept = student['department']
+            print(f"📊 Getting notifications for {student['name']} from {student_dept}")
+            
+            # Get attendance for subjects in student's department + common subjects
+            attendance_data = conn.execute('''
+                SELECT 
+                    s.subject_id,
+                    s.code,
+                    s.name as subject_name,
+                    s.department as subject_dept,
+                    COUNT(CASE WHEN a.status='present' THEN 1 END) as present,
+                    COUNT(CASE WHEN a.status='late' THEN 1 END) as late,
+                    COUNT(*) as total
+                FROM attendance a
+                JOIN subjects s ON a.subject_id = s.subject_id
+                WHERE a.student_id = ?
+                GROUP BY s.subject_id
+            ''', (student_id,)).fetchall()
+            
+            notifications = []
+            current_time = datetime.now().strftime("%H:%M")
+            
+            for record in attendance_data:
+                total = record['total']
+                if total == 0:
+                    continue
+                    
+                present = record['present']
                 percentage = (present / total) * 100
+                
+                # Only create notification if attendance is below 75%
+                if percentage < 75:
+                    subject_name = record['subject_name']
+                    
+                    # Determine message based on percentage
+                    if percentage < 60:
+                        message = f"⚠️ CRITICAL: Attendance in {subject_name} is only {round(percentage,1)}%! Please attend all classes."
+                    elif percentage < 70:
+                        message = f"⚠️ Warning: Attendance in {subject_name} is {round(percentage,1)}%. Need improvement."
+                    else:
+                        message = f"⚠️ Alert: Attendance in {subject_name} is {round(percentage,1)}%. Below 75% requirement."
+                    
+                    notifications.append({
+                        "subject": subject_name,
+                        "subject_code": record['code'],
+                        "percentage": round(percentage, 1),
+                        "present": present,
+                        "total": total,
+                        "message": message,
+                        "time": current_time
+                    })
+            
+            # Sort by lowest attendance first (most critical first)
+            notifications.sort(key=lambda x: x['percentage'])
+            
+            print(f"📢 Found {len(notifications)} notifications for {student['name']}")
+            return jsonify(notifications)
+            
+    except Exception as e:
+        print(f"Error in subject_notifications: {str(e)}")
+        return jsonify([])
+# ========== FIX SUBJECTS ENDPOINT ==========
 
-                print(f"Student: {student_id}, Subject: {subject_id}, %: {percentage}")
-                # ========== end of temporary code ===========
+@app.route('/api/fix-subjects', methods=['POST'])
+def fix_subjects():
+    """Add department column and update subjects with their departments"""
+    try:
+        with get_db() as conn:
+            # Check if department column exists
+            cursor = conn.execute("PRAGMA table_info(subjects)")
+            columns = [col[1] for col in cursor.fetchall()]
+            
+            if 'department' not in columns:
+                conn.execute("ALTER TABLE subjects ADD COLUMN department TEXT")
+                print("✅ Added department column to subjects table")
+            
+            # Update subjects with their departments
+            subjects_update = [
+                ('CS101', 'Computer Science'),
+                ('CS102', 'Computer Science'),
+                ('CS201', 'Computer Science'),
+                ('CS301', 'Computer Science'),
+                ('CS401', 'Computer Science'),
+                ('EC101', 'Electronics'),
+                ('EC201', 'Electronics'),
+                ('EC301', 'Electronics'),
+                ('ME101', 'Mechanical'),
+                ('ME201', 'Mechanical'),
+                ('ME301', 'Mechanical'),
+                ('CE101', 'Civil'),
+                ('CE201', 'Civil'),
+                ('CE301', 'Civil'),
+                ('EE101', 'Electrical'),
+                ('EE201', 'Electrical'),
+                ('MA101', 'Mathematics'),  # Common subject - all students see this
+                ('PH101', 'Physics'),      # Common subject - all students see this
+                ('EN101', 'English'),      # Common subject - all students see this
+            ]
+            
+            updated_count = 0
+            for code, dept in subjects_update:
+                result = conn.execute("UPDATE subjects SET department = ? WHERE code = ?", (dept, code))
+                if result.rowcount > 0:
+                    updated_count += 1
+                    print(f"  Updated {code} -> {dept}")
+            
+            conn.commit()
+            
+            return jsonify({
+                "success": True,
+                "message": f"Updated {updated_count} subjects with department information",
+                "subjects_updated": updated_count
+            })
+            
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+    
 
-    return notifications
+
+# ========== ADD THIS FOR SETTINGS PAGE ==========
+ # ========== CORRECTED FOR YOUR DATABASE (NO SEMESTER COLUMN) ==========
+@app.route('/api/current-student')
+def get_current_student():
+    """Get currently logged in student's data for settings page"""
+    
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+    
+    if session.get('role') != 'student':
+        return jsonify({'success': False, 'message': 'Not a student account'}), 401
+    
+    student_id = session.get('student_id')
+    
+    if not student_id:
+        return jsonify({'success': False, 'message': 'Student ID not found'}), 401
+    
+    try:
+        with get_db() as conn:
+            # Only select columns that ACTUALLY exist in your database
+            student = conn.execute('''
+                SELECT student_id, name, email, department, batch 
+                FROM students 
+                WHERE student_id = ?
+            ''', (student_id,)).fetchone()
+            
+            if student:
+                return jsonify({
+                    'success': True,
+                    'student': dict(student)
+                })
+            else:
+                return jsonify({'success': False, 'message': 'Student not found'}), 404
+    except Exception as e:
+        print(f"Database error: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    
 
 # ========== INITIALIZATION ==========
 
@@ -2015,6 +2245,8 @@ def initialize_data():
     migrate_existing_passwords()
     
     print(f"SQLite database initialized at: {DB_PATH}")
+
+    
 
 if __name__ == '__main__':
     # Initialize data files
