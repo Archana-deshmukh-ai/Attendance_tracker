@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, session, redirect, url_for, send_file
+from flask import Flask, jsonify, request, render_template, session, redirect, url_for, send_file, send_from_directory
 from flask_cors import CORS
 from flask_admin import Admin, BaseView, expose
 import pandas as pd
@@ -28,9 +28,6 @@ app = Flask(
     static_folder=os.path.join(BASE_DIR, '../frontend'),
     static_url_path=''
 )
-
-
-
 
 app.secret_key = "attendance-atlas-secret-key"
 CORS(app)
@@ -443,40 +440,6 @@ def get_failed_attempts_count(email, ip_address):
         print(f"Error getting failed attempts: {str(e)}")
         return {'email': 0, 'ip': 0}
 
-def check_login_attempts(f):
-    """Decorator to check and track login attempts"""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        ip_address = request.remote_addr
-        email = request.json.get('email') if request.is_json else None
-        
-        if is_ip_blocked(ip_address):
-            return jsonify({
-                "success": False,
-                "message": "Too many failed attempts. Please try again later.",
-                "blocked": True,
-                "cooldown": get_ip_block_remaining(ip_address)
-            }), 429
-        
-        if email and is_account_locked(email):
-            return jsonify({
-                "success": False,
-                "message": "Account is temporarily locked due to too many failed attempts.",
-                "locked": True,
-                "unlock_time": get_account_unlock_time(email)
-            }), 423
-        
-        if email and is_in_cooldown(email, ip_address):
-            return jsonify({
-                "success": False,
-                "message": "Please wait before trying again.",
-                "cooldown": True,
-                "wait_time": SECURITY_CONFIG['cooldown_period']
-            }), 429
-        
-        return f(*args, **kwargs)
-    return decorated_function
-
 # ============================================================================
 # EMAIL FUNCTIONS
 # ============================================================================
@@ -753,13 +716,10 @@ class AttendanceAdminView(SecureModelView):
         return redirect(url_for('attendance.index'))
 
 # ============================================================================
-# INITIALIZE FLASK-ADMIN (SIMPLE APPROACH)
+# INITIALIZE FLASK-ADMIN
 # ============================================================================
 
-# Simply initialize admin with default settings
 admin = Admin(app, name='Attendance Atlas Admin')
-
-# Add views
 admin.add_view(StudentAdminView(name='Students', endpoint='students'))
 admin.add_view(LecturerAdminView(name='Lecturers', endpoint='lecturers'))
 admin.add_view(SubjectAdminView(name='Subjects', endpoint='subjects'))
@@ -856,10 +816,26 @@ def lecturer_dashboard():
 def forgot_password_page():
     return render_template('forgot_password.html')
 
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')
+
 @app.route("/logout")
 def logout():
     session.clear()
     return render_template("logout.html")
+
+# ============================================================================
+# ROUTES - STATIC FILES
+# ============================================================================
+
+@app.route('/css/<path:filename>')
+def serve_css(filename):
+    return send_from_directory('../frontend/css', filename)
+
+@app.route('/js/<path:filename>')
+def serve_js(filename):
+    return send_from_directory('../frontend/js', filename)
 
 # ============================================================================
 # ROUTES - AUTHENTICATION
@@ -894,7 +870,6 @@ def signup():
         return jsonify(success=False, message=str(e)), 500
 
 @app.route("/login", methods=["POST"])
-@check_login_attempts
 def login():
     data = request.json
     role = data["role"]
@@ -903,7 +878,7 @@ def login():
     ip_address = request.remote_addr
 
     print(f"🔐 Login attempt - Role: {role}, Email: {email}, IP: {ip_address}")
-
+    
     try:
         with get_db() as conn:
             if role == "student":
@@ -912,10 +887,6 @@ def login():
                 row = conn.execute("SELECT * FROM lecturers WHERE email = ?", (email,)).fetchone()
 
             if row and check_password(password, row['password']):
-                clear_account_lock(email)
-                clear_ip_block(ip_address)
-                record_login_attempt(email, ip_address, success=True)
-
                 user = dict(row)
                 session["logged_in"] = True
                 session["email"] = user["email"]
@@ -929,30 +900,25 @@ def login():
                 else:
                     session["lecturer_id"] = user["lecturer_id"]
 
+                clear_account_lock(email)
+                clear_ip_block(ip_address)
+                record_login_attempt(email, ip_address, success=True)
+
                 print(f"✅ Login successful for {user['name']}")
                 return jsonify({"success": True, "role": role})
-            
-            record_login_attempt(email, ip_address, success=False)
-            failed_attempts = get_failed_attempts_count(email, ip_address)
-            remaining_attempts = max(0, SECURITY_CONFIG['max_login_attempts'] - failed_attempts['email'])
-
-            if remaining_attempts <= 0:
+            else:
+                record_login_attempt(email, ip_address, success=False)
+                failed_attempts = get_failed_attempts_count(email, ip_address)
+                remaining_attempts = max(0, SECURITY_CONFIG['max_login_attempts'] - failed_attempts['email'])
+                
                 return jsonify({
                     "success": False,
-                    "message": "Account locked due to too many failed attempts.",
-                    "locked": True,
-                    "unlock_time": get_account_unlock_time(email)
-                }), 423
-
-            return jsonify({
-                "success": False,
-                "message": f"Invalid credentials. {remaining_attempts} attempts remaining.",
-                "remaining_attempts": remaining_attempts
-            }), 401
+                    "message": f"Invalid credentials. {remaining_attempts} attempts remaining.",
+                    "remaining_attempts": remaining_attempts
+                }), 401
 
     except Exception as e:
-        print(f"Login error: {str(e)}")
-        record_login_attempt(email, ip_address, success=False)
+        print(f"❌ Login error: {str(e)}")
         return jsonify(success=False, message="Database error"), 500
 
 @app.route("/api/login-status")
@@ -1166,6 +1132,23 @@ def resend_otp():
 def health():
     return jsonify({"status": "running", "version": "2.0", "timestamp": datetime.now().isoformat()})
 
+@app.route('/api/student/<student_id>')
+def get_student(student_id):
+    try:
+        with get_db() as conn:
+            cursor = conn.execute('SELECT * FROM students WHERE student_id = ?', (student_id,))
+            student = cursor.fetchone()
+            
+            if student:
+                return jsonify({
+                    'success': True,
+                    'student': dict(student)
+                })
+            else:
+                return jsonify({'success': False, 'message': 'Student not found'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/api/students')
 def get_students():
     try:
@@ -1287,6 +1270,136 @@ def mark_attendance():
         })
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+# ============================================================================
+# ROUTES - STUDENT PERFORMANCE
+# ============================================================================
+
+@app.route('/api/student/performance', methods=['GET'])
+def get_student_performance():
+    """Get subject-wise performance for the logged-in student (only their branch subjects)"""
+    if 'student_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    student_id = session['student_id']
+    
+    try:
+        with get_db() as conn:
+            student = conn.execute(
+                "SELECT student_id, name, department FROM students WHERE student_id = ?", 
+                (student_id,)
+            ).fetchone()
+            
+            if not student:
+                return jsonify({'error': 'Student not found'}), 404
+            
+            student_dept = student['department']
+            print(f"🎓 Student {student_id} belongs to: {student_dept}")
+            
+            subjects = conn.execute("""
+                SELECT subject_id, code, name, credits, department 
+                FROM subjects 
+                WHERE department = ? OR department = 'Common' OR department = 'Mathematics'
+                ORDER BY subject_id
+            """, (student_dept,)).fetchall()
+            
+            if len(subjects) == 0:
+                print(f"⚠️ No subjects found for {student_dept}, trying alternative filter...")
+                dept_prefix = {
+                    'Computer Science': 'CS',
+                    'Electronics': 'EC',
+                    'Mechanical': 'ME',
+                    'Civil': 'CE',
+                    'Electrical': 'EE',
+                    'Information Technology': 'IT'
+                }
+                prefix = dept_prefix.get(student_dept, '')
+                if prefix:
+                    subjects = conn.execute("""
+                        SELECT subject_id, code, name, credits, department 
+                        FROM subjects 
+                        WHERE code LIKE ? OR department = 'Common' OR department = 'Mathematics'
+                    """, (f'{prefix}%',)).fetchall()
+            
+            print(f"📚 Found {len(subjects)} subjects for {student_dept}")
+            
+            performance = []
+            
+            for subject in subjects:
+                attendance = conn.execute('''
+                    SELECT 
+                        COUNT(CASE WHEN status='present' THEN 1 END) as present,
+                        COUNT(CASE WHEN status='late' THEN 1 END) as late,
+                        COUNT(*) as total
+                    FROM attendance
+                    WHERE student_id = ? AND subject_id = ?
+                ''', (student_id, subject['subject_id'])).fetchone()
+                
+                attendance_percentage = 0
+                if attendance['total'] > 0:
+                    attendance_percentage = (attendance['present'] / attendance['total']) * 100
+                
+                if attendance_percentage < 60:
+                    status_text = 'Critical - Action Required'
+                    status_class = 'critical'
+                elif attendance_percentage < 75:
+                    status_text = 'Needs Improvement'
+                    status_class = 'warning'
+                else:
+                    status_text = 'Good'
+                    status_class = 'good'
+                
+                performance.append({
+                    'subject_id': subject['subject_id'],
+                    'subject_code': subject['code'],
+                    'subject_name': subject['name'],
+                    'credits': subject['credits'],
+                    'department': subject['department'],
+                    'attendance': {
+                        'percentage': round(attendance_percentage, 2),
+                        'present': attendance['present'],
+                        'late': attendance['late'],
+                        'absent': attendance['total'] - attendance['present'],
+                        'total': attendance['total']
+                    },
+                    'status': status_text,
+                    'status_class': status_class
+                })
+            
+            return jsonify(performance)
+            
+    except Exception as e:
+        print(f"❌ Error in get_student_performance: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/student/info', methods=['GET'])
+def get_student_info():
+    """Get current student's information including branch"""
+    if 'student_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    student_id = session['student_id']
+    
+    try:
+        with get_db() as conn:
+            student = conn.execute(
+                "SELECT student_id, name, email, department, batch FROM students WHERE student_id = ?", 
+                (student_id,)
+            ).fetchone()
+            
+            if student:
+                return jsonify({
+                    'id': student['student_id'],
+                    'name': student['name'],
+                    'email': student['email'],
+                    'department': student['department'],
+                    'batch': student['batch']
+                })
+            else:
+                return jsonify({'error': 'Student not found'}), 404
+    except Exception as e:
+        print(f"Error in student info: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 # ============================================================================
 # ROUTES - LECTURER DASHBOARD
@@ -1439,42 +1552,127 @@ def lecturer_export():
         return jsonify({"success": False, "error": str(e)}), 500
 
 # ============================================================================
+# ROUTES - NOTIFICATIONS
+# ============================================================================
+
+@app.route('/api/subject-notifications/<student_id>')
+def subject_notifications(student_id):
+    """Get attendance alerts for a student (works for all branches)"""
+    
+    try:
+        with get_db() as conn:
+            student = conn.execute(
+                "SELECT student_id, name, department FROM students WHERE student_id = ?", 
+                (student_id,)
+            ).fetchone()
+            
+            if not student:
+                return jsonify([])
+            
+            student_dept = student['department']
+            print(f"📊 Getting notifications for {student['name']} from {student_dept}")
+            
+            attendance_data = conn.execute('''
+                SELECT 
+                    s.subject_id,
+                    s.code,
+                    s.name as subject_name,
+                    s.department as subject_dept,
+                    COUNT(CASE WHEN a.status='present' THEN 1 END) as present,
+                    COUNT(CASE WHEN a.status='late' THEN 1 END) as late,
+                    COUNT(*) as total
+                FROM attendance a
+                JOIN subjects s ON a.subject_id = s.subject_id
+                WHERE a.student_id = ?
+                GROUP BY s.subject_id
+            ''', (student_id,)).fetchall()
+            
+            notifications = []
+            current_time = datetime.now().strftime("%H:%M")
+            
+            for record in attendance_data:
+                total = record['total']
+                if total == 0:
+                    continue
+                    
+                present = record['present']
+                percentage = (present / total) * 100
+                
+                if percentage < 75:
+                    subject_name = record['subject_name']
+                    
+                    if percentage < 60:
+                        message = f"⚠️ CRITICAL: Attendance in {subject_name} is only {round(percentage,1)}%! Please attend all classes."
+                    elif percentage < 70:
+                        message = f"⚠️ Warning: Attendance in {subject_name} is {round(percentage,1)}%. Need improvement."
+                    else:
+                        message = f"⚠️ Alert: Attendance in {subject_name} is {round(percentage,1)}%. Below 75% requirement."
+                    
+                    notifications.append({
+                        "subject": subject_name,
+                        "subject_code": record['code'],
+                        "percentage": round(percentage, 1),
+                        "present": present,
+                        "total": total,
+                        "message": message,
+                        "time": current_time
+                    })
+            
+            notifications.sort(key=lambda x: x['percentage'])
+            
+            print(f"📢 Found {len(notifications)} notifications for {student['name']}")
+            return jsonify(notifications)
+            
+    except Exception as e:
+        print(f"Error in subject_notifications: {str(e)}")
+        return jsonify([])
+
+# ============================================================================
+# ROUTES - SETTINGS
+# ============================================================================
+
+@app.route('/api/current-student')
+def get_current_student():
+    """Get currently logged in student's data for settings page"""
+    
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+    
+    if session.get('role') != 'student':
+        return jsonify({'success': False, 'message': 'Not a student account'}), 401
+    
+    student_id = session.get('student_id')
+    
+    if not student_id:
+        return jsonify({'success': False, 'message': 'Student ID not found'}), 401
+    
+    try:
+        with get_db() as conn:
+            student = conn.execute('''
+                SELECT student_id, name, email, department, batch 
+                FROM students 
+                WHERE student_id = ?
+            ''', (student_id,)).fetchone()
+            
+            if student:
+                return jsonify({
+                    'success': True,
+                    'student': dict(student)
+                })
+            else:
+                return jsonify({'success': False, 'message': 'Student not found'}), 404
+    except Exception as e:
+        print(f"Database error: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+# ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
 
 def migrate_existing_passwords():
     """Migrate existing plain text passwords to hashed ones"""
-    print("\n" + "="*60)
-    print("🔐 CHECKING FOR PASSWORDS TO MIGRATE...")
-    print("="*60)
-    
-    with get_db() as conn:
-        students = conn.execute("SELECT email, password FROM students WHERE password IS NOT NULL").fetchall()
-        lecturers = conn.execute("SELECT email, password FROM lecturers WHERE password IS NOT NULL").fetchall()
-        migrated_count = 0
-        
-        for student in students:
-            if student['password'] and not student['password'].startswith('$2b$'):
-                hashed = hash_password(student['password'])
-                conn.execute("UPDATE students SET password = ? WHERE email = ?", (hashed, student['email']))
-                migrated_count += 1
-                print(f"✓ Migrated student: {student['email']}")
-        
-        for lecturer in lecturers:
-            if lecturer['password'] and not lecturer['password'].startswith('$2b$'):
-                hashed = hash_password(lecturer['password'])
-                conn.execute("UPDATE lecturers SET password = ? WHERE email = ?", (hashed, lecturer['email']))
-                migrated_count += 1
-                print(f"✓ Migrated lecturer: {lecturer['email']}")
-        
-        conn.commit()
-        
-        if migrated_count > 0:
-            print(f"\n✅ Successfully migrated {migrated_count} passwords to bcrypt hash!")
-        else:
-            print("\n✅ All passwords are already hashed. No migration needed.")
-    
-    print("="*60 + "\n")
+    print("⏭️ Skipping password migration...")
+    return
 
 def create_admin_user():
     """Create an admin user for accessing the admin panel"""

@@ -223,7 +223,7 @@
     font-size: 15px;
 }
 
-/* Process Section */
+/* Process Section - COMPLETELY FIXED */
 .process-section {
     margin-bottom: 100px;
     position: relative;
@@ -241,7 +241,7 @@
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 4px;
+    width: 3px;
     height: 100%;
     background: linear-gradient(to bottom, #102094, #38bdf8);
 }
@@ -254,7 +254,13 @@
 }
 
 .process-step:nth-child(odd) {
+    flex-direction: row;
+    text-align: right;
+}
+
+.process-step:nth-child(even) {
     flex-direction: row-reverse;
+    text-align: left;
 }
 
 .step-number {
@@ -272,26 +278,120 @@
     z-index: 2;
     flex-shrink: 0;
     margin: 0 40px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
 .step-content {
     background: white;
-    padding: 30px;
+    padding: 25px 30px;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     flex: 1;
     border: 1px solid #e2e8f0;
+    transition: transform 0.3s;
+    width: 100%;
+}
+
+.step-content:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+}
+
+.step-icon {
+    font-size: 32px;
+    margin-bottom: 15px;
+    color: #102094;
 }
 
 .step-content h3 {
     color: #102094;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     font-size: 22px;
 }
 
 .step-content p {
     color: #64748b;
     line-height: 1.6;
+    font-size: 15px;
+}
+
+/* Fix for odd/even alignment */
+.process-step:nth-child(odd) .step-content {
+    text-align: right;
+}
+
+.process-step:nth-child(even) .step-content {
+    text-align: left;
+}
+
+.process-step:nth-child(odd) .step-icon {
+    text-align: right;
+}
+
+.process-step:nth-child(even) .step-icon {
+    text-align: left;
+}
+
+/* ================= MOBILE RESPONSIVE FIX ================= */
+@media (max-width: 992px) {
+    .process-timeline:before {
+        left: 35px;
+    }
+    
+    .process-step {
+        flex-direction: row !important;
+        text-align: left !important;
+        margin-bottom: 40px;
+    }
+    
+    .process-step:nth-child(odd) .step-content,
+    .process-step:nth-child(even) .step-content {
+        text-align: left;
+    }
+    
+    .step-number {
+        margin: 0 20px 0 0;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+    
+    .step-content {
+        padding: 20px;
+    }
+    
+    .step-content h3 {
+        font-size: 18px;
+    }
+    
+    .step-content p {
+        font-size: 14px;
+    }
+    
+    .step-icon {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 576px) {
+    .step-number {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+        margin-right: 15px;
+    }
+    
+    .step-content {
+        padding: 15px;
+    }
+    
+    .step-content h3 {
+        font-size: 16px;
+    }
+    
+    .step-content p {
+        font-size: 13px;
+    }
 }
 
 /* Technology Section */

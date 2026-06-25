@@ -1857,3 +1857,194 @@ body.dark-theme .semester-progress {
 body.dark-theme .progress-bar {
     background: rgba(255,255,255,0.2);
 }
+
+/* newly added for subject wise performance */
+/* Subject item status colors */
+.subject-item.warning {
+    border-left: 4px solid #f59e0b;
+    background: #fffbeb;
+}
+
+.subject-item.excellent {
+    border-left: 4px solid #8b5cf6;
+}
+
+.subject-item.good {
+    border-left: 4px solid #10b981;
+}
+
+.attendance-rate.low-attendance {
+    color: #ef4444;
+}
+
+.performance-fill.warning-fill {
+    background: #f59e0b;
+}
+
+.performance-fill.good-fill {
+    background: #10b981;
+}
+
+.warning-text {
+    color: #ef4444;
+    font-size: 11px;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Add to your dashboard.css file */
+
+/* Department Banner */
+.dept-banner {
+    background: linear-gradient(135deg, #0b1a33 0%, #1a2f4a 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dept-banner i {
+    font-size: 1.5rem;
+}
+
+/* Subject Card Status Colors */
+.subject-card.warning {
+    border-left: 4px solid #f39c12;
+}
+
+.subject-card.good {
+    border-left: 4px solid #27ae60;
+}
+
+.progress-fill.warning-fill {
+    background: #f39c12;
+}
+
+.progress-fill.good-fill {
+    background: #27ae60;
+}
+
+.attendance-details {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: #6b7a93;
+}
+
+.error-message {
+    text-align: center;
+    padding: 40px;
+    background: #fee;
+    border-radius: 12px;
+    color: #c00;
+}
+
+.error-message i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.status-good {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-warning {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.subject-card {
+    background: #f8faff;
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid #eef2f9;
+    transition: all 0.3s;
+}
+
+.subject-card:hover {
+    transform: translateY(-5px);
+    border-color:  #102094;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.subject-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 7px;
+}
+
+.subject-code {
+    background:  #102094;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.subject-credits {
+    color: #6b7a93;
+    font-size: 12px;
+}
+
+.subject-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #102094;
+    margin-bottom: 15px;
+}
+
+.metric {
+    margin-bottom: 15px;
+}
+
+.metric-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #4a5f7a;
+}
+
+.progress-bar {
+    background: #e0e7ff;
+    height: 8px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    background: #102094;
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1s ease;
+}
+
+.loading {
+    text-align: center;
+    padding: 50px;
+    color: #102094;
+}

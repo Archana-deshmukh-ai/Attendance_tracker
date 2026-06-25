@@ -20,13 +20,28 @@
         "timestamp": "2026-03-10T21:08:36.122283",
         "ip": "127.0.0.1",
         "success": false
+      },
+      {
+        "timestamp": "2026-03-30T19:27:14.681115",
+        "ip": "127.0.0.1",
+        "success": false
+      },
+      {
+        "timestamp": "2026-03-31T21:01:12.571147",
+        "ip": "127.0.0.1",
+        "success": false
+      },
+      {
+        "timestamp": "2026-03-31T21:40:48.569127",
+        "ip": "127.0.0.1",
+        "success": false
       }
     ],
-    "failed_count": 4,
-    "last_attempt": "2026-03-10T21:08:36.122283"
+    "failed_count": 7,
+    "last_attempt": "2026-03-31T21:40:48.569127"
   },
   "127.0.0.1": {
-    "failed_attempts": 5
+    "failed_attempts": 2
   },
   "aditya.kumar@uni.edu": {
     "attempts": [
@@ -34,9 +49,283 @@
         "timestamp": "2026-03-09T19:34:46.385984",
         "ip": "127.0.0.1",
         "success": false
+      },
+      {
+        "timestamp": "2026-03-31T21:45:35.555844",
+        "ip": "127.0.0.1",
+        "success": false
+      }
+    ],
+    "failed_count": 2,
+    "last_attempt": "2026-03-31T21:45:35.555844"
+  },
+  "aaradhya.bose@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-03-31T21:00:44.813123",
+        "ip": "127.0.0.1",
+        "success": false
       }
     ],
     "failed_count": 1,
-    "last_attempt": "2026-03-09T19:34:46.385984"
+    "last_attempt": "2026-03-31T21:00:44.813123"
+  },
+  "kavya.patel@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-04-02T21:07:34.977247",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-02T21:07:34.989039",
+        "ip": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "failed_count": 0,
+    "last_attempt": "2026-04-02T21:07:34.989039"
+  },
+  "sai.kumar@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-04-02T21:12:12.631909",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-02T21:12:12.655937",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-13T15:41:05.015025",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-13T15:41:05.255615",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-13T21:43:32.729812",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-13T21:43:33.038529",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-15T20:43:15.878502",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-15T20:43:15.899481",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-15T20:48:48.472629",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-15T20:48:48.488088",
+        "ip": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "failed_count": 0,
+    "last_attempt": "2026-04-15T20:48:48.488088"
+  },
+  "usha.devi@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-04-02T21:14:39.757859",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-02T21:14:40.050452",
+        "ip": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "failed_count": 0,
+    "last_attempt": "2026-04-02T21:14:40.050452"
+  },
+  "aditya.verma@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-04-03T17:18:06.454529",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-03T17:18:06.738993",
+        "ip": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "failed_count": 0,
+    "last_attempt": "2026-04-03T17:18:06.738993"
+  },
+  "anaya.singh@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-04-07T21:37:21.396203",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-10T19:04:27.297837",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-10T19:04:27.306617",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-10T21:39:18.153630",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-10T21:39:18.221830",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-12T18:51:02.638296",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-12T18:51:02.669327",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-12T19:16:38.208329",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-12T19:16:38.236592",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-13T15:00:56.615409",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-13T15:00:56.633087",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-13T15:20:30.592646",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-13T15:20:30.606073",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-13T15:32:41.390822",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-13T15:32:41.414407",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-15T20:57:19.897439",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-15T21:10:53.314760",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-15T21:10:53.325833",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-21T21:54:41.808167",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-22T22:17:32.405924",
+        "ip": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "failed_count": 0,
+    "last_attempt": "2026-04-22T22:17:32.405924"
+  },
+  "krishna.iyer@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-04-05T21:16:15.803598",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-05T21:16:16.065817",
+        "ip": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "failed_count": 0,
+    "last_attempt": "2026-04-05T21:16:16.065817"
+  },
+  "sanjana.reddy@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-04-07T20:46:17.142072",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-04-07T20:46:17.406899",
+        "ip": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "failed_count": 0,
+    "last_attempt": "2026-04-07T20:46:17.406899"
+  },
+  "priya.patel@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-04-24T22:15:59.325499",
+        "ip": "127.0.0.1",
+        "success": false
+      },
+      {
+        "timestamp": "2026-04-24T22:15:59.553397",
+        "ip": "127.0.0.1",
+        "success": false
+      }
+    ],
+    "failed_count": 2,
+    "last_attempt": "2026-04-24T22:15:59.553397"
   }
 }

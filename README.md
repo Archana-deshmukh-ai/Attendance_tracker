@@ -192,6 +192,7 @@ Distributed under the MIT License. 📜
 ---
 
 ## 👩‍💻 Authors
+Made  by Kiranmai Vanapalli and  Archana Deshmukh |  Project 2026
 
 **V.Kiranmai** 👩‍💻 & **Archana Deshmukh** 👩‍💻
 

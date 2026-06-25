@@ -16,6 +16,10 @@
     <!-- AOS Animation Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Notification.css -->
+    <link rel="stylesheet" href="css/notification.css">
+   
+
 </head>
 <body class="js-loading">
 
@@ -37,6 +41,11 @@
     <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
         <i class="fas fa-bars"></i>
     </button>
+    <div id="notification-container"></div>
+        <script src="js/notification.js"></script>
+        <link rel="stylesheet" href="css/notification.css">
+    
+    
 </header>
 
 <!-- ================= MAIN CONTENT ================= -->
@@ -240,15 +249,13 @@
         </div>
 
         <!-- Subject Performance -->
-        <div class="subjects-section" data-aos="fade-up" data-aos-delay="500">
-            <div class="section-header">
-                <h2><i class="fas fa-book-open"></i> Subject-wise Performance</h2>
-                <button class="refresh-btn" onclick="refreshSubjects()" title="Refresh Subjects">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
+        <div class="performance-section">
+            <div class="section-title">
+                <i class="fas fa-chart-line"></i>
+                <span>Student-wise Performance</span>
             </div>
-            <div class="subjects-list" id="subjectsPerformance">
-                <!-- Will be populated by JavaScript -->
+            <div id="performanceContainer">
+            <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
             </div>
         </div>
 
@@ -337,6 +344,7 @@
             </div>
         </div>
 
+         
         <!-- Notifications & Alerts -->
         <div class="notifications-section" data-aos="fade-up" data-aos-delay="900">
             <div class="section-header">
@@ -465,8 +473,10 @@
 <!-- ================= SCRIPTS ================= -->
 <script src="js/script.js"></script>
 <script src="js/student_dashboard.js"></script>
+<script src="js/notification.js"></script>
+
 <script>
-    // Initialize AOS animations
+    // Initialize AOS animations!~ 
     AOS.init({
         duration: 600,
         once: true,
