@@ -1,270 +1,200 @@
 # 📊 Attendance Atlas
 
-## 🚀 Smart Attendance Management System
+## Smart Attendance Management System 🚀
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://python.org)
 [![Flask](https://img.shields.io/badge/flask-2.0%2B-green.svg)](https://flask.palletsprojects.com)
 [![SQLite](https://img.shields.io/badge/database-SQLite-orange.svg)](https://sqlite.org)
-[![JavaScript](https://img.shields.io/badge/javascript-ES6-yellow.svg)](https://javascript.com)
 [![License](https://img.shields.io/badge/license-MIT-red.svg)](LICENSE)
-[![GitHub last commit](https://img.shields.io/github/last-commit/Archana-deshmukh-ai/Attendance_tracker)](https://github.com/Archana-deshmukh-ai/Attendance_tracker)
-[![GitHub stars](https://img.shields.io/github/stars/Archana-deshmukh-ai/Attendance_tracker)](https://github.com/Archana-deshmukh-ai/Attendance_tracker)
 
-> A comprehensive, real-time attendance management system designed to revolutionize how educational institutions track and analyze student attendance.
+> ✨ A comprehensive web-based attendance management system with real-time tracking, advanced analytics, and role-based access control.
 
 ---
 
-## 🌟 Overview
+## 📋 Overview
 
-**Attendance Atlas** is a cutting-edge web-based attendance management system that eliminates traditional manual tracking methods. It provides real-time attendance monitoring, advanced analytics, and comprehensive reporting capabilities for educational institutions. Built with modern web technologies, it offers separate dashboards for students, lecturers, and administrators, ensuring a tailored experience for each user role.
+Attendance Atlas eliminates manual attendance tracking challenges by providing automated recording, real-time analytics, and comprehensive reporting. Built with Flask and modern web technologies, it serves students, lecturers, and administrators through dedicated dashboards.
 
-### 🎯 Problem Statement
-Educational institutions struggle with:
-- ❌ Manual attendance tracking errors
-- ❌ Time-consuming record keeping
-- ❌ Lack of real-time insights
-- ❌ Difficulty in generating reports
-- ❌ Security concerns with data management
+### 🌟 Key Benefits
 
-### 💡 Our Solution
-**Attendance Atlas** solves these challenges by providing:
-- ✅ Automated attendance tracking
-- ✅ Real-time analytics and insights
-- ✅ Secure role-based access
-- ✅ Comprehensive reporting tools
-- ✅ User-friendly interfaces for all stakeholders
+* ✅ Automated attendance tracking
+* 📈 Real-time analytics dashboard
+* 🔒 Secure role-based access
+* 📄 Multi-format report generation
+* 🎯 Department-specific data filtering
 
 ---
 
-## ✨ Key Features
+## ⚡ Features
 
-### 🔐 **Security & Authentication**
-- **Brute Force Protection** - 5 failed attempts lockout mechanism
-- **Account Lockout** - Temporary lock with countdown timer
-- **IP Blocking** - Prevents multiple attempts from same IP
-- **CAPTCHA Verification** - After 3 failed attempts
-- **Password Hashing** - bcrypt encryption for secure storage
-- **Session Management** - Automatic logout after inactivity
-- **Two-Factor Authentication** - Optional 2FA support
-- **Password Reset** - Secure OTP-based password recovery
+### 🔐 Security & Authentication
 
-### 👨‍🎓 **Student Features**
-- **Real-time Dashboard** - Personal attendance overview
-- **Subject-wise Performance** - Detailed analytics per subject
-- **Attendance History** - Complete record with filters
-- **Attendance Trends** - Interactive charts and graphs
-- **Download Reports** - PDF/CSV export options
-- **Certificate Generation** - Excellence certificates for high attendance
-- **Low Attendance Alerts** - Email and in-app notifications
-- **Goal Tracking** - Personal attendance targets
-- **Streak Counter** - Days since last absence
-- **Performance Ranking** - Compare with classmates
+* 🛡️ Brute force protection with account lockout (5 attempts)
+* 🌐 IP-based blocking and cooldown periods
+* 🔑 bcrypt password hashing
+* 📧 OTP-based password recovery
+* ⏱️ Session management with automatic timeout
 
-### 👨‍🏫 **Lecturer Features**
-- **Quick Attendance Marking** - Bulk operations support
-- **Class Management** - View and manage assigned subjects
-- **Student Analytics** - Track individual student performance
-- **Class Reports** - Generate class-wise summaries
-- **Export Functionality** - CSV, PDF, Excel formats
-- **Student Notes** - Add remarks for attendance records
-- **Real-time Statistics** - Live class attendance percentages
-- **Department Analysis** - Compare across departments
-- **Timetable Management** - Schedule and manage classes
-- **Bulk Actions** - Mark all present/absent/late at once
+### 👨‍🎓 Student Features
 
-### 📊 **Reports & Analytics**
-- **Interactive Charts** - Line, bar, pie charts with Chart.js
-- **Trend Analysis** - Daily, weekly, monthly trends
-- **Department Comparison** - Cross-department analytics
-- **Subject Performance** - Subject-wise attendance rates
-- **Date Range Filters** - Custom time period selection
-- **Data Export** - CSV, Excel, PDF downloads
-- **Print Reports** - Printable report formats
-- **Email Reports** - Send reports via email
-- **Save Filters** - Preserve filter preferences
-- **Real-time Updates** - Live data synchronization
+* 📊 Personal attendance dashboard with real-time percentages
+* 📚 Subject-wise performance analytics
+* 📈 Interactive charts and trend visualization
+* 💾 PDF/CSV report downloads
+* 🏆 Certificate generation for high attendance
+* ⚠️ Low attendance alerts and goal tracking
 
-### 🎨 **User Interface**
-- **Responsive Design** - Works on all devices
-- **Dark Mode Support** - Eye-friendly theme
-- **AOS Animations** - Smooth scroll animations
-- **Mobile Menu** - Optimized for smartphones
-- **Interactive Tabs** - Organized content sections
-- **Progress Indicators** - Visual feedback for actions
-- **Toast Notifications** - Non-intrusive alerts
-- **Loading States** - Spinners and progress bars
+### 👨‍🏫 Lecturer Features
 
----
+* ⚡ Quick attendance marking with bulk operations
+* 📖 Class and subject management
+* 👥 Student performance tracking
+* 📑 Multi-format report exports (CSV, Excel, PDF)
+* 🏛️ Department-wide analytics
+* 📝 Student notes and remarks system
 
-## 🎯 User Roles
+### 📊 Reports & Analytics
 
-### 👨‍🎓 **Student Dashboard**
-- Personal attendance percentage
-- Subject-wise breakdown
-- Attendance calendar view
-- Certificate eligibility status
-- Low attendance warnings
-- Download personal reports
-- View class schedule
-- Track attendance goals
-
-### 👨‍🏫 **Lecturer Dashboard**
-- Class overview statistics
-- Today's attendance percentage
-- Subject management
-- Student performance tracking
-- Bulk attendance marking
-- Export class reports
-- Student notes management
-- Real-time analytics
-
-### 👑 **Administrator Panel**
-- User management
-- System configuration
-- Institutional analytics
-- Data backup and restore
-- Security settings
-- Role management
-- System health monitoring
+* 📈 Interactive charts (Line, Bar, Pie)
+* 📅 Daily, weekly, monthly trend analysis
+* 🏢 Department and subject comparisons
+* 🎛️ Custom date range filtering
+* 💾 Export functionality with print support
 
 ---
 
 ## 💻 Technology Stack
 
-### **Backend**
-| Technology | Purpose |
-|------------|---------|
-| **Python 3.8+** | Core programming language |
-| **Flask** | Web framework |
-| **SQLite** | Database management |
-| **bcrypt** | Password hashing |
-| **Pandas** | Data processing |
-| **smtplib** | Email functionality |
-| **hashlib** | Security hashing |
-
-### **Frontend**
-| Technology | Purpose |
-|------------|---------|
-| **HTML5** | Structure |
-| **CSS3** | Styling & animations |
-| **JavaScript ES6** | Interactivity |
-| **Chart.js** | Data visualization |
-| **Font Awesome 6** | Icons |
-| **AOS** | Scroll animations |
-
-### **Security**
-| Feature | Implementation |
-|---------|---------------|
-| Password Storage | bcrypt hashing |
-| Session Management | Flask sessions |
-| Brute Force Protection | Attempt tracking |
-| XSS Prevention | Input sanitization |
-| SQL Injection | Parameterized queries |
-| CSRF Protection | Token validation |
+* 🐍 Backend: Python 3.8+, Flask, SQLite, bcrypt, Pandas
+* 🎨 Frontend: HTML5, CSS3, JavaScript ES6, Chart.js, Font Awesome
+* 🔒 Security: bcrypt hashing, Flask sessions, CSRF protection
 
 ---
 
-## 🚀 Installation & Setup
+## 🚀 Installation
 
-### Prerequisites
-- Python 3.8 or higher
-- pip package manager
-- Git (optional)
+### 📋 Prerequisites
 
-### Step-by-Step Installation
+* Python 3.8 or higher
+* pip package manager
 
-**Step 1: Clone the Repository**
-```bash
+### 📥 Step 1: Clone Repository
+
+```
 git clone https://github.com/Archana-deshmukh-ai/Attendance_tracker.git
 cd Attendance_tracker
+```
 
-Step 2: Create Virtual Environment
-# Windows
+### 🔧 Step 2: Create Virtual Environment
+
+#### Windows
+
+```
 python -m venv venv
 venv\Scripts\activate
+```
 
-# Mac/Linux
+#### Mac/Linux
+
+```
 python3 -m venv venv
 source venv/bin/activate
+```
 
-Step 3: Install Dependencies
+### 📦 Step 3: Install Dependencies
+
+```
 pip install -r requirements.txt
+```
 
-Step 4: Initialize Database
+### 🗄️ Step 4: Initialize Database
+
+```
 cd backend
 python populate_complete_db.py
+```
 
-When prompted, type yes to populate the database with sample data.
+Type 'yes' when prompted
 
-Step 5: Run the Application
+### 🚀 Step 5: Start Application
+
+```
 python app.py
+```
 
-Step 6: Access the Application
-Open your browser and navigate to:
-http://localhost:5000
+### 🌐 Step 6: Access Application
 
-🔒 Security Features
-Account Protection
-✅ Brute force prevention (5 attempts max)
+Open your browser and go to: http://localhost:5000
 
-✅ Account lockout (15 minutes)
+---
 
-✅ IP-based blocking
+## 👥 User Roles
 
-✅ Cooldown period between attempts
+👨‍🎓 Student
 
-✅ CAPTCHA after 3 failed attempts
+* Access Level: Personal data only
+* Key Features: View attendance, download reports, certificates
 
-Data Security
-✅ bcrypt password hashing
+👨‍🏫 Lecturer
 
-✅ SQL injection prevention
+* Access Level: Assigned subjects
+* Key Features: Mark attendance, generate class reports, analytics
 
-✅ XSS protection
+👑 Admin
 
-✅ CSRF tokens
+* Access Level: Full system access
+* Key Features: User management, system configuration
 
-✅ Session management
+### 🔑 Test Credentials
 
-✅ Secure cookie handling
+👨‍🎓 Student: [aarav.sharma@uni.edu](mailto:aarav.sharma@uni.edu) / student@1001
+👨‍🏫 Lecturer: [rajesh.iyer@uni.edu](mailto:rajesh.iyer@uni.edu) / prof@201
 
-Access Control
-✅ Role-based access control (RBAC)
+---
 
-✅ Session timeout (1 hour)
+## 🔒 Security Features
 
-✅ IP tracking
+* 🔐 Authentication: bcrypt password hashing, session management
+* ⏱️ Rate Limiting: 5 attempts before lockout (15 minutes)
+* 🌐 IP Protection: 10 attempts triggers IP block (30 minutes)
+* 📧 Password Reset: OTP-based recovery with 10-minute expiry
+* 🛡️ Data Protection: Parameterized queries, XSS prevention, CSRF tokens
 
-✅ Login attempt logging
+---
 
-✅ Account unlock via email
+## 📡 API Endpoints
 
-📊 Analytics & Reports
+* 🔍 GET /api/students - Retrieve all students
+* 🔍 GET /api/lecturers - Retrieve all lecturers
+* 🔍 GET /api/subjects - Retrieve all subjects
+* 🔍 GET /api/attendance - Retrieve attendance records
+* ✍️ POST /api/mark_attendance - Record attendance
+* 🔑 POST /login - User authentication
+* 📧 POST /api/forgot-password - Initiate password reset
+* 🔄 POST /api/reset-password - Complete password reset
 
-Available Reports
-Report Type	Description
-Attendance Summary	Overall attendance percentage
-Subject-wise	Per-subject attendance analysis
-Department-wise	Cross-department comparison
-Student Report	Individual student performance
-Class Report	Class-wide attendance statistics
-Monthly Summary	Monthly attendance trends
-Certificate	Attendance excellence certificates
-Export Data	CSV, Excel, PDF formats
+---
 
-Chart Types
-📈 Line Charts - Trend analysis
+## 🤝 Contributing
 
-📊 Bar Charts - Comparison analysis
+1. 🍴 Fork the repository
+2. 🌿 Create feature branch: `git checkout -b feature/AmazingFeature`
+3. 💾 Commit changes: `git commit -m 'Add AmazingFeature'`
+4. 📤 Push to branch: `git push origin feature/AmazingFeature`
+5. 🔄 Open a Pull Request
 
-🥧 Pie Charts - Distribution analysis
+---
 
-📉 Area Charts - Cumulative trends
+## 📄 License
 
-⭐ Show Your Support
+Distributed under the MIT License. 📜
 
-If you found this project helpful, please give it a ⭐ on GitHub!
+---
 
-Made  by Kiranmayee and  Archana Deshmukh |  Project 2026
+## 👩‍💻 Authors
 
-"Revolutionizing attendance management, one click at a time."
+**V.Kiranmai** 👩‍💻 & **Archana Deshmukh** 👩‍💻
+
+---
+
+*"Revolutionizing attendance management, one click at a time."* 🎯✨
