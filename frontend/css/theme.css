@@ -1,0 +1,33 @@
+.dark-mode {
+    background: #0f172a;
+    color: white;
+}
+
+.dark-mode .navbar,
+.dark-mode .card,
+.dark-mode .section,
+.dark-mode .footer {
+    background: #1e293b;
+    color: white;
+}
+ 
+/* Navbar in Dark Mode */
+.dark-mode .navbar {
+    background-color: #0f172a !important;
+}
+
+/* Navbar headings and links */
+.dark-mode .navbar .logo,
+.dark-mode .navbar .nav-links a,
+.dark-mode .navbar .header-right,
+.dark-mode .navbar h1,
+.dark-mode .navbar h2,
+.dark-mode .navbar h3,
+.dark-mode .navbar span {
+    color: white !important;
+}
+
+/* Hover effect */
+.dark-mode .navbar .nav-links a:hover {
+    color: #60a5fa !important;
+}

@@ -74,6 +74,44 @@ function setupNavigation() {
     });
 }
 
+// new appearence settings functions
+function saveAppearance() {
+
+    const selectedTheme =
+        document.querySelector('input[name="theme"]:checked').value;
+
+    localStorage.setItem("theme", selectedTheme);
+
+    applyTheme(selectedTheme);
+
+    alert("Theme applied successfully!");
+}
+
+function applyTheme(theme) {
+
+    document.body.classList.remove("dark-mode");
+
+    if (theme === "dark") {
+        document.body.classList.add("dark-mode");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const savedTheme = localStorage.getItem("theme") || "light";
+
+    const radio = document.querySelector(
+        `input[name="theme"][value="${savedTheme}"]`
+    );
+
+    if (radio) {
+        radio.checked = true;
+    }
+
+    applyTheme(savedTheme);
+});
+// new appearence settings functions end
+
 function saveProfile() { alert('Profile saved!'); }
 function saveAllSettings() { alert('All settings saved!'); }
 function changePassword() { alert('Password change feature coming soon'); }
@@ -88,3 +126,4 @@ window.saveAllSettings = saveAllSettings;
 window.changePassword = changePassword;
 window.deleteAccount = deleteAccount;
 window.togglePassword = togglePassword;
+

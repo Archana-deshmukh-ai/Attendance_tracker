@@ -875,3 +875,4 @@ function showStatusMessage(message, type) {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', initializeAttendancePage);
+

@@ -1330,6 +1330,30 @@ body.dark-theme .form-select {
     color: #f1f5f9;
 }
 
+/* new appearence setting design */
+
+.dark-mode {
+    background: #0f172a;
+    color: white;
+}
+
+.dark-mode .settings-container,
+.dark-mode .settings-content,
+.dark-mode .settings-sidebar,
+.dark-mode .settings-section {
+    background: #1e293b;
+    color: white;
+}
+
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea {
+    background: #334155;
+    color: white;
+    border: 1px solid #475569;
+}
+/* new appearence setting design end */
+
 
 
 

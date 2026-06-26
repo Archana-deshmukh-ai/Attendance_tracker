@@ -445,3 +445,4 @@ window.markAllAsRead = markAllAsRead;
 window.changePassword = changePassword;
 window.logoutOtherSessions = logoutOtherSessions;
 window.extendSession = extendSession;
+

@@ -248,3 +248,11 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.reload();
     }, msToMidnight);
 });
+
+// code for theme.css as for appearance purpose is added in all the html files since it is related to appearance of the website and not specific to any page.
+document.addEventListener("DOMContentLoaded", () => {
+    if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+    }
+});
+// end of the code for theme.css as for appearance purpose is added in all the html files since it is related to appearance of the website and not specific to any page.
