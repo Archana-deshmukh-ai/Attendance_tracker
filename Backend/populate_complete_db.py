@@ -4,6 +4,7 @@ import os
 import random
 from datetime import datetime, timedelta
 import bcrypt
+import hashlib
 
 # Database path
 DB_PATH = "Backend/data/institute.db"
@@ -18,13 +19,10 @@ def clear_database():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    # Delete all records
     cursor.execute("DELETE FROM attendance")
     cursor.execute("DELETE FROM subjects")
     cursor.execute("DELETE FROM students")
     cursor.execute("DELETE FROM lecturers")
-    
-    # Reset auto-increment
     cursor.execute("DELETE FROM sqlite_sequence")
     
     conn.commit()
@@ -35,76 +33,16 @@ def create_lecturers():
     """Create lecturers with ALL columns filled"""
     lecturers = [
         # CSE Department
-        {
-            'lecturer_id': 'L001',
-            'name': 'Dr. Rajesh Iyer',
-            'email': 'rajesh.iyer@uni.edu',
-            'password': 'prof@201',
-            'department': 'Computer Science'
-        },
-        {
-            'lecturer_id': 'L002',
-            'name': 'Prof. Sarah Johnson',
-            'email': 'sarah.johnson@uni.edu',
-            'password': 'prof@202',
-            'department': 'Computer Science'
-        },
-        {
-            'lecturer_id': 'L003',
-            'name': 'Dr. Amit Sharma',
-            'email': 'amit.sharma@uni.edu',
-            'password': 'prof@203',
-            'department': 'Computer Science'
-        },
-        {
-            'lecturer_id': 'L004',
-            'name': 'Prof. Priya Patel',
-            'email': 'priya.patel@uni.edu',
-            'password': 'prof@204',
-            'department': 'Electronics'
-        },
-        {
-            'lecturer_id': 'L005',
-            'name': 'Dr. Vikram Singh',
-            'email': 'vikram.singh@uni.edu',
-            'password': 'prof@205',
-            'department': 'Electronics'
-        },
-        {
-            'lecturer_id': 'L006',
-            'name': 'Prof. Meera Reddy',
-            'email': 'meera.reddy@uni.edu',
-            'password': 'prof@206',
-            'department': 'Mechanical'
-        },
-        {
-            'lecturer_id': 'L007',
-            'name': 'Dr. Anand Kumar',
-            'email': 'anand.kumar@uni.edu',
-            'password': 'prof@207',
-            'department': 'Mechanical'
-        },
-        {
-            'lecturer_id': 'L008',
-            'name': 'Prof. Neha Gupta',
-            'email': 'neha.gupta@uni.edu',
-            'password': 'prof@208',
-            'department': 'Civil'
-        },
-        {
-            'lecturer_id': 'L009',
-            'name': 'Dr. Ramesh Choudhary',
-            'email': 'ramesh.choudhary@uni.edu',
-            'password': 'prof@209',
-            'department': 'Civil'
-        },
-        {
-            'lecturer_id': 'L010',
-            'name': 'Prof. Kavita Singh',
-            'email': 'kavita.singh@uni.edu',
-            'password': 'prof@210',
-            'department': 'Mathematics'
-        }
+        {'lecturer_id': 'L001', 'name': 'Dr. Rajesh Iyer', 'email': 'rajesh.iyer@uni.edu', 'password': 'prof@201', 'department': 'Computer Science'},
+        {'lecturer_id': 'L002', 'name': 'Prof. Sarah Johnson', 'email': 'sarah.johnson@uni.edu', 'password': 'prof@202', 'department': 'Computer Science'},
+        {'lecturer_id': 'L003', 'name': 'Dr. Amit Sharma', 'email': 'amit.sharma@uni.edu', 'password': 'prof@203', 'department': 'Computer Science'},
+        {'lecturer_id': 'L004', 'name': 'Prof. Priya Patel', 'email': 'priya.patel@uni.edu', 'password': 'prof@204', 'department': 'Electronics'},
+        {'lecturer_id': 'L005', 'name': 'Dr. Vikram Singh', 'email': 'vikram.singh@uni.edu', 'password': 'prof@205', 'department': 'Electronics'},
+        {'lecturer_id': 'L006', 'name': 'Prof. Meera Reddy', 'email': 'meera.reddy@uni.edu', 'password': 'prof@206', 'department': 'Mechanical'},
+        {'lecturer_id': 'L007', 'name': 'Dr. Anand Kumar', 'email': 'anand.kumar@uni.edu', 'password': 'prof@207', 'department': 'Mechanical'},
+        {'lecturer_id': 'L008', 'name': 'Prof. Neha Gupta', 'email': 'neha.gupta@uni.edu', 'password': 'prof@208', 'department': 'Civil'},
+        {'lecturer_id': 'L009', 'name': 'Dr. Ramesh Choudhary', 'email': 'ramesh.choudhary@uni.edu', 'password': 'prof@209', 'department': 'Civil'},
+        {'lecturer_id': 'L010', 'name': 'Prof. Kavita Singh', 'email': 'kavita.singh@uni.edu', 'password': 'prof@210', 'department': 'Mathematics'},
     ]
     
     conn = sqlite3.connect(DB_PATH)
@@ -122,9 +60,9 @@ def create_lecturers():
     print(f"✓ Created {len(lecturers)} lecturers")
 
 def create_subjects():
-    """Create subjects with ALL columns filled and assigned to lecturers"""
+    """Create subjects with department-specific subjects only"""
     subjects = [
-        # Computer Science Subjects
+        # Computer Science Subjects (Only CSE students take these)
         {'code': 'CS101', 'name': 'Programming Fundamentals', 'credits': 4, 'department': 'Computer Science', 'lecturer_id': 'L001'},
         {'code': 'CS201', 'name': 'Data Structures and Algorithms', 'credits': 4, 'department': 'Computer Science', 'lecturer_id': 'L001'},
         {'code': 'CS301', 'name': 'Database Management Systems', 'credits': 3, 'department': 'Computer Science', 'lecturer_id': 'L002'},
@@ -134,29 +72,29 @@ def create_subjects():
         {'code': 'CS701', 'name': 'Artificial Intelligence', 'credits': 3, 'department': 'Computer Science', 'lecturer_id': 'L001'},
         {'code': 'CS801', 'name': 'Machine Learning', 'credits': 3, 'department': 'Computer Science', 'lecturer_id': 'L002'},
         
-        # Electronics Subjects
+        # Electronics Subjects (Only ECE students take these)
         {'code': 'EC101', 'name': 'Digital Electronics', 'credits': 4, 'department': 'Electronics', 'lecturer_id': 'L004'},
         {'code': 'EC201', 'name': 'Analog Circuits', 'credits': 4, 'department': 'Electronics', 'lecturer_id': 'L004'},
         {'code': 'EC301', 'name': 'Microprocessors', 'credits': 3, 'department': 'Electronics', 'lecturer_id': 'L005'},
         {'code': 'EC401', 'name': 'Embedded Systems', 'credits': 3, 'department': 'Electronics', 'lecturer_id': 'L005'},
         {'code': 'EC501', 'name': 'VLSI Design', 'credits': 3, 'department': 'Electronics', 'lecturer_id': 'L004'},
         
-        # Mechanical Subjects
+        # Mechanical Subjects (Only ME students take these)
         {'code': 'ME101', 'name': 'Engineering Mechanics', 'credits': 4, 'department': 'Mechanical', 'lecturer_id': 'L006'},
         {'code': 'ME201', 'name': 'Thermodynamics', 'credits': 4, 'department': 'Mechanical', 'lecturer_id': 'L006'},
         {'code': 'ME301', 'name': 'Fluid Mechanics', 'credits': 3, 'department': 'Mechanical', 'lecturer_id': 'L007'},
         {'code': 'ME401', 'name': 'Heat Transfer', 'credits': 3, 'department': 'Mechanical', 'lecturer_id': 'L007'},
         {'code': 'ME501', 'name': 'Manufacturing Processes', 'credits': 3, 'department': 'Mechanical', 'lecturer_id': 'L006'},
         
-        # Civil Subjects
+        # Civil Subjects (Only CE students take these)
         {'code': 'CE101', 'name': 'Building Materials', 'credits': 4, 'department': 'Civil', 'lecturer_id': 'L008'},
         {'code': 'CE201', 'name': 'Surveying', 'credits': 4, 'department': 'Civil', 'lecturer_id': 'L008'},
         {'code': 'CE301', 'name': 'Structural Analysis', 'credits': 3, 'department': 'Civil', 'lecturer_id': 'L009'},
         {'code': 'CE401', 'name': 'Geotechnical Engineering', 'credits': 3, 'department': 'Civil', 'lecturer_id': 'L009'},
         
-        # Common Subjects (for all departments)
-        {'code': 'MA101', 'name': 'Engineering Mathematics', 'credits': 4, 'department': 'Mathematics', 'lecturer_id': 'L010'},
-        {'code': 'PH101', 'name': 'Engineering Physics', 'credits': 4, 'department': 'Mathematics', 'lecturer_id': 'L010'},
+        # Common Subjects (All departments take these)
+        {'code': 'MA101', 'name': 'Engineering Mathematics', 'credits': 4, 'department': 'Common', 'lecturer_id': 'L010'},
+        {'code': 'PH101', 'name': 'Engineering Physics', 'credits': 4, 'department': 'Common', 'lecturer_id': 'L010'},
     ]
     
     conn = sqlite3.connect(DB_PATH)
@@ -174,8 +112,49 @@ def create_subjects():
     conn.close()
     print(f"✓ Created {len(subjects)} subjects")
 
+def determine_attendance_pattern(student_num, dept):
+    """
+    Determine attendance pattern for a student
+    Returns: dict with attendance rate range and pattern type
+    """
+    # Create varied attendance patterns across all students
+    # Use deterministic but varied pattern based on student number and department
+    seed_string = f"{dept}_{student_num}"
+    hash_value = int(hashlib.md5(seed_string.encode()).hexdigest()[:8], 16)
+    seed = hash_value % 100
+    
+    # Distribution to test notification system thoroughly:
+    # - 20% students: Very Low Attendance (below 60%) - CRITICAL notifications
+    # - 25% students: Low Attendance (60-74%) - WARNING notifications  
+    # - 20% students: Borderline (75-79%) - Close to threshold
+    # - 20% students: Average (80-84%) - Safe zone
+    # - 15% students: Good Attendance (85%+) - Excellent
+    
+    if seed < 20:  # 20% students - Very Low Attendance (below 60%) - CRITICAL
+        rate_min, rate_max = 40, 59
+        pattern_type = "critical"
+    elif seed < 45:  # 25% students - Low Attendance (60-74%) - WARNING
+        rate_min, rate_max = 60, 74
+        pattern_type = "warning"
+    elif seed < 65:  # 20% students - Borderline (75-79%)
+        rate_min, rate_max = 75, 79
+        pattern_type = "borderline"
+    elif seed < 85:  # 20% students - Average (80-84%)
+        rate_min, rate_max = 80, 84
+        pattern_type = "average"
+    else:  # 15% students - Good Attendance (85%+)
+        rate_min, rate_max = 85, 98
+        pattern_type = "good"
+    
+    return {
+        'rate_min': rate_min,
+        'rate_max': rate_max,
+        'pattern_type': pattern_type,
+        'expected_attendance': (rate_min + rate_max) / 2
+    }
+
 def create_students():
-    """Create students with ALL columns filled across multiple departments"""
+    """Create students with department-specific IDs"""
     students = []
     
     # Computer Science Students (40 students)
@@ -217,8 +196,6 @@ def create_students():
     ]
     
     # Generate students for each department with varied attendance patterns
-    # We'll store attendance pattern info to use later
-    
     # CSE Students
     for i, name in enumerate(cse_names, 1):
         pattern = determine_attendance_pattern(i, 'CSE')
@@ -288,53 +265,8 @@ def create_students():
     # Return students with patterns for attendance generation
     return students
 
-def determine_attendance_pattern(student_num, dept):
-    """
-    Determine attendance pattern for a student
-    Returns: dict with attendance rate range and pattern type
-    """
-    # Create varied attendance patterns across all students
-    # This ensures we have students across all attendance ranges to test notification system
-    
-    # Use deterministic but varied pattern based on student number and department
-    # This ensures consistent results when re-running the script
-    import hashlib
-    seed_string = f"{dept}_{student_num}"
-    hash_value = int(hashlib.md5(seed_string.encode()).hexdigest()[:8], 16)
-    seed = hash_value % 100
-    
-    # Distribution to test notification system thoroughly:
-    # - 20% students: Very Low Attendance (below 60%) - CRITICAL notifications
-    # - 25% students: Low Attendance (60-74%) - WARNING notifications  
-    # - 20% students: Borderline (75-79%) - Close to threshold
-    # - 20% students: Average (80-84%) - Safe zone
-    # - 15% students: Good Attendance (85%+) - Excellent
-    
-    if seed < 20:  # 20% students - Very Low Attendance (below 60%) - CRITICAL
-        rate_min, rate_max = 40, 59
-        pattern_type = "critical"
-    elif seed < 45:  # 25% students - Low Attendance (60-74%) - WARNING
-        rate_min, rate_max = 60, 74
-        pattern_type = "warning"
-    elif seed < 65:  # 20% students - Borderline (75-79%)
-        rate_min, rate_max = 75, 79
-        pattern_type = "borderline"
-    elif seed < 85:  # 20% students - Average (80-84%)
-        rate_min, rate_max = 80, 84
-        pattern_type = "average"
-    else:  # 15% students - Good Attendance (85%+)
-        rate_min, rate_max = 85, 98
-        pattern_type = "good"
-    
-    return {
-        'rate_min': rate_min,
-        'rate_max': rate_max,
-        'pattern_type': pattern_type,
-        'expected_attendance': (rate_min + rate_max) / 2
-    }
-
 def create_attendance(students_with_patterns):
-    """Create realistic attendance records with varied patterns"""
+    """Create realistic attendance records - students only attend subjects from their department + common subjects"""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
@@ -355,13 +287,8 @@ def create_attendance(students_with_patterns):
         })
     
     # Create student mapping by department
-    students_by_dept = {}
     student_patterns = {}
     for student in students_with_patterns:
-        dept = student['department']
-        if dept not in students_by_dept:
-            students_by_dept[dept] = []
-        students_by_dept[dept].append(student['student_id'])
         student_patterns[student['student_id']] = student['attendance_pattern']
     
     # Generate attendance for the last 60 days
@@ -374,37 +301,45 @@ def create_attendance(students_with_patterns):
     print("   Generating attendance records with varied patterns...")
     print("   (This may take a moment...)")
     
-    # For each subject, generate attendance records
-    for subject in subjects:
-        subject_id, subject_code, subject_dept = subject
+    # For each student, generate attendance only for their department subjects + common subjects
+    for student in students_with_patterns:
+        student_id = student['student_id']
+        student_dept = student['department']
         
-        # Determine which students take this subject
-        if subject_dept == 'Mathematics':
-            # All students take mathematics
-            eligible_students = []
-            for dept_students in students_by_dept.values():
-                eligible_students.extend(dept_students)
-        elif subject_dept in students_by_dept:
-            eligible_students = students_by_dept[subject_dept]
-        else:
+        # Determine which subjects this student takes
+        student_subjects = []
+        
+        # Add department-specific subjects
+        if student_dept in subjects_by_dept:
+            student_subjects.extend(subjects_by_dept[student_dept])
+        
+        # Add common subjects (Mathematics, Physics)
+        if 'Common' in subjects_by_dept:
+            student_subjects.extend(subjects_by_dept['Common'])
+        
+        if not student_subjects:
             continue
         
-        # Generate attendance for each day
-        current_date = start_date
-        days_with_class = 0
-        
-        while current_date <= end_date:
-            # Skip weekends (Saturday and Sunday)
-            if current_date.weekday() < 5:  # Monday to Friday
-                date_str = current_date.strftime('%Y-%m-%d')
-                
-                # Determine if class was conducted (80-90% probability)
-                class_probability = random.uniform(0.80, 0.90)
-                
-                if random.random() < class_probability:
-                    days_with_class += 1
+        # Generate attendance for each subject
+        for subject in student_subjects:
+            subject_id = subject['id']
+            subject_code = subject['code']
+            subject_dept = subject['dept']
+            
+            # Generate attendance for last 60 days
+            current_date = start_date
+            days_with_class = 0
+            
+            while current_date <= end_date:
+                # Skip weekends
+                if current_date.weekday() < 5:
+                    date_str = current_date.strftime('%Y-%m-%d')
                     
-                    for student_id in eligible_students:
+                    # Determine if class was conducted (80-90% probability)
+                    class_probability = random.uniform(0.80, 0.90)
+                    
+                    if random.random() < class_probability:
+                        days_with_class += 1
                         total_possible_records += 1
                         
                         # Get attendance pattern for this student
@@ -452,10 +387,12 @@ def create_attendance(students_with_patterns):
                         else:
                             status = 'absent'
                         
-                        # Get lecturer who marked attendance
-                        lecturer_id = get_lecturer_for_subject(cursor, subject_id)
+                        # Get lecturer
+                        cursor.execute("SELECT lecturer_id FROM subjects WHERE subject_id = ?", (subject_id,))
+                        lecturer_result = cursor.fetchone()
+                        lecturer_id = lecturer_result[0] if lecturer_result else None
                         
-                        # Add remarks for some absent students (for notification testing)
+                        # Add remarks for notification testing
                         remarks = None
                         if status == 'absent':
                             if pattern['pattern_type'] == 'critical' and random.random() < 0.30:
@@ -489,6 +426,8 @@ def create_attendance(students_with_patterns):
                                     'Travel'
                                 ]
                                 remarks = random.choice(remarks_list)
+                        elif status == 'late' and random.random() < 0.20:
+                            remarks = 'Arrived late to class'
                         
                         cursor.execute("""
                             INSERT INTO attendance 
@@ -498,28 +437,21 @@ def create_attendance(students_with_patterns):
                               datetime.now().isoformat(), remarks))
                         
                         attendance_count += 1
+                
+                current_date += timedelta(days=1)
             
-            current_date += timedelta(days=1)
-        
-        # Reset random seed
-        random.seed()
-        
-        if days_with_class > 0:
-            print(f"      {subject_code}: {days_with_class} classes")
+            # Reset random seed
+            random.seed()
+            
+            if days_with_class > 0:
+                print(f"      {subject_code}: {days_with_class} classes")
     
     conn.commit()
     conn.close()
-    
-    print(f"\n   ✓ Created {attendance_count:,} attendance records")
+    print(f"   ✓ Created {attendance_count:,} attendance records")
     print(f"   ✓ Total possible records: {total_possible_records:,}")
     
     return total_possible_records
-
-def get_lecturer_for_subject(cursor, subject_id):
-    """Get the lecturer assigned to a subject"""
-    cursor.execute("SELECT lecturer_id FROM subjects WHERE subject_id = ?", (subject_id,))
-    result = cursor.fetchone()
-    return result[0] if result else None
 
 def calculate_attendance_statistics():
     """Calculate and display attendance statistics for notification testing"""
@@ -657,7 +589,6 @@ def print_complete_statistics(attendance_stats):
     print("COMPLETE DATABASE STATISTICS")
     print("="*70)
     
-    # Count records
     cursor.execute("SELECT COUNT(*) FROM students")
     student_count = cursor.fetchone()[0]
     
@@ -676,36 +607,31 @@ def print_complete_statistics(attendance_stats):
     print(f"   • Subjects: {subject_count}")
     print(f"   • Attendance Records: {attendance_count:,}")
     
-    # Students by department
     print(f"\n👥 STUDENTS BY DEPARTMENT:")
-    cursor.execute("""
-        SELECT department, COUNT(*) as count 
-        FROM students 
-        GROUP BY department
-        ORDER BY count DESC
-    """)
-    dept_students = cursor.fetchall()
-    for dept, count in dept_students:
+    cursor.execute("SELECT department, COUNT(*) FROM students GROUP BY department")
+    for dept, count in cursor.fetchall():
         print(f"   • {dept}: {count} students")
     
-    # Subjects by department
     print(f"\n📚 SUBJECTS BY DEPARTMENT:")
-    cursor.execute("""
-        SELECT department, COUNT(*) as count 
-        FROM subjects 
-        GROUP BY department
-        ORDER BY count DESC
-    """)
-    dept_subjects = cursor.fetchall()
-    for dept, count in dept_subjects:
+    cursor.execute("SELECT department, COUNT(*) FROM subjects GROUP BY department")
+    for dept, count in cursor.fetchall():
         print(f"   • {dept}: {count} subjects")
     
-    # Get date range
+    # Verify department-specific attendance
+    print(f"\n✅ VERIFYING DEPARTMENT-SPECIFIC ATTENDANCE:")
+    cursor.execute("""
+        SELECT s.department, COUNT(DISTINCT a.student_id) as students_with_attendance
+        FROM students s
+        JOIN attendance a ON s.student_id = a.student_id
+        GROUP BY s.department
+    """)
+    for dept, count in cursor.fetchall():
+        print(f"   • {dept}: {count} students have attendance records")
+    
     cursor.execute("SELECT MIN(date), MAX(date) FROM attendance")
     date_range = cursor.fetchone()
-    
-    print(f"\n📅 ATTENDANCE DATE RANGE:")
     if date_range[0] and date_range[1]:
+        print(f"\n📅 ATTENDANCE DATE RANGE:")
         print(f"   • From: {date_range[0]}")
         print(f"   • To: {date_range[1]}")
         start = datetime.strptime(date_range[0], '%Y-%m-%d')
@@ -788,19 +714,31 @@ def main():
     print("\nThis script will create:")
     print("   • 10 Lecturers")
     print("   • 110 Students (CSE:40, ECE:25, ME:25, Civil:20)")
-    print("   • 25 Subjects across 5 departments")
+    print("   • 25 Subjects (Department-specific + Common subjects)")
     print("   • Attendance records for last 60 days")
+    print("   • Students ONLY attend subjects from their department + Common subjects")
     print("   • RANDOM attendance patterns (40% to 98%)")
     print("   • 45% students below 75% attendance for notification testing")
     print("   • Special remarks and notification triggers")
     
     # Check if database exists
     if not os.path.exists(DB_PATH):
-        print("\n❌ Database not found! Please run the app first to create the database.")
+        print("\n❌ Database not found! Please run the app first.")
         print("   Run: python app.py first to create the database structure")
         return
     
-    # Ask for confirmation
+    # Check if data already exists
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM students")
+    count = cursor.fetchone()[0]
+    conn.close()
+    
+    if count > 0:
+        print("\n✅ Database already has data!")
+        print("   Skipping population...")
+        return
+    
     print("\n⚠️  WARNING: This will DELETE all existing data!")
     confirm = input("\nType 'yes' to continue: ")
     
@@ -820,7 +758,7 @@ def main():
     print("\n👥 Creating students with varied attendance patterns...")
     students_with_patterns = create_students()
     
-    print("\n📊 Generating random attendance records for last 60 days...")
+    print("\n📊 Generating attendance records (department-specific)...")
     create_attendance(students_with_patterns)
     
     print("\n✨ Adding special notification patterns...")
@@ -841,7 +779,7 @@ def main():
     print("   • ECE Student: akash.verma@uni.edu")
     print("   • ME Student: amit.trivedi@uni.edu")
     print("   • CE Student: ankit.sharma@uni.edu")
-    print("\n   LECTURERS (Use these to see department-wide data):")
+    print("\n   LECTURERS:")
     print("   • Dr. Rajesh Iyer: rajesh.iyer@uni.edu / prof@201")
     print("   • Prof. Sarah Johnson: sarah.johnson@uni.edu / prof@202")
     print("\n🔔 NOTIFICATION SYSTEM TESTING:")

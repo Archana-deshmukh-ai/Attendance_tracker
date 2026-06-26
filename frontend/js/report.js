@@ -1258,6 +1258,7 @@ function updateStatistics(attendanceData) {
     const lateCountEl = document.getElementById('total-late');
     if (lateCountEl) lateCountEl.textContent = late;
 }
+<<<<<<< HEAD
 
 // code for theme.css as for appearance purpose is added in all the html files since it is related to appearance of the website and not specific to any page.
 document.addEventListener("DOMContentLoaded", () => {
@@ -1266,3 +1267,235 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 // end of the code for theme.css as for appearance purpose is added in all the html files since it is related to appearance of the website and not specific to any page.
+=======
+// Add this function to report.js to filter subjects for students
+function getStudentSubjects() {
+    if (currentUser.role !== 'student') {
+        return reportData.subjects;
+    }
+    
+    // Get student's department
+    const student = reportData.students.find(s => s.student_id == currentUser.id);
+    if (!student) return reportData.subjects;
+    
+    // Filter subjects that belong to student's department OR are common subjects
+    const studentDept = student.department;
+    const filteredSubjects = reportData.subjects.filter(subject => {
+        return subject.department === studentDept || subject.department === 'Common';
+    });
+    
+    console.log(`Filtered ${filteredSubjects.length} subjects for ${studentDept} student`);
+    return filteredSubjects;
+}
+
+// Update populateSubjectFilter function
+function populateSubjectFilter() {
+    const subjectFilter = document.getElementById('subjectFilter');
+    if (!subjectFilter) return;
+    
+    subjectFilter.innerHTML = '<option value="all">All Subjects</option>';
+    
+    const subjectsToShow = getStudentSubjects();
+    
+    subjectsToShow.forEach(subject => {
+        const option = document.createElement('option');
+        option.value = subject.subject_id;
+        option.textContent = `${subject.code} - ${subject.name}`;
+        subjectFilter.appendChild(option);
+    });
+}
+
+// Update loadStudentCharts to use filtered subjects
+function loadStudentCharts(attendanceData) {
+    destroyCharts();
+    
+    if (!attendanceData || attendanceData.length === 0) {
+        showEmptyChartMessage('statusChart', 'No attendance data available');
+        showEmptyChartMessage('trendChart', 'No trend data available');
+        showEmptyChartMessage('subjectChart', 'No subject data available');
+        return;
+    }
+    
+    clearEmptyChartMessage('statusChart');
+    clearEmptyChartMessage('trendChart');
+    clearEmptyChartMessage('subjectChart');
+    
+    // Status Chart with Late
+    const statusCtx = document.getElementById('statusChart')?.getContext('2d');
+    if (statusCtx) {
+        const presentCount = attendanceData.filter(r => r.status === 'present').length;
+        const absentCount = attendanceData.filter(r => r.status === 'absent').length;
+        const lateCount = attendanceData.filter(r => r.status === 'late').length;
+        
+        chartInstances.statusChart = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Present', 'Absent', 'Late'],
+                datasets: [{
+                    data: [presentCount, absentCount, lateCount],
+                    backgroundColor: ['#10b981', '#ef4444', '#f59e0b']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 12 } } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = presentCount + absentCount + lateCount;
+                                const percentage = total > 0 ? Math.round((context.raw / total) * 100) : 0;
+                                return `${context.label}: ${context.raw} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        const total = presentCount + absentCount + lateCount;
+        const presentStat = document.getElementById('presentStat');
+        const absentStat = document.getElementById('absentStat');
+        const lateStat = document.getElementById('lateStat');
+        if (presentStat) presentStat.textContent = total > 0 ? `${Math.round((presentCount / total) * 100)}%` : '0%';
+        if (absentStat) absentStat.textContent = total > 0 ? `${Math.round((absentCount / total) * 100)}%` : '0%';
+        if (lateStat) lateStat.textContent = total > 0 ? `${Math.round((lateCount / total) * 100)}%` : '0%';
+    }
+    
+    // Trend Chart
+    const dates = [...new Set(attendanceData.map(r => r.date))].sort();
+    if (dates.length > 0) {
+        const dateCounts = dates.map(date => {
+            const dayRecords = attendanceData.filter(r => r.date === date);
+            const present = dayRecords.filter(r => r.status === 'present').length;
+            const late = dayRecords.filter(r => r.status === 'late').length;
+            const total = dayRecords.length;
+            return total > 0 ? Math.round(((present + late) / total) * 100) : 0;
+        });
+        
+        const trendCtx = document.getElementById('trendChart')?.getContext('2d');
+        if (trendCtx) {
+            chartInstances.trendChart = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Attendance % (Present + Late)',
+                        data: dateCounts,
+                        borderColor: '#102094',
+                        backgroundColor: 'rgba(16, 32, 148, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Attendance Percentage (%)' } },
+                        x: { title: { display: true, text: 'Date' } }
+                    }
+                }
+            });
+        }
+    } else {
+        showEmptyChartMessage('trendChart', 'No trend data available');
+    }
+    
+    // Subject Chart - Now using filtered subjects that student actually takes
+    const studentSubjects = getStudentSubjects();
+    const subjectMap = {};
+    
+    attendanceData.forEach(record => {
+        const subject = studentSubjects.find(s => s.subject_id == record.subject_id);
+        if (subject) {
+            if (!subjectMap[record.subject_id]) {
+                subjectMap[record.subject_id] = { total: 0, present: 0, late: 0, name: subject.name, code: subject.code };
+            }
+            subjectMap[record.subject_id].total++;
+            if (record.status === 'present') subjectMap[record.subject_id].present++;
+            if (record.status === 'late') subjectMap[record.subject_id].late++;
+        }
+    });
+    
+    if (Object.keys(subjectMap).length > 0) {
+        const subjectCtx = document.getElementById('subjectChart')?.getContext('2d');
+        if (subjectCtx) {
+            const subjectLabels = Object.values(subjectMap).map(s => `${s.code}`);
+            const subjectData = Object.values(subjectMap).map(s => 
+                s.total > 0 ? Math.round(((s.present + s.late) / s.total) * 100) : 0
+            );
+            
+            if (chartInstances.subjectChart) chartInstances.subjectChart.destroy();
+            
+            chartInstances.subjectChart = new Chart(subjectCtx, {
+                type: 'bar',
+                data: {
+                    labels: subjectLabels,
+                    datasets: [{
+                        label: 'Attendance % (Present + Late)',
+                        data: subjectData,
+                        backgroundColor: '#38bdf8'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Attendance Percentage (%)' } }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                afterBody: function(context) {
+                                    const subjectData = Object.values(subjectMap)[context[0].dataIndex];
+                                    return `Present: ${subjectData.present}\nLate: ${subjectData.late}\nTotal: ${subjectData.total}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    } else {
+        showEmptyChartMessage('subjectChart', 'No subject data available');
+    }
+}
+
+// Update the loadAllData function to fetch subjects with department info
+async function loadAllData() {
+    try {
+        const attendanceRes = await fetch('/api/attendance');
+        const attendanceData = await attendanceRes.json();
+        if (attendanceData.success) {
+            reportData.attendance = attendanceData.attendance;
+            console.log(`Loaded ${reportData.attendance.length} attendance records`);
+        }
+        
+        const studentsRes = await fetch('/api/students');
+        const studentsData = await studentsRes.json();
+        if (studentsData.success) {
+            reportData.students = studentsData.students;
+            console.log(`Loaded ${reportData.students.length} students`);
+        }
+        
+        const subjectsRes = await fetch('/api/subjects');
+        const subjectsData = await subjectsRes.json();
+        if (subjectsData.success) {
+            reportData.subjects = subjectsData.subjects;
+            console.log(`Loaded ${reportData.subjects.length} subjects`);
+            console.log('Subjects by department:', reportData.subjects.reduce((acc, s) => {
+                acc[s.department] = (acc[s.department] || 0) + 1;
+                return acc;
+            }, {}));
+        }
+        
+        updateQuickStats();
+        
+    } catch (error) {
+        console.error('Error loading report data:', error);
+        showError('Failed to load report data');
+    }
+}
+>>>>>>> a0a027b48effd96bf68dd7db4f286e7f5731ba98
