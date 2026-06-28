@@ -32,6 +32,11 @@ app = Flask(
 app.secret_key = "attendance-atlas-secret-key"
 CORS(app)
 
+# Admin Credentials
+ADMIN_EMAIL = "admin@attendance.com"
+ADMIN_PASSWORD = "admin@123"
+
+
 # Directory Configuration
 DATA_DIR = os.path.join(BASE_DIR, "data")
 DB_PATH = os.path.join(DATA_DIR, "institute.db")
@@ -731,55 +736,73 @@ print("✅ Flask-Admin initialized successfully!")
 # ADMIN LOGIN ROUTES
 # ============================================================================
 
-@app.route('/admin-login')
-def admin_login():
+
+# @app.route('/admin')
+# def admin_home():
+#     """Admin home page"""
+#     return render_template('admin_index.html')
+
+# ================= ADMIN ROUTES =================
+
+# Admin Login Page (shows the HTML form)
+@app.route('/admin-login', methods=['GET'])
+def admin_login_page():
     """Admin login page"""
     return render_template('admin_login.html')
 
-@app.route('/admin')
-def admin_home():
-    """Admin home page"""
-    return render_template('admin_index.html')
-
-@app.route('/admin-login-submit', methods=['POST'])
+# Admin Login Submit (handles form POST)
+@app.route('/admin-login', methods=['POST'])
 def admin_login_submit():
-    """Handle admin login submission"""
     email = request.form.get('email')
     password = request.form.get('password')
     
-    if not email or not password:
-        return render_template('admin_login.html', error="Email and password are required")
-    
-    try:
-        with get_db() as conn:
-            user = conn.execute(
-                "SELECT * FROM lecturers WHERE email = ?", (email,)
-            ).fetchone()
-            
-            if user and check_password(password, user['password']):
-                if user['lecturer_id'] == 'ADMIN001':
-                    session["logged_in"] = True
-                    session["email"] = user["email"]
-                    session["role"] = "admin"
-                    session["name"] = user["name"]
-                    session["lecturer_id"] = user["lecturer_id"]
-                    return redirect(url_for('admin.index'))
-                else:
-                    return render_template('admin_login.html', 
-                                         error="You are not authorized as admin.")
-            else:
-                return render_template('admin_login.html', 
-                                     error="Invalid email or password.")
-    except Exception as e:
-        print(f"Admin login error: {str(e)}")
-        return render_template('admin_login.html', error="Database error occurred")
+    if email == ADMIN_EMAIL and password == ADMIN_PASSWORD:
+        session['admin_logged_in'] = True
+        session['admin_email'] = email
+        return redirect('/admin')
+    else:
+        return render_template('admin_login.html', error='Invalid email or password')
 
+# Admin Dashboard
+@app.route('/admin')
+def admin_dashboard():
+    if not session.get('admin_logged_in'):
+        return redirect('/admin-login')
+    return render_template('admin/admin_dashboard.html')
+
+# Admin - Manage Students
+@app.route('/admin/students')
+def admin_students():
+    if not session.get('admin_logged_in'):
+        return redirect('/admin-login')
+    return render_template('admin/admin_students.html')
+
+# Admin - Manage Lecturers
+@app.route('/admin/lecturers')
+def admin_lecturers():
+    if not session.get('admin_logged_in'):
+        return redirect('/admin-login')
+    return render_template('admin/admin_lecturers.html')
+
+# Admin - Manage Subjects
+@app.route('/admin/subjects')
+def admin_subjects():
+    if not session.get('admin_logged_in'):
+        return redirect('/admin-login')
+    return render_template('admin/admin_subjects.html')
+
+# Admin - View Attendance
+@app.route('/admin/attendance')
+def admin_attendance():
+    if not session.get('admin_logged_in'):
+        return redirect('/admin-login')
+    return render_template('admin/admin_attendance.html')
+
+# Admin Logout
 @app.route('/admin-logout')
 def admin_logout():
-    """Logout from admin panel"""
     session.clear()
-    return redirect(url_for('home_page'))
-
+    return redirect('/admin-login')
 # ============================================================================
 # ROUTES - HTML PAGES
 # ============================================================================
@@ -1704,6 +1727,154 @@ def initialize_data():
     migrate_existing_passwords()
     create_admin_user()
     print(f"📁 SQLite database initialized at: {DB_PATH}")
+
+# ===========================================================================
+
+
+# ================= ADMIN API ENDPOINTS =================
+
+@app.route('/api/admin/students')
+def admin_get_students():
+    """Get all students for admin"""
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        with get_db() as conn:
+            students = conn.execute('''
+                SELECT student_id, name, email, department, batch 
+                FROM students 
+                ORDER BY student_id
+            ''').fetchall()
+            return jsonify({
+                'success': True,
+                'students': [dict(s) for s in students]
+            })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/admin/lecturers')
+def admin_get_lecturers():
+    """Get all lecturers for admin"""
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        with get_db() as conn:
+            lecturers = conn.execute('''
+                SELECT lecturer_id, name, email, department 
+                FROM lecturers 
+                ORDER BY lecturer_id
+            ''').fetchall()
+            return jsonify({
+                'success': True,
+                'lecturers': [dict(l) for l in lecturers]
+            })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/admin/subjects')
+def admin_get_subjects():
+    """Get all subjects for admin"""
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        with get_db() as conn:
+            subjects = conn.execute('''
+                SELECT subject_id, code, name, credits, department 
+                FROM subjects 
+                ORDER BY code
+            ''').fetchall()
+            return jsonify({
+                'success': True,
+                'subjects': [dict(s) for s in subjects]
+            })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/admin/attendance')
+def admin_get_attendance():
+    """Get all attendance for admin"""
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        with get_db() as conn:
+            attendance = conn.execute('''
+                SELECT a.id, a.subject_id, a.student_id, a.date, a.status, a.timestamp,
+                       s.name as subject_name, st.name as student_name
+                FROM attendance a
+                JOIN subjects s ON a.subject_id = s.subject_id
+                JOIN students st ON a.student_id = st.student_id
+                ORDER BY a.timestamp DESC
+                LIMIT 100
+            ''').fetchall()
+            return jsonify({
+                'success': True,
+                'attendance': [dict(a) for a in attendance]
+            })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/admin/stats')
+def admin_get_stats():
+    """Get admin dashboard statistics"""
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        with get_db() as conn:
+            students = conn.execute('SELECT COUNT(*) as count FROM students').fetchone()['count']
+            lecturers = conn.execute('SELECT COUNT(*) as count FROM lecturers').fetchone()['count']
+            subjects = conn.execute('SELECT COUNT(*) as count FROM subjects').fetchone()['count']
+            attendance = conn.execute('SELECT COUNT(*) as count FROM attendance').fetchone()['count']
+            
+            return jsonify({
+                'success': True,
+                'stats': {
+                    'students': students,
+                    'lecturers': lecturers,
+                    'subjects': subjects,
+                    'attendance_records': attendance
+                }
+            })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/admin/delete-student/<student_id>', methods=['DELETE'])
+def admin_delete_student(student_id):
+    """Delete a student"""
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        with get_db() as conn:
+            conn.execute('DELETE FROM students WHERE student_id = ?', (student_id,))
+            conn.commit()
+            return jsonify({'success': True, 'message': 'Student deleted'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/admin/delete-lecturer/<lecturer_id>', methods=['DELETE'])
+def admin_delete_lecturer(lecturer_id):
+    """Delete a lecturer"""
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        with get_db() as conn:
+            conn.execute('DELETE FROM lecturers WHERE lecturer_id = ?', (lecturer_id,))
+            conn.commit()
+            return jsonify({'success': True, 'message': 'Lecturer deleted'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/admin/logout', methods=['POST'])
+def admin_logout_api():  # ← Changed name
+    session.clear()
+    return jsonify({'success': True, 'message': 'Logged out'})
+# ==================CODE END FOR ADMIN PANEL======================================
 
 # ============================================================================
 # APPLICATION ENTRY POINT
