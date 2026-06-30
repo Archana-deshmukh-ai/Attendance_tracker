@@ -1795,26 +1795,54 @@ def admin_get_subjects():
 
 @app.route('/api/admin/attendance')
 def admin_get_attendance():
-    """Get all attendance for admin"""
+    """Get ALL attendance records for admin"""
     if not session.get('admin_logged_in'):
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
     
     try:
         with get_db() as conn:
+            # Get ALL attendance records with student and subject details
             attendance = conn.execute('''
-                SELECT a.id, a.subject_id, a.student_id, a.date, a.status, a.timestamp,
-                       s.name as subject_name, st.name as student_name
+                SELECT 
+                    a.id,
+                    a.subject_id,
+                    a.student_id,
+                    a.date,
+                    a.status,
+                    a.timestamp,
+                    a.marked_by,
+                    s.name as subject_name,
+                    s.code as subject_code,
+                    st.name as student_name,
+                    st.department as student_dept,
+                    st.batch as student_batch
                 FROM attendance a
-                JOIN subjects s ON a.subject_id = s.subject_id
-                JOIN students st ON a.student_id = st.student_id
-                ORDER BY a.timestamp DESC
-                LIMIT 100
+                LEFT JOIN subjects s ON a.subject_id = s.subject_id
+                LEFT JOIN students st ON a.student_id = st.student_id
+                ORDER BY a.date DESC, a.timestamp DESC
+                LIMIT 500
             ''').fetchall()
+            
+            # Convert to list of dicts
+            result = []
+            for row in attendance:
+                record = dict(row)
+                # Handle None values
+                if record.get('student_name') is None:
+                    record['student_name'] = record.get('student_id', 'Unknown')
+                if record.get('subject_name') is None:
+                    record['subject_name'] = f"Subject {record.get('subject_id', 'Unknown')}"
+                if record.get('student_dept') is None:
+                    record['student_dept'] = 'Unknown'
+                result.append(record)
+            
             return jsonify({
                 'success': True,
-                'attendance': [dict(a) for a in attendance]
+                'count': len(result),
+                'attendance': result
             })
     except Exception as e:
+        print(f"Error in admin_get_attendance: {str(e)}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/admin/stats')
@@ -1874,6 +1902,209 @@ def admin_delete_lecturer(lecturer_id):
 def admin_logout_api():  # ← Changed name
     session.clear()
     return jsonify({'success': True, 'message': 'Logged out'})
+
+
+# ================= ADMIN - ADD STUDENT =================
+@app.route('/api/admin/add-student', methods=['POST'])
+def admin_add_student():
+    """Add a new student"""
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    data = request.json
+    student_id = data.get('student_id')
+    name = data.get('name')
+    email = data.get('email')
+    password = data.get('password', 'student123')
+    department = data.get('department')
+    batch = data.get('batch')
+    
+    if not all([student_id, name, email]):
+        return jsonify({'success': False, 'message': 'Student ID, Name, and Email are required'}), 400
+    
+    hashed_password = hash_password(password)
+    
+    try:
+        with get_db() as conn:
+            conn.execute('''
+                INSERT INTO students (student_id, name, email, password, department, batch)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (student_id, name, email, hashed_password, department, batch))
+            conn.commit()
+            return jsonify({'success': True, 'message': 'Student added successfully'})
+    except sqlite3.IntegrityError:
+        return jsonify({'success': False, 'message': 'Student ID or Email already exists'}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# ================= ADMIN - EDIT STUDENT =================
+@app.route('/api/admin/edit-student/<student_id>', methods=['PUT'])
+def admin_edit_student(student_id):
+    """Edit an existing student"""
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    data = request.json
+    name = data.get('name')
+    email = data.get('email')
+    department = data.get('department')
+    batch = data.get('batch')
+    
+    if not all([name, email]):
+        return jsonify({'success': False, 'message': 'Name and Email are required'}), 400
+    
+    try:
+        with get_db() as conn:
+            conn.execute('''
+                UPDATE students 
+                SET name = ?, email = ?, department = ?, batch = ?
+                WHERE student_id = ?
+            ''', (name, email, department, batch, student_id))
+            conn.commit()
+            return jsonify({'success': True, 'message': 'Student updated successfully'})
+    except sqlite3.IntegrityError:
+        return jsonify({'success': False, 'message': 'Email already exists'}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# ================= ADMIN - GET STUDENT BY ID =================
+@app.route('/api/admin/student/<student_id>')
+def admin_get_student(student_id):
+    """Get a single student by ID"""
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        with get_db() as conn:
+            student = conn.execute('''
+                SELECT student_id, name, email, department, batch 
+                FROM students 
+                WHERE student_id = ?
+            ''', (student_id,)).fetchone()
+            
+            if student:
+                return jsonify({'success': True, 'student': dict(student)})
+            else:
+                return jsonify({'success': False, 'message': 'Student not found'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# ================= ADMIN - EXPORT STUDENTS TO EXCEL =================
+@app.route('/api/admin/export-students')
+def admin_export_students():
+    """Export all students to Excel/CSV"""
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        with get_db() as conn:
+            students = conn.execute('''
+                SELECT student_id, name, email, department, batch 
+                FROM students 
+                ORDER BY student_id
+            ''').fetchall()
+            
+            # Create CSV
+            output = io.StringIO()
+            writer = csv.writer(output)
+            writer.writerow(['Student ID', 'Name', 'Email', 'Department', 'Batch'])
+            
+            for student in students:
+                writer.writerow([
+                    student['student_id'],
+                    student['name'],
+                    student['email'],
+                    student['department'] or '',
+                    student['batch'] or ''
+                ])
+            
+            output.seek(0)
+            return send_file(
+                io.BytesIO(output.getvalue().encode('utf-8')),
+                mimetype='text/csv',
+                as_attachment=True,
+                download_name=f'students_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+            )
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# ================= ADMIN - ATTENDANCE SUMMARY =================
+@app.route('/api/admin/attendance-summary')
+def admin_attendance_summary():
+    """Get attendance summary by department"""
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        with get_db() as conn:
+            # Get attendance by department
+            summary = conn.execute('''
+                SELECT 
+                    s.department,
+                    COUNT(DISTINCT s.student_id) as total_students,
+                    COUNT(CASE WHEN a.status='present' THEN 1 END) as present_count,
+                    COUNT(a.id) as total_attendance
+                FROM students s
+                LEFT JOIN attendance a ON s.student_id = a.student_id
+                GROUP BY s.department
+                ORDER BY s.department
+            ''').fetchall()
+            
+            result = []
+            for row in summary:
+                department = row['department'] or 'Unknown'
+                total_students = row['total_students']
+                total_attendance = row['total_attendance'] or 0
+                present_count = row['present_count'] or 0
+                
+                percentage = round((present_count / total_attendance * 100), 1) if total_attendance > 0 else 0
+                
+                result.append({
+                    'department': department,
+                    'total_students': total_students,
+                    'total_attendance': total_attendance,
+                    'present_count': present_count,
+                    'attendance_percentage': percentage
+                })
+            
+            return jsonify({'success': True, 'summary': result})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# ================= ADMIN - FILTER STUDENTS BY DEPARTMENT =================
+@app.route('/api/admin/students/filter/<department>')
+def admin_filter_students(department):
+    """Get students filtered by department"""
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        with get_db() as conn:
+            if department == 'All':
+                students = conn.execute('''
+                    SELECT student_id, name, email, department, batch 
+                    FROM students 
+                    ORDER BY student_id
+                ''').fetchall()
+            else:
+                students = conn.execute('''
+                    SELECT student_id, name, email, department, batch 
+                    FROM students 
+                    WHERE department = ?
+                    ORDER BY student_id
+                ''', (department,)).fetchall()
+            
+            return jsonify({
+                'success': True,
+                'students': [dict(s) for s in students]
+            })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 # ==================CODE END FOR ADMIN PANEL======================================
 
 # ============================================================================
