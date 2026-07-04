@@ -41,7 +41,7 @@
     "last_attempt": "2026-03-31T21:40:48.569127"
   },
   "127.0.0.1": {
-    "failed_attempts": 2
+    "failed_attempts": 0
   },
   "aditya.kumar@uni.edu": {
     "attempts": [
@@ -327,5 +327,21 @@
     ],
     "failed_count": 2,
     "last_attempt": "2026-04-24T22:15:59.553397"
+  },
+  "aarav.sharma@uni.edu": {
+    "attempts": [
+      {
+        "timestamp": "2026-07-04T18:43:40.855830",
+        "ip": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2026-07-04T18:43:41.147767",
+        "ip": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "failed_count": 0,
+    "last_attempt": "2026-07-04T18:43:41.147767"
   }
 }

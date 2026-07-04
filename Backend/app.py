@@ -745,24 +745,53 @@ print("✅ Flask-Admin initialized successfully!")
 # ================= ADMIN ROUTES =================
 
 # Admin Login Page (shows the HTML form)
+# ================= ADMIN AUTHENTICATION =================
+
+def verify_admin_login(email, password):
+    """Verify admin credentials against database"""
+    try:
+        with get_db() as conn:
+            admin = conn.execute(
+                "SELECT * FROM admins WHERE email = ?", (email,)
+            ).fetchone()
+            
+            if admin and check_password(password, admin['password']):
+                return dict(admin)
+            return None
+    except Exception as e:
+        print(f"Admin login error: {str(e)}")
+        return None
+
+# ================= ADMIN LOGIN =================
+
 @app.route('/admin-login', methods=['GET'])
 def admin_login_page():
     """Admin login page"""
     return render_template('admin_login.html')
 
-# Admin Login Submit (handles form POST)
 @app.route('/admin-login', methods=['POST'])
 def admin_login_submit():
+    """Admin login submit"""
     email = request.form.get('email')
     password = request.form.get('password')
     
-    if email == ADMIN_EMAIL and password == ADMIN_PASSWORD:
-        session['admin_logged_in'] = True
-        session['admin_email'] = email
-        return redirect('/admin')
-    else:
-        return render_template('admin_login.html', error='Invalid email or password')
-
+    try:
+        with get_db() as conn:
+            admin = conn.execute(
+                "SELECT * FROM admins WHERE email = ?", (email,)
+            ).fetchone()
+            
+            if admin and check_password(password, admin['password']):
+                session['admin_logged_in'] = True
+                session['admin_email'] = admin['email']
+                session['admin_name'] = admin['name']
+                session['admin_id'] = admin['admin_id']
+                return redirect('/admin')
+            else:
+                return render_template('admin_login.html', error='Invalid email or password')
+    except Exception as e:
+        print(f"Login error: {str(e)}")
+        return render_template('admin_login.html', error='Login error')
 # Admin Dashboard
 @app.route('/admin')
 def admin_dashboard():
@@ -1934,6 +1963,37 @@ def admin_add_student():
             return jsonify({'success': True, 'message': 'Student added successfully'})
     except sqlite3.IntegrityError:
         return jsonify({'success': False, 'message': 'Student ID or Email already exists'}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+    
+@app.route('/api/admin/add-lecturer', methods=['POST'])
+def admin_add_lecturer():
+    """Add a new lecturer"""
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    data = request.json
+    lecturer_id = data.get('lecturer_id')
+    name = data.get('name')
+    email = data.get('email')
+    password = data.get('password', 'lecturer@123')
+    department = data.get('department')
+    
+    if not all([lecturer_id, name, email]):
+        return jsonify({'success': False, 'message': 'Lecturer ID, Name, and Email are required'}), 400
+    
+    hashed_password = hash_password(password)
+    
+    try:
+        with get_db() as conn:
+            conn.execute('''
+                INSERT INTO lecturers (lecturer_id, name, email, password, department)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (lecturer_id, name, email, hashed_password, department))
+            conn.commit()
+            return jsonify({'success': True, 'message': 'Lecturer added successfully'})
+    except sqlite3.IntegrityError:
+        return jsonify({'success': False, 'message': 'Lecturer ID or Email already exists'}), 400
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
