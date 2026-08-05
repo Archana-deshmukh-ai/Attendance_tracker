@@ -41,7 +41,6 @@ Attendance Atlas eliminates manual attendance tracking challenges by providing a
 * 📚 Subject-wise performance analytics
 * 📈 Interactive charts and trend visualization
 * 💾 PDF/CSV report downloads
-* 🏆 Certificate generation for high attendance
 * ⚠️ Low attendance alerts and goal tracking
 
 ### 👨‍🏫 Lecturer Features
@@ -133,7 +132,7 @@ Open your browser and go to: http://localhost:5000
 👨‍🎓 Student
 
 * Access Level: Personal data only
-* Key Features: View attendance, download reports, certificates
+* Key Features: View attendance, download reports
 
 👨‍🏫 Lecturer
 

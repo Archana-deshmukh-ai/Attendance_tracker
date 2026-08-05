@@ -16,8 +16,7 @@ percentage = (present_classes / total_classes) * 100
 attendance_summary = percentage.reset_index()
 attendance_summary.columns = ["student_id", "attendance_percentage"]
 
-# certificate eligibility condition
-attendance_summary["eligible"] = attendance_summary["attendance_percentage"] >= 75
+
 
 # save result
 attendance_summary.to_csv("Backend/Backend/data/attendance_summary.csv", index=False)

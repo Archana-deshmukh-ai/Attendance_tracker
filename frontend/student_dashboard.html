@@ -75,10 +75,7 @@
                     <i class="fas fa-chart-line"></i>
                     <span>View Detailed Report</span>
                 </button>
-                <button class="quick-action" onclick="downloadAttendanceCertificate()">
-                    <i class="fas fa-file-certificate"></i>
-                    <span>Get Certificate</span>
-                </button>
+                 
                 <button class="quick-action" onclick="downloadReport()">
                     <i class="fas fa-download"></i>
                     <span>Download Report</span>
@@ -185,14 +182,6 @@
                     <span class="action-badge new">New</span>
                 </button>
                 
-                <button class="action-card" onclick="requestAttendanceCertificate()" data-aos="flip-left" data-aos-delay="350">
-                    <div class="action-icon">
-                        <i class="fas fa-award"></i>
-                    </div>
-                    <h4>Get Certificate</h4>
-                    <p>Request attendance excellence certificate</p>
-                    <span class="action-badge" id="certEligibility">Check</span>
-                </button>
                 
                 <a href="/settings" class="action-card" data-aos="flip-left" data-aos-delay="400">
                     <div class="action-icon">
@@ -342,7 +331,7 @@
                     <div class="progress-bar">
                         <div class="progress-fill" id="excellenceFill" style="width: 95%"></div>
                     </div>
-                    <p class="goal-desc">For certificate eligibility</p>
+                    
                 </div>
             </div>
         </div>
@@ -513,15 +502,7 @@
         showInfoMessage('Full schedule view coming soon!');
     };
     
-    // Download attendance certificate function
-    window.downloadAttendanceCertificate = function() {
-        const att = studentState?.currentAttendance || 85;
-        if (att >= 95) {
-            showSuccessMessage('Certificate downloaded successfully!');
-        } else {
-            showInfoMessage(`You need 95% attendance to download certificate. Current: ${att}%`);
-        }
-    };
+     
     
     // Info message
     function showInfoMessage(message) {
@@ -534,7 +515,7 @@
     
     // Make functions available globally
     window.showInfoMessage = showInfoMessage;
-    window.downloadAttendanceCertificate = downloadAttendanceCertificate;
+     
     window.viewFullSchedule = viewFullSchedule;
 </script>
 </body>

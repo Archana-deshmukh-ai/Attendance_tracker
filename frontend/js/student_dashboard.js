@@ -449,14 +449,12 @@ function showMessage(message, type) { const div = document.createElement('div');
 
 function viewDetailedReport() { window.location.href = '/report'; }
 function downloadReport() { showInfoMessage('Report download coming soon!'); }
-function requestAttendanceCertificate() { const att = studentState.currentAttendance || 85; if (att >= STUDENT_CONFIG.attendanceThresholds.excellence) { if (confirm('You are eligible! Request certificate?')) showSuccessMessage('Request submitted!'); } else { showInfoMessage(`Need ${STUDENT_CONFIG.attendanceThresholds.excellence}% attendance. Current: ${att}%`); } }
 function markAllAsRead() { studentState.notifications.forEach(n => n.unread = false); renderNotifications(); updateNotificationCount(); fetch(`${STUDENT_CONFIG.apiBaseUrl}/student/notifications/mark-read`, { method: 'POST' }); showSuccessMessage('All marked as read'); }
 function showInfoMessage(message) { const div = document.createElement('div'); div.style.cssText = `position:fixed;top:20px;right:20px;background:#dbeafe;color:#1e40af;padding:15px;border-radius:10px;z-index:9999;max-width:300px;`; div.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`; document.body.appendChild(div); setTimeout(() => div.remove(), 5000); }
 
 document.addEventListener('DOMContentLoaded', initStudentDashboard);
 window.viewDetailedReport = viewDetailedReport;
 window.downloadReport = downloadReport;
-window.requestAttendanceCertificate = requestAttendanceCertificate;
 window.markAllAsRead = markAllAsRead;
 window.refreshDashboard = refreshDashboard;
 // Add these functions to your existing student_dashboard.js
@@ -723,28 +721,7 @@ function updateAttendanceStatus(percent) {
     `;
 }
 
-// Update certificate eligibility badge
-function updateCertificateEligibility() {
-    const att = studentState.currentAttendance || 85;
-    const certBadge = document.querySelector('#certEligibility');
-    if (certBadge) {
-        if (att >= 95) {
-            certBadge.textContent = 'Eligible!';
-            certBadge.classList.add('eligible');
-        } else {
-            certBadge.textContent = `${95 - att}% more needed`;
-            certBadge.classList.remove('eligible');
-        }
-    }
-}
-
-// Call updateCertificateEligibility after loading data
-function updateAllData() {
-    updateGoalsProgress();
-    updatePerformanceSummary();
-    updateCertificateEligibility();
-}
-
+ 
 
 // Add this function to student_dashboard.js
 function goToSettings() {
